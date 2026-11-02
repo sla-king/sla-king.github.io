@@ -18,7 +18,6 @@
             min-height: 100vh;
             overflow: hidden;
             position: relative;
-            user-select: none;
         }
 
         .window {
@@ -51,10 +50,24 @@
             white-space: pre;
             text-align: left;
         }
+
+        #drag-outline {
+            position: fixed;
+            box-sizing: border-box;
+            border: 1px dotted #ffffff;
+            background: transparent;
+            z-index: 9999;
+            pointer-events: none;
+            display: none;
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
-    <div class="window">
+    <div id="drag-outline"></div>
+
+    <div class="window" id="draggable-window">
         <div class="title-bar" id="title-bar">
             <div class="title-bar-text">Command Prompt</div>
             <div class="title-bar-controls">
@@ -67,8 +80,67 @@
 <pre>Microsoft Windows XP [Version 5.1.2600]
 (C) Copyright 1985-2001 Microsoft Corp.
 
-C:\Users\sla-king&gt;</pre>
+C:\Users\sla-king&gt;_</pre>
         </div>
     </div>
+
+    <script>
+        const win = document.getElementById("draggable-window");
+        const titleBar = document.getElementById("title-bar");
+        const outline = document.getElementById("drag-outline");
+
+        let isDragging = false;
+        let startX, startY;
+        let winRect;
+
+        window.addEventListener('load', () => {
+            const consoleBody = document.querySelector('.window-body');
+            consoleBody.scrollTop = consoleBody.scrollHeight;
+        });
+
+        titleBar.addEventListener("mousedown", (e) => {
+            if (e.target.tagName.toLowerCase() === 'button') return;
+
+            isDragging = true;
+            winRect = win.getBoundingClientRect();
+            
+            startX = e.clientX - winRect.left;
+            startY = e.clientY - winRect.top;
+
+            outline.style.width = winRect.width + "px";
+            outline.style.height = winRect.height + "px";
+            outline.style.left = winRect.left + "px";
+            outline.style.top = winRect.top + "px";
+            
+            outline.style.display = "block";
+            
+            e.preventDefault();
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            
+            let newX = e.clientX - startX;
+            let newY = e.clientY - startY;
+
+            outline.style.left = newX + "px";
+            outline.style.top = newY + "px";
+        });
+
+        document.addEventListener("mouseup", () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            outline.style.display = "none";
+
+            const finalX = parseInt(outline.style.left);
+            const finalY = parseInt(outline.style.top);
+
+            win.style.left = finalX + "px";
+            win.style.top = finalY + "px";
+            
+            win.style.transform = "none";
+        });
+    </script>
 </body>
 </html>
