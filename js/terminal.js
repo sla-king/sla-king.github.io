@@ -1,4 +1,5 @@
 import { commands } from './commands.js';
+import { getPathString, setPath } from './filesystem.js';
 
 export function initTerminal(onClose) {
     const consoleBody = document.getElementById("console-body");
@@ -7,6 +8,10 @@ export function initTerminal(onClose) {
     const promptText = document.getElementById("prompt-text");
 
     const initialText = "Microsoft Windows XP [Version 5.1.2600]\n(C) Copyright 1985-2001 Microsoft Corp.\n\n";
+
+    function updatePrompt() {
+        promptText.textContent = getPathString() + ">";
+    }
 
     function print(text) {
         consoleOutput.textContent += text + "\n";
@@ -24,6 +29,8 @@ export function initTerminal(onClose) {
     function reset() {
         consoleOutput.textContent = initialText;
         cmdInput.value = "";
+        setPath(["C:", "Users", "sla-king"]);
+        updatePrompt();
         scrollToBottom();
     }
 
@@ -49,6 +56,7 @@ export function initTerminal(onClose) {
                         clearScreen: clearScreen,
                         closeWindow: onClose
                     });
+                    updatePrompt();
                 } else {
                     print(`'${cmd}' is not recognized as an internal or external command,`);
                     print("operable program or batch file.");
