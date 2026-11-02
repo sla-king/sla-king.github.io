@@ -10,7 +10,7 @@ export function initTerminal(onClose) {
     const initialText = "Microsoft Windows XP [Version 5.1.2600]\n(C) Copyright 1985-2001 Microsoft Corp.\n\n";
     let lastKeyWasTab = false;
 
-    const pathCommands = ['cd', 'chdir', 'dir', 'type'];
+    const pathCommands = ['cd', 'chdir', 'dir', 'ls', 'type', 'cat'];
 
     function updatePrompt() {
         promptText.textContent = getPathString() + ">";

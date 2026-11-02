@@ -11,6 +11,20 @@ export const commands = {
         context.print("EXIT      Quits the CMD.EXE program (or closes the window).");
         context.print("");
     },
+    
+    ls: (args, context) => {
+        commands.dir(args, context);
+    },
+    cat: (args, context) => {
+        commands.type(args, context);
+    },
+    clear: (args, context) => {
+        commands.cls(args, context);
+    },
+    chdir: (args, context) => {
+        commands.cd(args, context);
+    },
+
     cls: (args, context) => {
         context.clearScreen();
     },
@@ -64,8 +78,6 @@ export const commands = {
     },
     cd: (args, context) => {
         if (args.length === 0) {
-            context.print(getPathString());
-            context.print("");
             return;
         }
 
@@ -79,9 +91,6 @@ export const commands = {
         }
 
         setPath(targetPath);
-    },
-    chdir: (args, context) => {
-        commands.cd(args, context);
     },
     type: (args, context) => {
         if (args.length === 0) {
