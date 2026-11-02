@@ -1,0 +1,167 @@
+body {
+    background-image: url('../assets/bliss.jpg'); 
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: #3a6ea5;
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.window {
+    width: 680px;
+    position: absolute;
+    top: calc(50vh - 195px);
+    left: calc(50vw - 340px);
+    background-color: #0831d9;
+    box-sizing: border-box;
+}
+
+#draggable-window .window-body {
+    background-color: #000000;
+    height: 360px;
+    margin: 0 3px;
+    padding: 12px 8px 12px 12px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    cursor: text;
+}
+
+#console-output {
+    background-color: #000000;
+    color: #c0c0c0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-family: 'Lucida Console', 'Consolas', 'Courier New', monospace;
+    font-size: 12px; 
+    line-height: 1.2;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: left;
+}
+
+.input-line {
+    display: flex;
+    align-items: flex-start;
+    color: #c0c0c0;
+    font-family: 'Lucida Console', 'Consolas', 'Courier New', monospace;
+    font-size: 12px; 
+    line-height: 1.2;
+    height: 1.2em;
+}
+
+#prompt-text {
+    white-space: pre;
+    line-height: inherit;
+}
+
+#cmd-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #c0c0c0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    padding: 0;
+    margin: 0;
+    height: 1.2em;
+}
+
+.title-bar-controls button[disabled] {
+    opacity: 0.5;
+    cursor: default;
+}
+
+#drag-outline {
+    position: fixed;
+    box-sizing: border-box;
+    border: 1px dotted #ffffff;
+    background: transparent;
+    z-index: 9999;
+    pointer-events: none;
+    display: none;
+    margin: 0;
+    padding: 0;
+}
+
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #1941a5 100%);
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -1px 2px rgba(0,0,0,0.3);
+    font-family: 'Tahoma', sans-serif;
+}
+
+.start-button {
+    height: 100%;
+    padding: 0 16px;
+    background: linear-gradient(to bottom, #3c8a0f 0%, #54b611 10%, #3c8a0f 50%, #2b660a 100%);
+    border-radius: 0 10px 10px 0;
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    font-style: italic;
+    text-shadow: 1px 1px 1px black;
+    cursor: default;
+    box-shadow: inset -1px 0px 1px rgba(255,255,255,0.4);
+}
+
+.taskbar-item {
+    height: 22px;
+    margin-left: 8px;
+    padding: 0 8px;
+    background: linear-gradient(to bottom, #3f8cf3 0%, #245edb 100%);
+    border: 1px solid #1941a5;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+    width: 160px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3);
+    outline: none;
+    user-select: none;
+}
+
+.taskbar-item:hover {
+    background: linear-gradient(to bottom, #5c9df5 0%, #3f8cf3 100%);
+}
+
+.taskbar-item.active {
+    background: linear-gradient(to bottom, #2864d6 0%, #1b469c 100%);
+    border-color: #12316c;
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.4);
+}
+
+.taskbar-item.active:hover {
+    background: linear-gradient(to bottom, #2864d6 0%, #1b469c 100%);
+}
+
+.system-tray {
+    margin-left: auto;
+    height: 100%;
+    padding: 0 10px;
+    background: linear-gradient(to bottom, #0f8bee 0%, #1290f5 9%, #0f8bee 18%, #0f8bee 92%, #084fb1 100%);
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+    border-left: 1px solid #1941a5;
+    box-shadow: inset 1px 0 2px rgba(255,255,255,0.4);
+}
