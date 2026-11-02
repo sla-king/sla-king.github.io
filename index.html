@@ -23,16 +23,17 @@
         .window {
             width: 680px;
             position: absolute;
-            top: 50vh;
-            left: 50vw;
-            transform: translate(-50%, -50%);
+            top: calc(50vh - 195px);
+            left: calc(50vw - 340px);
+            background-color: #0831d9;
+            box-sizing: border-box;
         }
 
-        .window-body {
+        #draggable-window .window-body {
             background-color: #000000;
             height: 360px;
-            margin: 0;
-            padding: 8px 8px 8px 12px;
+            margin: 0 3px;
+            padding: 0;
             overflow-y: scroll;
             overflow-x: hidden;
             box-sizing: border-box;
@@ -42,15 +43,20 @@
             background-color: #000000;
             color: #c0c0c0;
             margin: 0;
-            padding: 0;
+            padding: 12px 8px 12px 12px;
             border: none;
-            font-family: 'Consolas', 'Lucida Console', 'Courier New', monospace;
-            font-size: 13px;
+            font-family: 'Lucida Console', 'Consolas', 'Courier New', monospace;
+            font-size: 12px; 
             line-height: 1.2;
             white-space: pre;
             text-align: left;
         }
 
+        .title-bar-controls button[disabled] {
+            opacity: 0.5;
+            cursor: default;
+        }
+        
         #drag-outline {
             position: fixed;
             box-sizing: border-box;
@@ -71,9 +77,9 @@
         <div class="title-bar" id="title-bar">
             <div class="title-bar-text">Command Prompt</div>
             <div class="title-bar-controls">
-                <button aria-label="Minimize"></button>
-                <button aria-label="Maximize"></button>
-                <button aria-label="Close"></button>
+                <button aria-label="Minimize" id="btn-minimize"></button>
+                <button aria-label="Maximize" disabled></button>
+                <button aria-label="Close" id="btn-close"></button>
             </div>
         </div>
         <div class="window-body">
@@ -88,6 +94,8 @@ C:\Users\sla-king&gt;_</pre>
         const win = document.getElementById("draggable-window");
         const titleBar = document.getElementById("title-bar");
         const outline = document.getElementById("drag-outline");
+        const btnMinimize = document.getElementById("btn-minimize");
+        const btnClose = document.getElementById("btn-close");
 
         let isDragging = false;
         let startX, startY;
@@ -98,8 +106,16 @@ C:\Users\sla-king&gt;_</pre>
             consoleBody.scrollTop = consoleBody.scrollHeight;
         });
 
+        btnMinimize.addEventListener("click", () => {
+            win.style.display = "none";
+        });
+
+        btnClose.addEventListener("click", () => {
+            win.style.display = "none";
+        });
+
         titleBar.addEventListener("mousedown", (e) => {
-            if (e.target.tagName.toLowerCase() === 'button') return;
+            if (e.target.closest('.title-bar-controls')) return;
 
             isDragging = true;
             winRect = win.getBoundingClientRect();
@@ -138,8 +154,6 @@ C:\Users\sla-king&gt;_</pre>
 
             win.style.left = finalX + "px";
             win.style.top = finalY + "px";
-            
-            win.style.transform = "none";
         });
     </script>
 </body>
