@@ -80,6 +80,9 @@ export const commands = {
 
         setPath(targetPath);
     },
+    chdir: (args, context) => {
+        commands.cd(args, context);
+    },
     type: (args, context) => {
         if (args.length === 0) {
             context.print("The syntax of the command is incorrect.");
