@@ -206,9 +206,25 @@ C:\Users\sla-king&gt;_</pre>
             taskbarApp.classList.remove("active");
         }
 
+        function bringOnScreen() {
+            if (win.style.display === "none") return;
+            
+            let rect = win.getBoundingClientRect();
+            let maxX = window.innerWidth - win.offsetWidth;
+            let maxY = window.innerHeight - win.offsetHeight - 30;
+            
+            let newX = Math.max(0, Math.min(rect.left, maxX));
+            let newY = Math.max(0, Math.min(rect.top, maxY));
+            
+            win.style.left = newX + "px";
+            win.style.top = newY + "px";
+            win.style.transform = "none";
+        }
+
         function showWindow() {
             win.style.display = "block";
             taskbarApp.classList.add("active");
+            bringOnScreen();
         }
 
         setInterval(updateClock, 1000);
@@ -264,11 +280,12 @@ C:\Users\sla-king&gt;_</pre>
 
             outline.style.display = "none";
 
-            const finalX = parseInt(outline.style.left);
-            const finalY = parseInt(outline.style.top);
+            let finalX = parseInt(outline.style.left);
+            let finalY = parseInt(outline.style.top);
 
             win.style.left = finalX + "px";
             win.style.top = finalY + "px";
+            win.style.transform = "none";
         });
     </script>
 </body>
