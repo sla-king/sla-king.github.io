@@ -1,32 +1,74 @@
 <!doctype html>
-<html lang=en>
-
+<html lang="en">
 <head>
-    <meta charset=utf-8>
-    <link rel=icon href=data:,>
-    <meta name=viewport content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>sla-king's Homepage</title>
-     <style>
+    <link rel="stylesheet" href="https://unpkg.com/xp.css">
+    <style>
         body {
-            font: system-ui;
-            max-width: 512px;
-            margin: auto;
-            margin-top: 2em;
+            background-image: url('assets/bliss.jpg'); 
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-color: #3a6ea5;
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            user-select: none;
+        }
+
+        .window {
+            width: 680px;
+            position: absolute;
+            top: 50vh;
+            left: 50vw;
+            transform: translate(-50%, -50%);
+        }
+
+        .window-body {
+            background-color: #000000;
+            height: 360px;
+            margin: 0;
+            padding: 8px 8px 8px 12px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        pre {
+            background-color: #000000;
+            color: #c0c0c0;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-family: 'Consolas', 'Lucida Console', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.2;
+            white-space: pre;
+            text-align: left;
         }
     </style>
 </head>
-
 <body>
-    <h1>
-        sla-king's Homepage
-    </h1>
-    <p>
-        Hello!
-    </p>
-    <p>
-        This is my website :)
-    </p>
+    <div class="window">
+        <div class="title-bar" id="title-bar">
+            <div class="title-bar-text">Command Prompt</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body">
+<pre>Microsoft Windows XP [Version 5.1.2600]
+(C) Copyright 1985-2001 Microsoft Corp.
 
+C:\Users\sla-king&gt;</pre>
+        </div>
+    </div>
 </body>
-
 </html>
