@@ -1,4 +1,30 @@
-export const regretsOfTheDying = `Regrets of the Dying
+export const aboutMeTxt = `Hi, I'm sla-king. I'm a CS major at UCI. I like doing cybersecurity stuff.`;
+
+export const contactTxt = `Email: alex.l.seidinger@gmail.com\nLinkedIn: linkedin.com/in/alexanderseidinger\nGitHub: github.com/sla-king`;
+
+export const bidoofTxt = `
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡤⠷⠤⢤⣀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⣿⣿⡾⠱⢀⠢⠌⢂⡽⣧⡀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣤⢿⡿⣿⣿⣇⡠⠁⠒⡈⣤⡿⠟⠟⣷⣦⡀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣀⣠⣀⡀⠀⠀⠀⠀⠀⣀⡤⠟⠛⡀⣀⠀⠄⠠⢀⡀⠘⠻⢧⣇⣠⣿⠀⠜⠸⡇⢼⣿⠀⠀
+⠀⠀⠀⠀⠀⢠⣾⠏⠁⡩⣿⠄⠀⢠⣴⣟⠡⠀⠒⠠⢡⠠⢌⣤⠷⠶⠾⣈⠡⢂⠌⢙⠻⣦⡚⢡⠜⣾⡿⠀⠀
+⠀⠀⠀⠀⠀⢸⣷⡰⣤⣼⠿⠖⠚⠉⠉⡉⠙⠛⠶⢧⣄⣲⡟⠀⣀⠀⣀⣿⡆⠐⠊⡄⢱⠈⢿⣿⠿⠛⠁⠀⠀
+⠀⠀⠀⠀⠀⠀⣹⠟⠉⠀⣀⣼⡶⠤⣴⣀⠁⠢⢌⠠⣉⠿⣧⣒⣤⣶⡿⠟⣀⢊⡑⢌⢢⢉⢆⡹⢳⡀⠀⠀⠀
+⠀⠀⠀⠀⠀⣴⠃⣠⣴⣾⠋⠁⠀⠀⠀⠈⠳⣶⣄⣣⡌⢒⠨⠝⣿⡉⠦⡱⣈⠦⡘⡔⢪⠜⣢⠱⡩⢿⣄⠀⠀
+⠀⠀⢀⣀⣾⢃⡾⠛⣛⠋⠀⠀⠀⠀⠀⠀⠀⠚⠋⠉⠹⣷⡈⡖⠬⢿⣔⡱⢌⠲⡱⢌⢇⠺⣄⠳⡑⢎⢿⡄⠀
+⢀⡾⢉⠹⢿⣿⠇⣾⣿⠇⠀⠀⠀⠀⠀⠀⠀⢰⣿⡇⠀⣿⡇⠰⡿⠿⠉⠿⢿⣶⢱⠎⡎⣱⠈⣇⣹⡎⣸⣿⡀
+⢾⣷⠂⣀⠘⣻⡆⠈⣋⣤⣶⣾⣿⢿⡶⣶⣦⣄⡙⠁⠀⣾⢩⡑⢂⡰⢀⠠⣘⢿⣼⢌⡱⣡⢋⠴⣟⡣⢅⣻⡇
+⠀⢙⣿⠇⡘⣬⣿⠟⡯⢽⣧⣼⣿⡾⣿⣿⢿⣿⣿⣶⡞⣙⠆⣘⠢⡐⢣⣸⣽⠿⠟⡤⠓⡔⣌⣾⡟⣑⢪⣼⡇
+⣴⡟⢡⢊⠔⣿⣿⣾⣵⣯⣿⣿⣶⣿⣿⣻⡿⣯⣿⣿⣿⣌⡱⠠⢃⠜⣠⣹⣷⡉⡜⡰⢩⣴⣾⣿⣯⣿⣿⣿⡇
+⠙⣿⣦⣌⡬⢿⣿⣿⣿⣿⣿⣿⣿⣿⣳⣿⢿⣻⣿⣿⣿⢚⠷⡳⢾⢞⢧⣻⣿⣷⣾⣽⣿⣿⣿⣿⣿⣿⣿⡿⠀
+⠀⠀⢹⣿⢻⡭⣛⣿⣿⡟⠛⠁⠉⠛⠛⠛⣿⣿⣿⠻⣥⡛⣞⠭⣷⣾⣷⣿⣿⢟⣻⡿⠛⠻⣿⣿⣿⣿⡟⠁⠀
+⠀⠀⠘⣿⣶⣷⣷⠊⣿⡇⠀⠀⡇⠀⠀⠀⣿⢹⡎⡗⢣⣽⡎⣽⣽⣿⣿⣿⡟⠋⠁⠀⠀⠀⣼⣿⣿⣿⣦⠀⠀
+⠀⠀⠀⠈⠉⠹⣯⣛⠼⣳⣀⣀⣣⣀⣀⣰⣯⠳⡜⣵⣯⣶⣼⣷⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠋⠙⠟⠋⠛⠀⠀
+⠀⠀⠀⠀⠀⠀⢉⣿⣷⣿⣿⠋⠁⠀⠈⠻⢬⣷⣿⠾⠛⣿⣿⣿⣿⡋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣉⣟⡉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣛⣻⣿⣛⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+`;
+
+export const regretsOfTheDyingTxt = `Regrets of the Dying
 By Bronnie Ware
 
 For many years I worked in palliative care. My patients were those who had gone home to die. Some incredibly special times were shared. I was with them for the last three to twelve weeks of their lives.

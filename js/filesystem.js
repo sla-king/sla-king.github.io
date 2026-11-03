@@ -1,4 +1,4 @@
-import { regretsOfTheDying } from './texts.js';
+import { aboutMeTxt, bidoofTxt, contactTxt, regretsOfTheDyingTxt } from './texts.js';
 
 export const fs = {
     "C:": {
@@ -6,11 +6,12 @@ export const fs = {
             "sla-king": {
                 "Desktop": {},
                 "Favorites": {
-                    "regrets-of-the-dying.txt": regretsOfTheDying
+                    "bidoof.txt": bidoofTxt,
+                    "regrets-of-the-dying.txt": regretsOfTheDyingTxt,
                 },
                 "My Documents": {
-                    "about_me.txt": "Hi, I'm sla-king.\nI like cybersecurity stuff.",
-                    "contact.txt": "Email: alex.l.seidinger@gmail.com\nLinkedIn: linkedin.com/in/alexanderseidinger\nGitHub: github.com/sla-king",
+                    "about_me.txt": aboutMeTxt,
+                    "contact.txt": contactTxt,
                 }
             }
         }
