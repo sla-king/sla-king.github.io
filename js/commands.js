@@ -78,10 +78,10 @@ export const commands = {
             }
         }
 
-        const freeBytes = 34359738368; // Exactly 32 GB in bytes
+        const freeBytes = 9492147973;
 
-        context.print(`               ${fileCount} File(s)   ${currentDirBytes.toString().padStart(14)} bytes`);
-        context.print(`               ${dirCount} Dir(s)   ${freeBytes.toLocaleString('en-US')} bytes free`);
+        context.print(`               ${fileCount} File(s) ${currentDirBytes.toString().padStart(14)} bytes`);
+        context.print(`               ${dirCount} Dir(s)  ${freeBytes.toLocaleString('en-US').padStart(14)} bytes free`);
         context.print("");
     },
     exit: (args, context) => {
@@ -107,6 +107,11 @@ export const commands = {
 
         if (typeof node === 'object') {
             context.print("Access is denied.");
+            context.print("");
+            return;
+        }
+
+        if (node === "") {
             context.print("");
             return;
         }

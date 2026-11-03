@@ -2,6 +2,8 @@ import { aboutMeTxt, bidoofTxt, contactTxt, regretsOfTheDyingTxt } from './texts
 
 export const fs = {
     "C:": {
+        "AUTOEXEC.BAT": "",
+        "CONFIG.SYS": "",
         "Documents and Settings": {
             "sla-king": {
                 "Desktop": {},
@@ -14,7 +16,7 @@ export const fs = {
                     "contact.txt": contactTxt,
                 }
             }
-        }
+        },
     }
 };
 
@@ -77,7 +79,7 @@ export function resolvePath(input) {
 export function getNode(path) {
     let node = fs;
     for (let part of path) {
-        if (!node || typeof node !== 'object' || !node[part]) return null;
+        if (!node || typeof node !== 'object' || !Object.prototype.hasOwnProperty.call(node, part)) return null;
         node = node[part];
     }
     return node;
