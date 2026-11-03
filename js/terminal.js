@@ -15,16 +15,23 @@ export function initTerminal(onClose) {
     let cycleBeforeWord = "";
     let cycleAfterWord = "";
     let isCyclingCommand = false;
+    
     let printQueue = Promise.resolve();
+    let printSession = 0;
+    let isProcessing = false;
 
     function updatePrompt() {
         promptText.textContent = getPathString() + ">";
+        scrollToBottom();
     }
 
     function print(text) {
+        const currentSession = printSession;
         printQueue = printQueue.then(async () => {
+            if (currentSession !== printSession) return;
             const lines = text.split('\n');
             for (let i = 0; i < lines.length; i++) {
+                if (currentSession !== printSession) return;
                 consoleOutput.textContent += lines[i] + "\n";
                 scrollToBottom();
                 await new Promise(r => setTimeout(r, 10));
@@ -38,10 +45,14 @@ export function initTerminal(onClose) {
     }
 
     function clearScreen() {
+        printSession++;
+        printQueue = Promise.resolve();
         consoleOutput.textContent = "";
+        scrollToBottom();
     }
 
     function reset() {
+        clearScreen();
         consoleOutput.textContent = initialText;
         cmdInput.value = "";
         setPath(["C:", "Documents and Settings", "sla-king"]);
@@ -120,6 +131,11 @@ export function initTerminal(onClose) {
     }
 
     cmdInput.addEventListener('keydown', async (e) => {
+        if (isProcessing) {
+            e.preventDefault();
+            return;
+        }
+
         if (e.key === 'Tab') {
             e.preventDefault();
 
@@ -201,10 +217,16 @@ export function initTerminal(onClose) {
         }
 
         if (e.key === 'Enter') {
+            isProcessing = true;
+            
             const rawInput = cmdInput.value;
             const trimmedInput = rawInput.trim();
             
-            print(promptText.textContent + rawInput);
+            cmdInput.value = "";
+            cycleMatches = [];
+
+            consoleOutput.textContent += promptText.textContent + rawInput + "\n";
+            scrollToBottom();
 
             if (trimmedInput !== "") {
                 const parts = [];
@@ -232,12 +254,6 @@ export function initTerminal(onClose) {
                 const args = parts.slice(1);
 
                 if (commands[cmd]) {
-                    cmdInput.value = "";
-                    cycleMatches = [];
-                    scrollToBottom();
-                    
-                    cmdInput.disabled = true;
-                    
                     commands[cmd](args, {
                         print: print,
                         clearScreen: clearScreen,
@@ -245,25 +261,17 @@ export function initTerminal(onClose) {
                     });
                     
                     await printQueue;
-                    
-                    updatePrompt();
-                    cmdInput.disabled = false;
-                    cmdInput.focus();
                 } else {
                     print(`'${cmd}' is not recognized as an internal or external command,`);
                     print("operable program or batch file.");
                     print("");
-                    cmdInput.value = "";
-                    cycleMatches = [];
-                    scrollToBottom();
                     await printQueue;
                 }
-            } else {
-                cmdInput.value = "";
-                cycleMatches = [];
-                scrollToBottom();
-                await printQueue;
             }
+
+            updatePrompt();
+            isProcessing = false;
+            cmdInput.focus();
         }
     });
 
