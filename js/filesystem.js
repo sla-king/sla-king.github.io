@@ -1,15 +1,26 @@
+import { regretsOfTheDying } from './texts.js';
+
 export const fs = {
     "C:": {
         "Documents and Settings": {
             "sla-king": {
                 "Desktop": {},
-                "Favorites": {},
+                "Favorites": {
+                    "regrets-of-the-dying.txt": regretsOfTheDying
+                },
                 "My Documents": {
-                    "welcome.txt": "Hello! This is my website :)"
+                    "about_me.txt": "Hi, I'm sla-king.\nI like cybersecurity stuff.",
+                    "contact.txt": "Email: alex.l.seidinger@gmail.com\nLinkedIn: linkedin.com/in/alexanderseidinger\nGitHub: github.com/sla-king",
                 }
             }
         }
     }
+};
+
+export const fileDates = {
+    "about_me.txt": "11/02/2026  11:43 PM",
+    "contact.txt": "11/02/2026  11:43 PM",
+    "regrets-of-the-dying.txt": "11/02/2026  11:52 PM"
 };
 
 export let currentPath = ["C:", "Documents and Settings", "sla-king"];
@@ -35,7 +46,7 @@ export function resolvePath(input) {
     }
 
     let parts = cleanInput.split(/[/\\]/).filter(p => p !== "");
-
+    
     if (cleanInput === "~") {
         return ["C:", "Documents and Settings", "sla-king"];
     }
@@ -68,4 +79,31 @@ export function getNode(path) {
         node = node[part];
     }
     return node;
+}
+
+export function getLatestDateInNode(node, defaultDate) {
+    let maxTime = 0;
+    let maxDateStr = defaultDate;
+    let foundFile = false;
+
+    for (const key in node) {
+        if (typeof node[key] === 'string') {
+            const dateStr = fileDates[key] || defaultDate;
+            const time = new Date(dateStr).getTime();
+            if (time > maxTime || !foundFile) {
+                maxTime = time;
+                maxDateStr = dateStr;
+                foundFile = true;
+            }
+        } else if (typeof node[key] === 'object') {
+            const childDate = getLatestDateInNode(node[key], defaultDate);
+            const time = new Date(childDate).getTime();
+            if (time > maxTime || !foundFile) {
+                maxTime = time;
+                maxDateStr = childDate;
+                foundFile = true;
+            }
+        }
+    }
+    return foundFile ? maxDateStr : defaultDate;
 }

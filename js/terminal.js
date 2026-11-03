@@ -42,6 +42,8 @@ export function initTerminal(onClose) {
     }
 
     consoleBody.addEventListener('click', () => {
+        // Don't steal focus if the user has selected text to copy
+        if (window.getSelection().toString().length > 0) return;
         cmdInput.focus();
     });
 
@@ -58,89 +60,41 @@ export function initTerminal(onClose) {
         };
     }
 
-    function getRelativePath(targetParts, baseParts) {
-        if (targetParts.length > 0 && baseParts.length > 0 && targetParts[0] !== baseParts[0]) {
-            return targetParts.join('\\') + '\\';
-        }
-
-        let common = 0;
-        while (common < targetParts.length && common < baseParts.length && targetParts[common] === baseParts[common]) {
-            common++;
-        }
-        
-        let up = [];
-        for (let i = common; i < baseParts.length; i++) {
-            up.push("..");
-        }
-        
-        let down = targetParts.slice(common);
-        
-        let parts = up.concat(down);
-        if (parts.length === 0) return "";
-        return parts.join('\\') + '\\';
-    }
-
     function getPathMatches(input) {
-        let cleanInput = input.replace(/"/g, '');
-        let parts = cleanInput.split(/[/\\]/);
-        let filePart = parts.pop() || "";
-        let dirParts = parts;
+        let lastSlashIdx = Math.max(input.lastIndexOf('/'), input.lastIndexOf('\\'));
+        let dirPart = "";
+        let filePart = "";
 
-        let currentNode = getNode(currentPath);
-        let currentPathParts = [...currentPath];
-
-        for (let part of dirParts) {
-            if (!currentNode || typeof currentNode !== 'object') return [];
-            
-            if (part.endsWith(":")) {
-                currentPathParts = [part.toUpperCase()];
-                currentNode = getNode(currentPathParts);
-                if (!currentNode) return [];
-                continue;
-            }
-
-            if (part === ".") continue;
-            if (part === "..") {
-                if (currentPathParts.length > 1) {
-                    currentPathParts.pop();
-                    currentNode = getNode(currentPathParts);
-                }
-                continue;
-            }
-
-            let keys = Object.keys(currentNode);
-            let match = keys.find(k => k.toLowerCase() === part.toLowerCase());
-            if (!match) {
-                let partials = keys.filter(k => k.toLowerCase().startsWith(part.toLowerCase()));
-                if (partials.length === 1) {
-                    match = partials[0];
-                } else {
-                    return []; 
-                }
-            }
-            currentNode = currentNode[match];
-            currentPathParts.push(match);
+        if (lastSlashIdx !== -1) {
+            dirPart = input.substring(0, lastSlashIdx + 1);
+            filePart = input.substring(lastSlashIdx + 1);
+        } else {
+            filePart = input;
         }
+
+        let cleanDir = dirPart.replace(/"/g, '');
+        const dirPath = resolvePath(cleanDir);
+        const currentNode = getNode(dirPath);
 
         if (!currentNode || typeof currentNode !== 'object') return [];
 
         let matches = [];
-        if (filePart === ".") {
+        let cleanFile = filePart.replace(/"/g, '');
+
+        if (cleanFile === ".") {
             matches = ["."];
-        } else if (filePart === "..") {
+        } else if (cleanFile === "..") {
             matches = [".."];
         } else {
-            matches = Object.keys(currentNode).filter(k => k.toLowerCase().startsWith(filePart.toLowerCase()));
+            matches = Object.keys(currentNode).filter(k => k.toLowerCase().startsWith(cleanFile.toLowerCase()));
         }
-
-        let dirString = getRelativePath(currentPathParts, currentPath);
 
         return matches.map(m => {
             const isDir = (m === "." || m === "..") ? true : (typeof currentNode[m] === 'object');
             return {
                 name: m,
                 isDir: isDir,
-                dirPart: dirString
+                dirPart: dirPart 
             };
         });
     }

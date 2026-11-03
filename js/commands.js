@@ -1,38 +1,35 @@
-import { currentPath, setPath, getPathString, resolvePath, getNode } from './filesystem.js';
+import { currentPath, setPath, getPathString, resolvePath, getNode, fileDates, getLatestDateInNode } from './filesystem.js';
 
 export const commands = {
     help: (args, context) => {
-        context.print("For more information on a specific command, type HELP command-name");
         context.print("CD        Displays the name of or changes the current directory.");
         context.print("CLS       Clears the screen.");
         context.print("DIR       Displays a list of files and subdirectories in a directory.");
         context.print("EXIT      Quits the CMD.EXE program (command interpreter).");
-        context.print("ECHO      Displays messages.");
         context.print("TYPE      Displays the contents of a text file.");
         context.print("");
     },
-    
-    ls: (args, context) => {
-        commands.dir(args, context);
-    },
-    cat: (args, context) => {
-        commands.type(args, context);
-    },
-    clear: (args, context) => {
-        commands.cls(args, context);
-    },
-    chdir: (args, context) => {
-        commands.cd(args, context);
-    },
+    cd: (args, context) => {
+        const pathString = args.join(' ');
+        
+        if (pathString.length === 0) {
+            context.print(getPathString());
+            return;
+        }
 
+        const targetPath = resolvePath(pathString);
+        const node = getNode(targetPath);
+
+        if (node === null || typeof node === 'string') {
+            context.print("The system cannot find the path specified.");
+            context.print("");
+            return;
+        }
+
+        setPath(targetPath);
+    },
     cls: (args, context) => {
         context.clearScreen();
-    },
-    exit: (args, context) => {
-        context.closeWindow();
-    },
-    echo: (args, context) => {
-        context.print(args.join(' '));
     },
     dir: (args, context) => {
         const pathString = args.join(' ');
@@ -54,19 +51,27 @@ export const commands = {
         let dirCount = 0;
         let totalBytes = 0;
         
-        const time = "11/01/2026  11:39 PM";
+        const defaultTime = "11/01/2026  11:39 PM";
 
         if (targetPath.length > 1) {
-            context.print(`${time}    <DIR>          .`);
-            context.print(`${time}    <DIR>          ..`);
+            const dotTime = getLatestDateInNode(node, defaultTime);
+            
+            const parentPath = targetPath.slice(0, -1);
+            const parentNode = getNode(parentPath);
+            const dotdotTime = parentNode ? getLatestDateInNode(parentNode, defaultTime) : defaultTime;
+            
+            context.print(`${dotTime}    <DIR>          .`);
+            context.print(`${dotdotTime}    <DIR>          ..`);
             dirCount += 2;
         }
 
         for (const key in node) {
             if (typeof node[key] === 'object') {
-                context.print(`${time}    <DIR>          ${key}`);
+                const folderTime = getLatestDateInNode(node[key], defaultTime);
+                context.print(`${folderTime}    <DIR>          ${key}`);
                 dirCount++;
             } else {
+                const time = fileDates[key] || defaultTime;
                 const size = node[key].length;
                 totalBytes += size;
                 context.print(`${time}    ${size.toString().padStart(14)} ${key}`);
@@ -75,27 +80,11 @@ export const commands = {
         }
 
         context.print(`               ${fileCount} File(s)   ${totalBytes.toString().padStart(14)} bytes`);
-        context.print(`               ${dirCount} Dir(s)   1,234,567,890 bytes free`);
+        context.print(`               ${dirCount} Dir(s)   94,983,632 bytes free`);
         context.print("");
     },
-    cd: (args, context) => {
-        const pathString = args.join(' ');
-        
-        if (pathString.length === 0) {
-            context.print(getPathString());
-            return;
-        }
-
-        const targetPath = resolvePath(pathString);
-        const node = getNode(targetPath);
-
-        if (node === null || typeof node === 'string') {
-            context.print("The system cannot find the path specified.");
-            context.print("");
-            return;
-        }
-
-        setPath(targetPath);
+    exit: (args, context) => {
+        context.closeWindow();
     },
     type: (args, context) => {
         const pathString = args.join(' ');
@@ -123,5 +112,18 @@ export const commands = {
 
         context.print(node);
         context.print("");
+    },
+
+    cat: (args, context) => {
+        commands.type(args, context);
+    },
+    chdir: (args, context) => {
+        commands.cd(args, context);
+    },
+    clear: (args, context) => {
+        commands.cls(args, context);
+    },
+    ls: (args, context) => {
+        commands.dir(args, context);
     }
 };
