@@ -15,14 +15,22 @@ export function initTerminal(onClose) {
     let cycleBeforeWord = "";
     let cycleAfterWord = "";
     let isCyclingCommand = false;
+    let printQueue = Promise.resolve();
 
     function updatePrompt() {
         promptText.textContent = getPathString() + ">";
     }
 
     function print(text) {
-        consoleOutput.textContent += text + "\n";
-        scrollToBottom();
+        printQueue = printQueue.then(async () => {
+            const lines = text.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                consoleOutput.textContent += lines[i] + "\n";
+                scrollToBottom();
+                await new Promise(r => setTimeout(r, 10));
+            }
+        });
+        return printQueue;
     }
 
     function scrollToBottom() {
@@ -42,7 +50,6 @@ export function initTerminal(onClose) {
     }
 
     consoleBody.addEventListener('click', () => {
-        // Don't steal focus if the user has selected text to copy
         if (window.getSelection().toString().length > 0) return;
         cmdInput.focus();
     });
@@ -112,7 +119,7 @@ export function initTerminal(onClose) {
         return combined;
     }
 
-    cmdInput.addEventListener('keydown', (e) => {
+    cmdInput.addEventListener('keydown', async (e) => {
         if (e.key === 'Tab') {
             e.preventDefault();
 
@@ -225,22 +232,38 @@ export function initTerminal(onClose) {
                 const args = parts.slice(1);
 
                 if (commands[cmd]) {
+                    cmdInput.value = "";
+                    cycleMatches = [];
+                    scrollToBottom();
+                    
+                    cmdInput.disabled = true;
+                    
                     commands[cmd](args, {
                         print: print,
                         clearScreen: clearScreen,
                         closeWindow: onClose
                     });
+                    
+                    await printQueue;
+                    
                     updatePrompt();
+                    cmdInput.disabled = false;
+                    cmdInput.focus();
                 } else {
                     print(`'${cmd}' is not recognized as an internal or external command,`);
                     print("operable program or batch file.");
                     print("");
+                    cmdInput.value = "";
+                    cycleMatches = [];
+                    scrollToBottom();
+                    await printQueue;
                 }
+            } else {
+                cmdInput.value = "";
+                cycleMatches = [];
+                scrollToBottom();
+                await printQueue;
             }
-
-            cmdInput.value = "";
-            cycleMatches = [];
-            scrollToBottom();
         }
     });
 

@@ -49,13 +49,12 @@ export const commands = {
         
         let fileCount = 0;
         let dirCount = 0;
-        let totalBytes = 0;
+        let currentDirBytes = 0;
         
         const defaultTime = "11/01/2026  11:39 PM";
 
         if (targetPath.length > 1) {
             const dotTime = getLatestDateInNode(node, defaultTime);
-            
             const parentPath = targetPath.slice(0, -1);
             const parentNode = getNode(parentPath);
             const dotdotTime = parentNode ? getLatestDateInNode(parentNode, defaultTime) : defaultTime;
@@ -73,14 +72,16 @@ export const commands = {
             } else {
                 const time = fileDates[key] || defaultTime;
                 const size = node[key].length;
-                totalBytes += size;
+                currentDirBytes += size;
                 context.print(`${time}    ${size.toString().padStart(14)} ${key}`);
                 fileCount++;
             }
         }
 
-        context.print(`               ${fileCount} File(s)   ${totalBytes.toString().padStart(14)} bytes`);
-        context.print(`               ${dirCount} Dir(s)   94,983,632 bytes free`);
+        const freeBytes = 34359738368; // Exactly 32 GB in bytes
+
+        context.print(`               ${fileCount} File(s)   ${currentDirBytes.toString().padStart(14)} bytes`);
+        context.print(`               ${dirCount} Dir(s)   ${freeBytes.toLocaleString('en-US')} bytes free`);
         context.print("");
     },
     exit: (args, context) => {
