@@ -1,18 +1,18 @@
 export const fs = {
     "C:": {
-        "Users": {
+        "Documents and Settings": {
             "sla-king": {
                 "Desktop": {},
-                "Documents": {
+                "Favorites": {},
+                "My Documents": {
                     "welcome.txt": "Hello! This is my website :)"
-                },
-                "Downloads": {}
+                }
             }
         }
     }
 };
 
-export let currentPath = ["C:", "Users", "sla-king"];
+export let currentPath = ["C:", "Documents and Settings", "sla-king"];
 
 export function setPath(newPath) {
     currentPath = newPath;
@@ -30,10 +30,10 @@ export function resolvePath(input) {
     let parts = input.split(/[/\\]/).filter(p => p !== "");
 
     if (input === "~") {
-        return ["C:", "Users", "sla-king"];
+        return ["C:", "Documents and Settings", "sla-king"];
     }
     if (input.startsWith("~/") || input.startsWith("~\\")) {
-        newPath = ["C:", "Users", "sla-king"];
+        newPath = ["C:", "Documents and Settings", "sla-king"];
         parts.shift(); 
     } 
     else if (parts.length > 0 && parts[0].endsWith(":")) {

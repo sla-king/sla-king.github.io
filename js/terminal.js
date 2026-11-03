@@ -32,7 +32,7 @@ export function initTerminal(onClose) {
     function reset() {
         consoleOutput.textContent = initialText;
         cmdInput.value = "";
-        setPath(["C:", "Users", "sla-king"]);
+        setPath(["C:", "Documents and Settings", "sla-king"]);
         updatePrompt();
         scrollToBottom();
     }

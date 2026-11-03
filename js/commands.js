@@ -4,11 +4,11 @@ export const commands = {
     help: (args, context) => {
         context.print("For more information on a specific command, type HELP command-name");
         context.print("CD        Displays the name of or changes the current directory.");
-        context.print("DIR       Displays a list of files and subdirectories in a directory.");
-        context.print("TYPE      Displays the contents of a text file.");
-        context.print("ECHO      Displays messages.");
         context.print("CLS       Clears the screen.");
-        context.print("EXIT      Quits the CMD.EXE program (or closes the window).");
+        context.print("DIR       Displays a list of files and subdirectories in a directory.");
+        context.print("EXIT      Quits the CMD.EXE program (command interpreter).");
+        context.print("ECHO      Displays messages.");
+        context.print("TYPE      Displays the contents of a text file.");
         context.print("");
     },
     
@@ -44,8 +44,9 @@ export const commands = {
             return;
         }
 
-        context.print("");
         context.print(` Volume in drive C has no label.`);
+        context.print(` Volume Serial Number is 0CB7-868B`);
+        context.print("");
         context.print(` Directory of ${getPathString(targetPath)}\n`);
         
         let fileCount = 0;
@@ -78,6 +79,8 @@ export const commands = {
     },
     cd: (args, context) => {
         if (args.length === 0) {
+            context.print(getPathString());
+            context.print("");
             return;
         }
 
