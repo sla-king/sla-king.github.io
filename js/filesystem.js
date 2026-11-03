@@ -27,19 +27,26 @@ export function resolvePath(input) {
     if (!input) return [...currentPath];
 
     let newPath = [];
-    let parts = input.split(/[/\\]/).filter(p => p !== "");
+    let cleanInput = input.replace(/"/g, ''); 
+    
+    if (cleanInput.startsWith('/') || cleanInput.startsWith('\\')) {
+        newPath = [currentPath[0]];
+        cleanInput = cleanInput.substring(1);
+    }
 
-    if (input === "~") {
+    let parts = cleanInput.split(/[/\\]/).filter(p => p !== "");
+
+    if (cleanInput === "~") {
         return ["C:", "Documents and Settings", "sla-king"];
     }
-    if (input.startsWith("~/") || input.startsWith("~\\")) {
+    if (cleanInput.startsWith("~/") || cleanInput.startsWith("~\\")) {
         newPath = ["C:", "Documents and Settings", "sla-king"];
         parts.shift(); 
     } 
     else if (parts.length > 0 && parts[0].endsWith(":")) {
         newPath = [parts.shift().toUpperCase()];
     } 
-    else {
+    else if (newPath.length === 0) {
         newPath = [...currentPath];
     }
 

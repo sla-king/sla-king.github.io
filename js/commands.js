@@ -35,7 +35,8 @@ export const commands = {
         context.print(args.join(' '));
     },
     dir: (args, context) => {
-        const targetPath = args.length > 0 ? resolvePath(args[0]) : currentPath;
+        const pathString = args.join(' ');
+        const targetPath = pathString.length > 0 ? resolvePath(pathString) : currentPath;
         const node = getNode(targetPath);
 
         if (node === null || typeof node === 'string') {
@@ -78,13 +79,14 @@ export const commands = {
         context.print("");
     },
     cd: (args, context) => {
-        if (args.length === 0) {
+        const pathString = args.join(' ');
+        
+        if (pathString.length === 0) {
             context.print(getPathString());
-            context.print("");
             return;
         }
 
-        const targetPath = resolvePath(args[0]);
+        const targetPath = resolvePath(pathString);
         const node = getNode(targetPath);
 
         if (node === null || typeof node === 'string') {
@@ -96,13 +98,15 @@ export const commands = {
         setPath(targetPath);
     },
     type: (args, context) => {
-        if (args.length === 0) {
+        const pathString = args.join(' ');
+
+        if (pathString.length === 0) {
             context.print("The syntax of the command is incorrect.");
             context.print("");
             return;
         }
 
-        const targetPath = resolvePath(args[0]);
+        const targetPath = resolvePath(pathString);
         const node = getNode(targetPath);
 
         if (node === null) {
