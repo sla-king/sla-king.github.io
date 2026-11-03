@@ -78,7 +78,7 @@ export const commands = {
             }
         }
 
-        const freeBytes = 9492147973;
+        const freeBytes = 9498362732;
 
         context.print(`               ${fileCount} File(s) ${currentDirBytes.toString().padStart(14)} bytes`);
         context.print(`               ${dirCount} Dir(s)  ${freeBytes.toLocaleString('en-US').padStart(14)} bytes free`);
