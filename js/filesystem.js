@@ -20,7 +20,7 @@ export const fs = {
 export const fileDates = {
     "about_me.txt": "11/02/2026  11:43 PM",
     "contact.txt": "11/02/2026  11:43 PM",
-    "regrets-of-the-dying.txt": "11/02/2026  11:52 PM"
+    "regrets-of-the-dying.txt": "11/03/2026  12:08 AM"
 };
 
 export let currentPath = ["C:", "Documents and Settings", "sla-king"];
