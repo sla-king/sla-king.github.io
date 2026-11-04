@@ -13,7 +13,10 @@
 
     <div class="window" id="draggable-window">
         <div class="title-bar" id="title-bar">
-            <div class="title-bar-text">Command Prompt</div>
+            <div class="title-bar-text">
+                <img src="assets/command_prompt_icon.png" class="window-icon" alt="">
+                Command Prompt
+            </div>
             <div class="title-bar-controls">
                 <button aria-label="Minimize" id="btn-minimize"></button>
                 <button aria-label="Maximize" disabled></button>
@@ -23,7 +26,7 @@
         <div class="window-body" id="console-body">
             <pre id="console-output"></pre>
             <div class="input-line">
-                <span id="prompt-text">C:\Users\sla-king&gt;</span>
+                <span id="prompt-text">C:\Documents and Settings\sla-king&gt;</span>
                 <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus>
             </div>
         </div>
@@ -31,9 +34,11 @@
 
     <div class="taskbar">
         <div class="start-button">
+            <img src="assets/windows_xp_icon.png" class="start-icon" alt="">
             start
         </div>
         <div class="taskbar-item active" id="taskbar-app">
+            <img src="assets/command_prompt_icon.png" class="taskbar-icon" alt="">
             Command Prompt
         </div>
         <div class="system-tray">

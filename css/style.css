@@ -87,6 +87,11 @@ body {
     cursor: default;
 }
 
+.title-bar-text {
+    display: flex;
+    align-items: center;
+}
+
 #drag-outline {
     position: fixed;
     box-sizing: border-box;
@@ -115,7 +120,7 @@ body {
 
 .start-button {
     height: 100%;
-    padding: 0 16px;
+    padding: 0 16px 0 8px;
     background: linear-gradient(to bottom, #3c8a0f 0%, #54b611 10%, #3c8a0f 50%, #2b660a 100%);
     border-radius: 0 10px 10px 0;
     display: flex;
@@ -173,4 +178,41 @@ body {
     font-size: 11px;
     border-left: 1px solid #1941a5;
     box-shadow: inset 1px 0 2px rgba(255,255,255,0.4);
+}
+
+.window-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    image-rendering: pixelated;
+    vertical-align: middle;
+}
+
+.taskbar-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    image-rendering: pixelated;
+}
+
+.window-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+.taskbar-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    object-fit: contain;
+}
+
+.start-icon {
+    width: 24px; 
+    height: 24px;
+    margin-right: 6px;
+    object-fit: contain;
 }
