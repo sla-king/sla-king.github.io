@@ -32,6 +32,38 @@
         </div>
     </div>
 
+    <div class="window" id="explorer-window" style="display: none; top: calc(50vh - 200px); left: calc(50vw - 275px); width: 550px; height: 400px;">
+        <div class="title-bar" id="explorer-title-bar">
+            <div class="title-bar-text">
+                <span class="window-icon" style="font-size: 14px; display: flex; align-items: center; justify-content: center;">📁</span>
+                My Documents
+            </div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" id="explorer-btn-minimize"></button>
+                <button aria-label="Maximize" disabled></button>
+                <button aria-label="Close" id="explorer-btn-close"></button>
+            </div>
+        </div>
+        <div class="window-body explorer-body" id="explorer-body"></div>
+    </div>
+
+    <div class="window" id="notepad-window" style="display: none; top: calc(50vh - 225px); left: calc(50vw - 300px); width: 600px; height: 450px;">
+        <div class="title-bar" id="notepad-title-bar">
+            <div class="title-bar-text">
+                <span class="window-icon" style="font-size: 14px; display: flex; align-items: center; justify-content: center;">📄</span>
+                <span id="notepad-title-text">Notepad</span>
+            </div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" id="notepad-btn-minimize"></button>
+                <button aria-label="Maximize" disabled></button>
+                <button aria-label="Close" id="notepad-btn-close"></button>
+            </div>
+        </div>
+        <div class="window-body notepad-body">
+            <textarea id="notepad-textarea" readonly></textarea>
+        </div>
+    </div>
+
     <div id="start-menu" class="start-menu">
         <div class="start-menu-header">
             <img src="assets/profile_picture.png" class="user-avatar" alt="">
@@ -44,6 +76,12 @@
                     Command Prompt
                 </div>
             </div>
+            <div class="start-menu-right">
+                <div class="menu-item right-item" data-action="documents">
+                    <span class="menu-icon" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">📁</span>
+                    My Documents
+                </div>
+            </div>
         </div>
         <div class="start-menu-footer"></div>
     </div>
@@ -53,10 +91,22 @@
             <img src="assets/windows_xp_icon.png" class="start-icon" alt="">
             start
         </div>
-        <div class="taskbar-item active" id="taskbar-app">
-            <img src="assets/command_prompt_icon_small.png" class="taskbar-icon" alt="">
-            Command Prompt
+        
+        <div id="taskbar-apps" style="display: flex;">
+            <div class="taskbar-item active" id="taskbar-app">
+                <img src="assets/command_prompt_icon_small.png" class="taskbar-icon" alt="">
+                Command Prompt
+            </div>
+            <div class="taskbar-item" id="taskbar-explorer" style="display: none;">
+                <span class="taskbar-icon" style="font-size: 14px; display: flex; align-items: center; justify-content: center;">📁</span>
+                My Documents
+            </div>
+            <div class="taskbar-item" id="taskbar-notepad" style="display: none;">
+                <span class="taskbar-icon" style="font-size: 14px; display: flex; align-items: center; justify-content: center;">📄</span>
+                Notepad
+            </div>
         </div>
+
         <div class="system-tray">
             <span id="clock">12:00 PM</span>
         </div>
