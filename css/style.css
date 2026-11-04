@@ -251,7 +251,7 @@ body {
     bottom: 30px;
     left: 0;
     width: 380px;
-    background-color: #fff;
+    background-color: #fff !important;
     border: 2px solid #0831d9;
     border-bottom: none;
     border-radius: 8px 8px 0 0;
@@ -268,7 +268,7 @@ body {
 }
 
 .start-menu-header {
-    background: linear-gradient(to bottom, #0058ee 0%, #3f8cf3 9%, #0058ee 18%, #0058ee 92%, #002ea3 100%);
+    background: linear-gradient(to bottom, #0058ee 0%, #3f8cf3 9%, #0058ee 18%, #0058ee 92%, #002ea3 100%) !important;
     padding: 6px 8px;
     display: flex;
     align-items: center;
@@ -292,13 +292,13 @@ body {
 .start-menu-body {
     display: flex;
     padding: 0;
-    background-color: #ffffff;
+    background-color: #ffffff !important;
     height: 280px;
 }
 
 .start-menu-left {
     width: 50%;
-    background-color: #ffffff;
+    background-color: #ffffff !important;
     display: flex;
     flex-direction: column;
     padding: 2px 0;
@@ -308,7 +308,7 @@ body {
 
 .start-menu-right {
     width: 50%;
-    background-color: #d3e5fa;
+    background-color: #d3e5fa !important;
     display: flex;
     flex-direction: column;
     padding: 2px 0;
@@ -318,15 +318,19 @@ body {
 .menu-item {
     padding: 6px 10px;
     font-size: 11px;
-    color: #000;
+    color: #000 !important;
     cursor: pointer;
     display: flex;
     align-items: center;
 }
 
+.right-item {
+    font-weight: bold;
+}
+
 .menu-item:hover {
-    background-color: #316ac5;
-    color: white;
+    background-color: #316ac5 !important;
+    color: white !important;
 }
 
 .menu-icon {
@@ -338,7 +342,7 @@ body {
 
 .start-menu-footer {
     height: 38px;
-    background: linear-gradient(to bottom, #3f8cf3 0%, #245edb 100%);
+    background: linear-gradient(to bottom, #3f8cf3 0%, #245edb 100%) !important;
     border-top: 1px solid #002ea3;
 }
 
@@ -387,9 +391,9 @@ body {
 }
 
 .notepad-body {
-    padding: 0;
-    margin: 0 3px 3px 3px;
-    background-color: #ece9d8;
+    padding: 0 !important;
+    margin: 0 3px 3px 3px !important;
+    background-color: #ece9d8 !important;
     display: flex;
     flex-direction: column;
     height: calc(100% - 30px);
@@ -406,4 +410,19 @@ body {
     font-size: 12px;
     box-sizing: border-box;
     background: white;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.taskbar-item.slide-in {
+    animation: slideIn 0.2s ease-out;
 }

@@ -118,9 +118,25 @@ function minimizeToTaskbar(winElement, taskbarElement) {
     }, 250);
 }
 
+function openInstantly(winElement, taskbarElement) {
+    winElement.style.transition = "none";
+    winElement.style.transform = "none";
+    winElement.style.opacity = "1";
+    winElement.style.display = "block";
+    void winElement.offsetWidth; 
+
+    if (taskbarElement.style.display === "none") {
+        taskbarApps.appendChild(taskbarElement);
+        taskbarElement.style.display = "flex";
+        
+        taskbarElement.classList.remove("slide-in");
+        void taskbarElement.offsetWidth; 
+        taskbarElement.classList.add("slide-in");
+    }
+}
+
 function restoreFromTaskbar(winElement, taskbarElement) {
     winElement.style.display = "block";
-    taskbarElement.style.display = "flex";
     winElement.style.transform = "none";
     winElement.style.opacity = "1";
     winElement.style.transition = "none";
@@ -226,10 +242,7 @@ function renderExplorer(path) {
 function openExplorer() {
     explPath = ["C:", "Documents and Settings", "sla-king", "My Documents"];
     renderExplorer(explPath);
-    if (explWin.style.display === "none") {
-        taskbarApps.appendChild(taskbarExpl);
-        restoreFromTaskbar(explWin, taskbarExpl);
-    }
+    openInstantly(explWin, taskbarExpl);
     bringToFront(explWin, taskbarExpl);
 }
 
@@ -246,7 +259,8 @@ taskbarExpl.addEventListener("mousedown", (e) => {
     e.stopPropagation();
     startMenu.classList.remove("show");
     if (explWin.style.display === "none") {
-        openExplorer();
+        restoreFromTaskbar(explWin, taskbarExpl);
+        bringToFront(explWin, taskbarExpl);
     } else if (!taskbarExpl.classList.contains("active")) {
         bringToFront(explWin, taskbarExpl);
     } else {
@@ -258,11 +272,8 @@ function openNotepad(filename, content) {
     const displayName = filename.replace(/\.[^/.]+$/, "");
     noteTitleText.textContent = displayName + " - Notepad";
     noteTextarea.value = content || "";
-    taskbarApps.appendChild(taskbarNote);
     
-    if (noteWin.style.display === "none") {
-        restoreFromTaskbar(noteWin, taskbarNote);
-    }
+    openInstantly(noteWin, taskbarNote);
     bringToFront(noteWin, taskbarNote);
 }
 
@@ -327,10 +338,7 @@ noteWin.addEventListener("mousedown", () => bringToFront(noteWin, taskbarNote));
 
 document.querySelector('.menu-item[data-action="cmd"]').addEventListener("click", () => {
     startMenu.classList.remove("show");
-    if (termWin.style.display === "none") {
-        taskbarApps.appendChild(taskbarTerm);
-        restoreFromTaskbar(termWin, taskbarTerm);
-    }
+    openInstantly(termWin, taskbarTerm);
     bringToFront(termWin, taskbarTerm);
     cmdInput.focus();
 });
