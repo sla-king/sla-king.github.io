@@ -39,19 +39,26 @@ function hideWindow(reset = false, animate = false) {
             win.style.opacity = "1";
             win.style.transition = "none";
             taskbarApp.classList.remove("active");
-            if (reset) terminal.reset();
+            if (reset) {
+                terminal.reset();
+                taskbarApp.style.display = "none";
+            }
         }, 250);
     } else {
         isMinimized = false;
         win.style.display = "none";
         taskbarApp.classList.remove("active");
-        if (reset) terminal.reset();
+        if (reset) {
+            terminal.reset();
+            taskbarApp.style.display = "none";
+        }
     }
 }
 
 function showWindow() {
     if (win.style.display === "none") {
         win.style.display = "block";
+        taskbarApp.style.display = "flex";
         
         win.style.transform = "none";
         win.style.opacity = "1";
@@ -180,3 +187,29 @@ document.addEventListener("mouseup", () => {
     win.style.top = finalY + "px";
     win.style.transform = "none";
 });
+
+const startButton = document.getElementById("start-button");
+const startMenu = document.getElementById("start-menu");
+
+startButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    startMenu.classList.toggle("show");
+});
+
+document.addEventListener("click", (e) => {
+    if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
+        startMenu.classList.remove("show");
+    }
+});
+
+const cmdMenuItem = document.querySelector('.menu-item[data-action="cmd"]');
+if (cmdMenuItem) {
+    cmdMenuItem.addEventListener("click", () => {
+        startMenu.classList.remove("show");
+        if (win.style.display === "none") {
+            showWindow();
+        } else {
+            terminal.focus();
+        }
+    });
+}

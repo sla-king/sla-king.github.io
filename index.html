@@ -14,7 +14,7 @@
     <div class="window" id="draggable-window">
         <div class="title-bar" id="title-bar">
             <div class="title-bar-text">
-                <img src="assets/command_prompt_icon.png" class="window-icon" alt="">
+                <img src="assets/command_prompt_icon_small.png" class="window-icon" alt="">
                 Command Prompt
             </div>
             <div class="title-bar-controls">
@@ -32,13 +32,29 @@
         </div>
     </div>
 
+    <div id="start-menu" class="start-menu">
+        <div class="start-menu-header">
+            <img src="assets/profile_picture.png" class="user-avatar" alt="">
+            <span class="user-name">sla-king</span>
+        </div>
+        <div class="start-menu-body">
+            <div class="start-menu-left">
+                <div class="menu-item" data-action="cmd">
+                    <img src="assets/command_prompt_icon_medium.png" class="menu-icon" alt="">
+                    Command Prompt
+                </div>
+            </div>
+        </div>
+        <div class="start-menu-footer"></div>
+    </div>
+
     <div class="taskbar">
-        <div class="start-button">
+        <div class="start-button" id="start-button">
             <img src="assets/windows_xp_icon.png" class="start-icon" alt="">
             start
         </div>
         <div class="taskbar-item active" id="taskbar-app">
-            <img src="assets/command_prompt_icon.png" class="taskbar-icon" alt="">
+            <img src="assets/command_prompt_icon_small.png" class="taskbar-icon" alt="">
             Command Prompt
         </div>
         <div class="system-tray">
