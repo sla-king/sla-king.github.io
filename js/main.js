@@ -11,20 +11,89 @@ const taskbarApp = document.getElementById("taskbar-app");
 let isDragging = false;
 let startX, startY;
 let winRect;
+let isMinimized = false;
 
-function hideWindow(reset = false) {
-    win.style.display = "none";
-    taskbarApp.classList.remove("active");
-    if (reset) {
-        terminal.reset();
+function hideWindow(reset = false, animate = false) {
+    if (animate) {
+        isMinimized = true;
+        const currentRect = win.getBoundingClientRect();
+        const taskRect = taskbarApp.getBoundingClientRect();
+        
+        const scale = taskRect.width / currentRect.width;
+        const winCenterX = currentRect.left + currentRect.width / 2;
+        const winCenterY = currentRect.top + currentRect.height / 2;
+        const taskCenterX = taskRect.left + taskRect.width / 2;
+        const taskCenterY = taskRect.top + taskRect.height / 2;
+        
+        const deltaX = taskCenterX - winCenterX;
+        const deltaY = taskCenterY - winCenterY;
+        
+        win.style.transformOrigin = 'center center';
+        win.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
+        win.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale})`;
+        win.style.opacity = '0';
+        
+        setTimeout(() => {
+            win.style.display = "none";
+            win.style.transform = "none";
+            win.style.opacity = "1";
+            win.style.transition = "none";
+            taskbarApp.classList.remove("active");
+            if (reset) terminal.reset();
+        }, 250);
+    } else {
+        isMinimized = false;
+        win.style.display = "none";
+        taskbarApp.classList.remove("active");
+        if (reset) terminal.reset();
     }
 }
 
 function showWindow() {
-    win.style.display = "block";
-    taskbarApp.classList.add("active");
-    bringOnScreen();
-    terminal.focus();
+    if (win.style.display === "none") {
+        win.style.display = "block";
+        
+        win.style.transform = "none";
+        win.style.opacity = "1";
+        win.style.transition = "none";
+
+        bringOnScreen();
+
+        if (isMinimized) {
+            isMinimized = false;
+            
+            const taskRect = taskbarApp.getBoundingClientRect();
+            const targetRect = win.getBoundingClientRect();
+            
+            win.style.opacity = "0";
+            win.style.transformOrigin = 'center center';
+            
+            const scale = taskRect.width / targetRect.width;
+            const winCenterX = targetRect.left + targetRect.width / 2;
+            const winCenterY = targetRect.top + targetRect.height / 2;
+            const taskCenterX = taskRect.left + taskRect.width / 2;
+            const taskCenterY = taskRect.top + taskRect.height / 2;
+            
+            const deltaX = taskCenterX - winCenterX;
+            const deltaY = taskCenterY - winCenterY;
+            
+            win.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale})`;
+            
+            void win.offsetHeight; 
+            
+            win.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
+            win.style.transform = "translate(0, 0) scale(1)";
+            win.style.opacity = "1";
+            
+            setTimeout(() => {
+                win.style.transition = "none";
+                win.style.transform = "none";
+            }, 250);
+        }
+        
+        taskbarApp.classList.add("active");
+        terminal.focus();
+    }
 }
 
 function bringOnScreen() {
@@ -42,7 +111,7 @@ function bringOnScreen() {
     win.style.transform = "none";
 }
 
-const terminal = initTerminal(() => hideWindow(true));
+const terminal = initTerminal(() => hideWindow(true, false));
 
 function updateClock() {
     const now = new Date();
@@ -58,14 +127,14 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-btnMinimize.addEventListener("click", () => hideWindow(false));
-btnClose.addEventListener("click", () => hideWindow(true));
+btnMinimize.addEventListener("click", () => hideWindow(false, true));
+btnClose.addEventListener("click", () => hideWindow(true, false));
 
 taskbarApp.addEventListener("click", () => {
     if (win.style.display === "none") {
         showWindow();
     } else {
-        hideWindow(false);
+        hideWindow(false, true);
     }
 });
 
