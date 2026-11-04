@@ -7,11 +7,28 @@ const btnMinimize = document.getElementById("btn-minimize");
 const btnClose = document.getElementById("btn-close");
 const clock = document.getElementById("clock");
 const taskbarApp = document.getElementById("taskbar-app");
+const startButton = document.getElementById("start-button");
+const startMenu = document.getElementById("start-menu");
+const cmdInput = document.getElementById("cmd-input");
 
 let isDragging = false;
 let startX, startY;
 let winRect;
 let isMinimized = false;
+let zIndexCounter = 10;
+
+function focusWindow() {
+    win.style.zIndex = ++zIndexCounter;
+    taskbarApp.classList.add("active");
+    win.classList.remove("unfocused");
+    cmdInput.focus();
+}
+
+function blurWindow() {
+    taskbarApp.classList.remove("active");
+    win.classList.add("unfocused");
+    cmdInput.blur();
+}
 
 function hideWindow(reset = false, animate = false) {
     if (animate) {
@@ -41,7 +58,7 @@ function hideWindow(reset = false, animate = false) {
             taskbarApp.classList.remove("active");
             if (reset) {
                 terminal.reset();
-                taskbarApp.style.display = "none";
+                taskbarApp.style.display = "none"; 
             }
         }, 250);
     } else {
@@ -50,7 +67,7 @@ function hideWindow(reset = false, animate = false) {
         taskbarApp.classList.remove("active");
         if (reset) {
             terminal.reset();
-            taskbarApp.style.display = "none";
+            taskbarApp.style.display = "none"; 
         }
     }
 }
@@ -58,7 +75,7 @@ function hideWindow(reset = false, animate = false) {
 function showWindow() {
     if (win.style.display === "none") {
         win.style.display = "block";
-        taskbarApp.style.display = "flex";
+        taskbarApp.style.display = "flex"; 
         
         win.style.transform = "none";
         win.style.opacity = "1";
@@ -98,8 +115,7 @@ function showWindow() {
             }, 250);
         }
         
-        taskbarApp.classList.add("active");
-        terminal.focus();
+        focusWindow();
     }
 }
 
@@ -137,11 +153,16 @@ updateClock();
 btnMinimize.addEventListener("click", () => hideWindow(false, true));
 btnClose.addEventListener("click", () => hideWindow(true, false));
 
-taskbarApp.addEventListener("click", () => {
+taskbarApp.addEventListener("mousedown", (e) => {
+    e.stopPropagation(); 
+    startMenu.classList.remove("show");
+    
     if (win.style.display === "none") {
-        showWindow();
+        showWindow(); 
+    } else if (!taskbarApp.classList.contains("active")) {
+        focusWindow(); 
     } else {
-        hideWindow(false, true);
+        hideWindow(false, true); 
     }
 });
 
@@ -188,15 +209,29 @@ document.addEventListener("mouseup", () => {
     win.style.transform = "none";
 });
 
-const startButton = document.getElementById("start-button");
-const startMenu = document.getElementById("start-menu");
-
-startButton.addEventListener("click", (e) => {
-    e.stopPropagation();
-    startMenu.classList.toggle("show");
+win.addEventListener("mousedown", () => {
+    focusWindow();
 });
 
-document.addEventListener("click", (e) => {
+startButton.addEventListener("mousedown", (e) => {
+    e.stopPropagation();
+    blurWindow();
+    startMenu.classList.toggle("show");
+    if (startMenu.classList.contains("show")) {
+        startMenu.style.zIndex = ++zIndexCounter; 
+    }
+});
+
+startMenu.addEventListener("mousedown", (e) => {
+    e.stopPropagation();
+    startMenu.style.zIndex = ++zIndexCounter;
+});
+
+document.addEventListener("mousedown", (e) => {
+    if (!win.contains(e.target)) {
+        blurWindow();
+    }
+    
     if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
         startMenu.classList.remove("show");
     }
@@ -209,7 +244,7 @@ if (cmdMenuItem) {
         if (win.style.display === "none") {
             showWindow();
         } else {
-            terminal.focus();
+            focusWindow();
         }
     });
 }

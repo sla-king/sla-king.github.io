@@ -22,6 +22,35 @@ body {
     box-sizing: border-box;
 }
 
+.window.unfocused .title-bar {
+    background: linear-gradient(
+        to bottom,
+        #9eb9e8 0%,
+        #aec9f5 8%,
+        #8da6d6 40%,
+        #8da6d6 88%,
+        #7c94c4 93%,
+        #5e76a6 95%,
+        #5e76a6 100%
+    );
+    border-top-color: transparent;
+    border-left-color: transparent;
+    border-right-color: transparent;
+}
+
+.window.unfocused .title-bar-text {
+    color: #e5eeff;
+}
+
+.window.unfocused {
+    background-color: #9eb9e8;
+    border-top-color: #9eb9e8;
+    border-left-color: #9eb9e8;
+    border-right-color: #809dcd;
+    border-bottom-color: #809dcd;
+    box-shadow: inset -1px -1px #809dcd, inset 1px 1px #c5d8f6, inset -2px -2px #809dcd, inset 2px 2px #9eb9e8;
+}
+
 #draggable-window .window-body {
     background-color: #000000;
     height: 360px;
