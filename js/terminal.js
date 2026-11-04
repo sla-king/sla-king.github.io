@@ -20,6 +20,9 @@ export function initTerminal(onClose) {
     let printSession = 0;
     let isProcessing = false;
 
+    let commandHistory = [];
+    let historyIndex = 0;
+
     function updatePrompt() {
         promptText.textContent = getPathString() + ">";
         scrollToBottom();
@@ -56,6 +59,8 @@ export function initTerminal(onClose) {
         consoleOutput.textContent = initialText;
         cmdInput.value = "";
         setPath(["C:", "Documents and Settings", "sla-king"]);
+        commandHistory = [];
+        historyIndex = 0;
         updatePrompt();
         scrollToBottom();
     }
@@ -133,6 +138,33 @@ export function initTerminal(onClose) {
     cmdInput.addEventListener('keydown', async (e) => {
         if (isProcessing) {
             e.preventDefault();
+            return;
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (historyIndex > 0) {
+                historyIndex--;
+                cmdInput.value = commandHistory[historyIndex];
+                const len = cmdInput.value.length;
+                cmdInput.setSelectionRange(len, len);
+                cycleMatches = [];
+            }
+            return;
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (historyIndex < commandHistory.length - 1) {
+                historyIndex++;
+                cmdInput.value = commandHistory[historyIndex];
+            } else if (historyIndex === commandHistory.length - 1) {
+                historyIndex++;
+                cmdInput.value = "";
+            }
+            const len = cmdInput.value.length;
+            cmdInput.setSelectionRange(len, len);
+            cycleMatches = [];
             return;
         }
 
@@ -221,6 +253,14 @@ export function initTerminal(onClose) {
             
             const rawInput = cmdInput.value;
             const trimmedInput = rawInput.trim();
+
+            if (trimmedInput !== "") {
+                commandHistory.push(trimmedInput);
+                if (commandHistory.length > 50) {
+                    commandHistory.shift();
+                }
+            }
+            historyIndex = commandHistory.length;
             
             cmdInput.value = "";
             cycleMatches = [];
