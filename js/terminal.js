@@ -65,9 +65,12 @@ export function initTerminal(onClose) {
         scrollToBottom();
     }
 
-    consoleBody.addEventListener('click', () => {
+    consoleBody.addEventListener('click', (e) => {
         if (window.getSelection().toString().length > 0) return;
-        cmdInput.focus();
+        
+        if (window.matchMedia("(pointer: fine)").matches || e.target.closest('.input-line')) {
+            cmdInput.focus({ preventScroll: true });
+        }
     });
 
     function getWordInfo(text) {
@@ -311,7 +314,7 @@ export function initTerminal(onClose) {
 
             updatePrompt();
             isProcessing = false;
-            cmdInput.focus();
+            cmdInput.focus({ preventScroll: true });
         }
     });
 
@@ -320,7 +323,7 @@ export function initTerminal(onClose) {
     });
 
     return {
-        focus: () => cmdInput.focus(),
+        focus: () => cmdInput.focus({ preventScroll: true }),
         reset: reset
     };
 }

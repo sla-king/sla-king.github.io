@@ -33,6 +33,10 @@ const taskbarApps = document.getElementById("taskbar-apps");
 let zIndexCounter = 10;
 let explPath = ["C:", "Documents and Settings", "sla-king", "My Documents"];
 
+let isDragging = false;
+let dragTarget = null;
+let startX, startY, initialX, initialY;
+
 function bringToFront(winElement, taskbarElement) {
     winElement.style.zIndex = ++zIndexCounter;
     winElement.classList.remove("unfocused");
@@ -50,51 +54,60 @@ function blurAllWindows() {
     cmdInput.blur();
 }
 
-function makeDraggable(winElement, titleBarElement, taskbarElement) {
-    let isDragging = false;
-    let startX, startY, winRect;
-
-    titleBarElement.addEventListener("pointerdown", (e) => {
-        if (e.target.closest('.title-bar-controls')) return;
-        bringToFront(winElement, taskbarElement);
-        isDragging = true;
-        winRect = winElement.getBoundingClientRect();
-        startX = e.clientX - winRect.left;
-        startY = e.clientY - winRect.top;
-        outline.style.width = winRect.width + "px";
-        outline.style.height = winRect.height + "px";
-        outline.style.left = winRect.left + "px";
-        outline.style.top = winRect.top + "px";
-        outline.style.display = "block";
-        titleBarElement.setPointerCapture(e.pointerId);
-        e.preventDefault();
-    });
-
-    titleBarElement.addEventListener("pointermove", (e) => {
-        if (!isDragging) return;
-        let newX = e.clientX - startX;
-        let newY = e.clientY - startY;
-        outline.style.left = newX + "px";
-        outline.style.top = newY + "px";
-        e.preventDefault();
-    });
-
-    titleBarElement.addEventListener("pointerup", (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        outline.style.display = "none";
-        let finalX = parseInt(outline.style.left);
-        let finalY = parseInt(outline.style.top);
-        winElement.style.left = finalX + "px";
-        winElement.style.top = finalY + "px";
-        winElement.style.transform = "none";
-        titleBarElement.releasePointerCapture(e.pointerId);
-    });
+function startDrag(e, winElement, taskbarElement) {
+    if (e.target.closest('.title-bar-controls')) return;
+    bringToFront(winElement, taskbarElement);
+    
+    isDragging = true;
+    dragTarget = winElement;
+    
+    const rect = winElement.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    initialX = rect.left;
+    initialY = rect.top;
+    
+    outline.style.width = rect.width + "px";
+    outline.style.height = rect.height + "px";
+    outline.style.left = initialX + "px";
+    outline.style.top = initialY + "px";
+    outline.style.display = "block";
+    
+    e.preventDefault();
 }
 
-makeDraggable(termWin, termTitleBar, taskbarTerm);
-makeDraggable(explWin, explTitleBar, taskbarExpl);
-makeDraggable(noteWin, noteTitleBar, taskbarNote);
+document.addEventListener("pointermove", (e) => {
+    if (!isDragging || !dragTarget) return;
+    
+    let newX = initialX + (e.clientX - startX);
+    let newY = initialY + (e.clientY - startY);
+    
+    outline.style.left = newX + "px";
+    outline.style.top = newY + "px";
+});
+
+function endDrag() {
+    if (!isDragging || !dragTarget) return;
+    isDragging = false;
+    
+    outline.style.display = "none";
+    
+    const finalX = parseInt(outline.style.left);
+    const finalY = parseInt(outline.style.top);
+    
+    dragTarget.style.left = finalX + "px";
+    dragTarget.style.top = finalY + "px";
+    dragTarget.style.transform = "none";
+    
+    dragTarget = null;
+}
+
+document.addEventListener("pointerup", endDrag);
+document.addEventListener("pointercancel", endDrag);
+
+termTitleBar.addEventListener("pointerdown", (e) => startDrag(e, termWin, taskbarTerm));
+explTitleBar.addEventListener("pointerdown", (e) => startDrag(e, explWin, taskbarExpl));
+noteTitleBar.addEventListener("pointerdown", (e) => startDrag(e, noteWin, taskbarNote));
 
 function minimizeToTaskbar(winElement, taskbarElement) {
     const currentRect = winElement.getBoundingClientRect();
@@ -126,6 +139,20 @@ function openInstantly(winElement, taskbarElement) {
     winElement.style.transform = "none";
     winElement.style.opacity = "1";
     winElement.style.display = "block";
+    
+    const rect = winElement.getBoundingClientRect();
+    let maxX = window.innerWidth - winElement.offsetWidth;
+    let maxY = window.innerHeight - winElement.offsetHeight - 30;
+    
+    let newLeft = Math.max(0, Math.min(rect.left, maxX));
+    let newTop = Math.max(0, Math.min(rect.top, maxY));
+    
+    if (maxX < 0) newLeft = 0;
+    if (maxY < 0) newTop = 0;
+
+    winElement.style.left = newLeft + "px";
+    winElement.style.top = newTop + "px";
+    
     void winElement.offsetWidth; 
 
     if (taskbarElement.style.display === "none") {
@@ -143,6 +170,19 @@ function restoreFromTaskbar(winElement, taskbarElement) {
     winElement.style.transform = "none";
     winElement.style.opacity = "1";
     winElement.style.transition = "none";
+
+    const rect = winElement.getBoundingClientRect();
+    let maxX = window.innerWidth - winElement.offsetWidth;
+    let maxY = window.innerHeight - winElement.offsetHeight - 30;
+    
+    let newLeft = Math.max(0, Math.min(rect.left, maxX));
+    let newTop = Math.max(0, Math.min(rect.top, maxY));
+    
+    if (maxX < 0) newLeft = 0;
+    if (maxY < 0) newTop = 0;
+
+    winElement.style.left = newLeft + "px";
+    winElement.style.top = newTop + "px";
 
     const taskRect = taskbarElement.getBoundingClientRect();
     const targetRect = winElement.getBoundingClientRect();
@@ -182,16 +222,14 @@ const terminal = initTerminal(closeTerminal);
 btnMinimize.addEventListener("click", () => minimizeToTaskbar(termWin, taskbarTerm));
 btnClose.addEventListener("click", closeTerminal);
 
-taskbarTerm.addEventListener("click", (e) => {
+taskbarTerm.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
     startMenu.classList.remove("show");
     if (termWin.style.display === "none") {
         restoreFromTaskbar(termWin, taskbarTerm);
         bringToFront(termWin, taskbarTerm);
-        cmdInput.focus();
     } else if (!taskbarTerm.classList.contains("active")) {
         bringToFront(termWin, taskbarTerm);
-        cmdInput.focus();
     } else {
         minimizeToTaskbar(termWin, taskbarTerm);
     }
@@ -258,7 +296,7 @@ function closeExplorer() {
 explBtnMinimize.addEventListener("click", () => minimizeToTaskbar(explWin, taskbarExpl));
 explBtnClose.addEventListener("click", closeExplorer);
 
-taskbarExpl.addEventListener("click", (e) => {
+taskbarExpl.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
     startMenu.classList.remove("show");
     if (explWin.style.display === "none") {
@@ -289,7 +327,7 @@ function closeNotepad() {
 noteBtnMinimize.addEventListener("click", () => minimizeToTaskbar(noteWin, taskbarNote));
 noteBtnClose.addEventListener("click", closeNotepad);
 
-taskbarNote.addEventListener("click", (e) => {
+taskbarNote.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
     startMenu.classList.remove("show");
     if (noteWin.style.display === "none") {
@@ -343,7 +381,6 @@ document.querySelector('.menu-item[data-action="cmd"]').addEventListener("click"
     startMenu.classList.remove("show");
     openInstantly(termWin, taskbarTerm);
     bringToFront(termWin, taskbarTerm);
-    cmdInput.focus();
 });
 
 document.querySelector('.menu-item[data-action="documents"]').addEventListener("click", () => {
