@@ -54,7 +54,7 @@ function makeDraggable(winElement, titleBarElement, taskbarElement) {
     let isDragging = false;
     let startX, startY, winRect;
 
-    titleBarElement.addEventListener("mousedown", (e) => {
+    titleBarElement.addEventListener("pointerdown", (e) => {
         if (e.target.closest('.title-bar-controls')) return;
         bringToFront(winElement, taskbarElement);
         isDragging = true;
@@ -66,18 +66,20 @@ function makeDraggable(winElement, titleBarElement, taskbarElement) {
         outline.style.left = winRect.left + "px";
         outline.style.top = winRect.top + "px";
         outline.style.display = "block";
+        titleBarElement.setPointerCapture(e.pointerId);
         e.preventDefault();
     });
 
-    document.addEventListener("mousemove", (e) => {
+    titleBarElement.addEventListener("pointermove", (e) => {
         if (!isDragging) return;
         let newX = e.clientX - startX;
         let newY = e.clientY - startY;
         outline.style.left = newX + "px";
         outline.style.top = newY + "px";
+        e.preventDefault();
     });
 
-    document.addEventListener("mouseup", () => {
+    titleBarElement.addEventListener("pointerup", (e) => {
         if (!isDragging) return;
         isDragging = false;
         outline.style.display = "none";
@@ -86,6 +88,7 @@ function makeDraggable(winElement, titleBarElement, taskbarElement) {
         winElement.style.left = finalX + "px";
         winElement.style.top = finalY + "px";
         winElement.style.transform = "none";
+        titleBarElement.releasePointerCapture(e.pointerId);
     });
 }
 
@@ -179,7 +182,7 @@ const terminal = initTerminal(closeTerminal);
 btnMinimize.addEventListener("click", () => minimizeToTaskbar(termWin, taskbarTerm));
 btnClose.addEventListener("click", closeTerminal);
 
-taskbarTerm.addEventListener("mousedown", (e) => {
+taskbarTerm.addEventListener("click", (e) => {
     e.stopPropagation();
     startMenu.classList.remove("show");
     if (termWin.style.display === "none") {
@@ -255,7 +258,7 @@ function closeExplorer() {
 explBtnMinimize.addEventListener("click", () => minimizeToTaskbar(explWin, taskbarExpl));
 explBtnClose.addEventListener("click", closeExplorer);
 
-taskbarExpl.addEventListener("mousedown", (e) => {
+taskbarExpl.addEventListener("click", (e) => {
     e.stopPropagation();
     startMenu.classList.remove("show");
     if (explWin.style.display === "none") {
@@ -286,7 +289,7 @@ function closeNotepad() {
 noteBtnMinimize.addEventListener("click", () => minimizeToTaskbar(noteWin, taskbarNote));
 noteBtnClose.addEventListener("click", closeNotepad);
 
-taskbarNote.addEventListener("mousedown", (e) => {
+taskbarNote.addEventListener("click", (e) => {
     e.stopPropagation();
     startMenu.classList.remove("show");
     if (noteWin.style.display === "none") {
@@ -313,7 +316,7 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-startButton.addEventListener("mousedown", (e) => {
+startButton.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
     blurAllWindows();
     startMenu.classList.toggle("show");
@@ -322,19 +325,19 @@ startButton.addEventListener("mousedown", (e) => {
     }
 });
 
-startMenu.addEventListener("mousedown", (e) => {
+startMenu.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
     startMenu.style.zIndex = ++zIndexCounter;
 });
 
-document.addEventListener("mousedown", (e) => {
+document.addEventListener("pointerdown", (e) => {
     if (!termWin.contains(e.target) && !explWin.contains(e.target) && !noteWin.contains(e.target)) blurAllWindows();
     if (!startMenu.contains(e.target) && !startButton.contains(e.target)) startMenu.classList.remove("show");
 });
 
-termWin.addEventListener("mousedown", () => bringToFront(termWin, taskbarTerm));
-explWin.addEventListener("mousedown", () => bringToFront(explWin, taskbarExpl));
-noteWin.addEventListener("mousedown", () => bringToFront(noteWin, taskbarNote));
+termWin.addEventListener("pointerdown", () => bringToFront(termWin, taskbarTerm));
+explWin.addEventListener("pointerdown", () => bringToFront(explWin, taskbarExpl));
+noteWin.addEventListener("pointerdown", () => bringToFront(noteWin, taskbarNote));
 
 document.querySelector('.menu-item[data-action="cmd"]').addEventListener("click", () => {
     startMenu.classList.remove("show");

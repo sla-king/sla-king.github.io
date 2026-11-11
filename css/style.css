@@ -68,7 +68,7 @@ body {
     overflow-y: scroll;
     overflow-x: hidden;
     box-sizing: border-box;
-    cursor: text;
+    cursor: default;
 }
 
 #console-output {
@@ -85,6 +85,7 @@ body {
     text-align: left;
     -webkit-font-smoothing: none;
     font-smooth: never;
+    cursor: default;
 }
 
 .input-line {
@@ -102,6 +103,7 @@ body {
 #prompt-text {
     white-space: pre;
     line-height: inherit;
+    cursor: default;
 }
 
 #cmd-input {
@@ -128,6 +130,12 @@ body {
 .title-bar-text {
     display: flex;
     align-items: center;
+}
+
+.title-bar {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #drag-outline {
