@@ -1,0 +1,129 @@
+@import url('https://fonts.cdnfonts.com/css/perfect-dos-vga-437');
+
+/* App Window Dimensions */
+#explorer-window {
+    --win-w: 550px;
+    --win-h: 400px;
+}
+
+#notepad-window {
+    --win-w: 600px;
+    --win-h: 450px;
+}
+
+/* Terminal App */
+#draggable-window .window-body {
+    background-color: #000000;
+    color: #c0c0c0;
+    font-family: 'Perfect DOS VGA 437', 'Terminal', 'Fixedsys', 'Lucida Console', monospace;
+    font-size: clamp(12px, 2vw, 14px);
+    line-height: 1.2;
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+    padding: 12px 8px 12px 12px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    cursor: default;
+}
+
+#console-output {
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: left;
+    cursor: default;
+}
+
+.input-line {
+    display: flex;
+    align-items: flex-start;
+    height: 1.2em;
+}
+
+#prompt-text {
+    white-space: pre;
+    line-height: inherit;
+    cursor: default;
+}
+
+#cmd-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    margin: 0;
+    height: 1.2em;
+}
+
+/* Explorer App */
+.window .explorer-body {
+    background-color: #ffffff;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 15px;
+}
+
+.explorer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    cursor: pointer;
+    padding: 5px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    text-align: center;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+    user-select: none;
+}
+
+.explorer-item:hover {
+    background-color: #e6f1ff;
+    border-color: #99c2ff;
+}
+
+.explorer-item:active {
+    background-color: #cce3ff;
+}
+
+.explorer-icon {
+    font-size: 32px;
+    margin-bottom: 5px;
+    line-height: 1;
+}
+
+/* Notepad App */
+.window .notepad-body {
+    padding: 0;
+    background-color: #ece9d8;
+    display: flex;
+    flex-direction: column;
+}
+
+#notepad-textarea {
+    flex: 1;
+    width: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    padding: 4px;
+    font-family: 'Lucida Console', 'Courier New', monospace;
+    font-size: 12px;
+    box-sizing: border-box;
+    background: #ffffff;
+}

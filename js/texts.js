@@ -2,20 +2,14 @@ export const aboutMeTxt = `Hi, I'm sla-king. I'm a CS major at UCI. I like doing
 
 export const contactTxt = `Email: alex.l.seidinger@gmail.com\nLinkedIn: linkedin.com/in/alexanderseidinger\nGitHub: github.com/sla-king`;
 
-export const experienceTxt = `
-==============================================================================
-                                  EXPERIENCE
-==============================================================================
+export const experienceTxt = `# Experience  
 SOC Analyst | UCI Office of Information Technology | May 2026 - Present
 CCDC Team Captain | Cyber@UCI | Oct 2025 - Present
 Security Risk and Compliance Intern | CyberForward | Feb 2024 - May 2024
 
-==============================================================================
-                                CERTIFICATIONS
-==============================================================================
+# Certifications
 CompTIA Security+ CE (SY0-701) | Sep 2025
-Google Cybersecurity Professional Certificate | Oct 2024
-`;
+Google Cybersecurity Professional Certificate | Oct 2024`;
 
 export const bidoofTxt = `
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡤⠷⠤⢤⣀⠀⠀⠀⠀⠀⠀⠀

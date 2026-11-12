@@ -1,5 +1,7 @@
 import { aboutMeTxt, contactTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt } from './texts.js';
 
+export const HOME_PATH = ["C:", "Documents and Settings", "sla-king"];
+
 export const fs = {
     "C:": {
         "AUTOEXEC.BAT": "",
@@ -17,99 +19,87 @@ export const fs = {
                     "experience.txt": experienceTxt,
                 }
             }
-        },
+        }
     }
 };
 
 export const fileDates = {
     "about_me.txt": "11/03/2026  01:24 PM",
     "contact.txt": "11/02/2026  11:43 PM",
-    "experience.txt": "11/04/2026  11:05 AM",
+    "experience.txt": "11/11/2026  07:28 PM",
     "bidoof.txt": "11/03/2026  01:31 PM",
     "regrets-of-the-dying.txt": "11/03/2026  12:08 AM",
 };
 
-export let currentPath = ["C:", "Documents and Settings", "sla-king"];
+export let currentPath = [...HOME_PATH];
 
 export function setPath(newPath) {
     currentPath = newPath;
 }
 
 export function getPathString(pathArray = currentPath) {
-    if (pathArray.length === 1) return pathArray[0] + "\\";
-    return pathArray.join("\\");
-}
-
-export function resolvePath(input) {
-    if (!input) return [...currentPath];
-
-    let newPath = [];
-    let cleanInput = input.replace(/"/g, ''); 
-    
-    if (cleanInput.startsWith('/') || cleanInput.startsWith('\\')) {
-        newPath = [currentPath[0]];
-        cleanInput = cleanInput.substring(1);
-    }
-
-    let parts = cleanInput.split(/[/\\]/).filter(p => p !== "");
-    
-    if (cleanInput === "~") {
-        return ["C:", "Documents and Settings", "sla-king"];
-    }
-    if (cleanInput.startsWith("~/") || cleanInput.startsWith("~\\")) {
-        newPath = ["C:", "Documents and Settings", "sla-king"];
-        parts.shift(); 
-    } 
-    else if (parts.length > 0 && parts[0].endsWith(":")) {
-        newPath = [parts.shift().toUpperCase()];
-    } 
-    else if (newPath.length === 0) {
-        newPath = [...currentPath];
-    }
-
-    for (let part of parts) {
-        if (part === ".") continue;
-        if (part === "..") {
-            if (newPath.length > 1) newPath.pop();
-            continue;
-        }
-        newPath.push(part);
-    }
-    return newPath;
+    return pathArray.length === 1 ? `${pathArray[0]}\\` : pathArray.join("\\");
 }
 
 export function getNode(path) {
     let node = fs;
-    for (let part of path) {
-        if (!node || typeof node !== 'object' || !Object.prototype.hasOwnProperty.call(node, part)) return null;
-        node = node[part];
+    for (const part of path) {
+        if (!node || typeof node !== "object") return null;
+        const key = Object.keys(node).find(k => k.toLowerCase() === part.toLowerCase());
+        if (!key) return null;
+        node = node[key];
     }
     return node;
 }
 
-export function getLatestDateInNode(node, defaultDate) {
-    let maxTime = 0;
-    let maxDateStr = defaultDate;
-    let foundFile = false;
+export function resolvePath(input, basePath = currentPath) {
+    if (!input) return [...basePath];
 
-    for (const key in node) {
-        if (typeof node[key] === 'string') {
-            const dateStr = fileDates[key] || defaultDate;
-            const time = new Date(dateStr).getTime();
-            if (time > maxTime || !foundFile) {
-                maxTime = time;
-                maxDateStr = dateStr;
-                foundFile = true;
-            }
-        } else if (typeof node[key] === 'object') {
-            const childDate = getLatestDateInNode(node[key], defaultDate);
-            const time = new Date(childDate).getTime();
-            if (time > maxTime || !foundFile) {
-                maxTime = time;
-                maxDateStr = childDate;
-                foundFile = true;
-            }
+    let cleanInput = input.replace(/"/g, "");
+    if (cleanInput === "~") return [...HOME_PATH];
+
+    let newPath = [];
+    const parts = cleanInput.split(/[/\\]/).filter(Boolean);
+
+    if (cleanInput.startsWith("/") || cleanInput.startsWith("\\")) {
+        newPath = [basePath[0]];
+    } else if (cleanInput.startsWith("~/") || cleanInput.startsWith("~\\")) {
+        newPath = [...HOME_PATH];
+        parts.shift();
+    } else if (parts.length > 0 && parts[0].endsWith(":")) {
+        newPath = [parts.shift().toUpperCase()];
+    } else {
+        newPath = [...basePath];
+    }
+
+    for (const part of parts) {
+        if (part === ".") continue;
+        if (part === "..") {
+            if (newPath.length > 1) newPath.pop();
+        } else {
+            const parentNode = getNode(newPath);
+            const canonicalKey = parentNode && typeof parentNode === "object"
+                ? Object.keys(parentNode).find(k => k.toLowerCase() === part.toLowerCase())
+                : null;
+            newPath.push(canonicalKey || part);
         }
     }
-    return foundFile ? maxDateStr : defaultDate;
+    return newPath;
+}
+
+export function getLatestDateInNode(node, defaultDate) {
+    let maxTime = -1;
+    let maxDateStr = defaultDate;
+
+    for (const [key, value] of Object.entries(node)) {
+        const dateStr = typeof value === "string"
+            ? (fileDates[key] || defaultDate)
+            : getLatestDateInNode(value, defaultDate);
+        const time = new Date(dateStr).getTime();
+        if (time > maxTime) {
+            maxTime = time;
+            maxDateStr = dateStr;
+        }
+    }
+    return maxDateStr;
 }
