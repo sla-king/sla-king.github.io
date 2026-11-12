@@ -1,5 +1,9 @@
 @import url('https://fonts.cdnfonts.com/css/perfect-dos-vga-437');
 
+:root {
+    color-scheme: light dark;
+}
+
 /* App Window Dimensions */
 #ie-window {
     --win-w: 720px;
@@ -73,6 +77,7 @@
 /* Explorer App */
 .window .explorer-body {
     background-color: #ffffff;
+    color: #000000;
     padding: 10px;
     overflow-y: auto;
     display: flex;
@@ -130,13 +135,14 @@
     font-family: 'Lucida Console', 'Courier New', monospace;
     font-size: 12px;
     box-sizing: border-box;
-    background: #ffffff;
+    background-color: #ffffff;
+    color: #000000;
 }
 
 /* Internet Explorer App */
 .window .ie-body {
     padding: 0;
-    background-color: #ece9d8;
+    background-color: light-dark(#ece9d8, #27272a);
     display: flex;
     flex-direction: column;
 }
@@ -146,15 +152,16 @@
     align-items: center;
     gap: 6px;
     padding: 3px 6px;
-    border-bottom: 1px solid #aca899;
+    background-color: light-dark(#ece9d8, #27272a);
+    border-bottom: 1px solid light-dark(#aca899, #3f3f46);
     font-family: 'Tahoma', sans-serif;
     font-size: 11px;
-    color: #000000;
+    color: light-dark(#000000, #e4e4e7);
     user-select: none;
 }
 
 .ie-address-label {
-    color: #555555;
+    color: light-dark(#555555, #a1a1aa);
 }
 
 .ie-address-input {
@@ -162,8 +169,9 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background-color: #ffffff;
-    border: 1px solid #7f9db9;
+    background-color: light-dark(#ffffff, #18181b);
+    border: 1px solid light-dark(#7f9db9, #52525b);
+    color: light-dark(#000000, #e4e4e7);
     padding: 2px 4px;
     overflow: hidden;
     white-space: nowrap;
@@ -173,7 +181,7 @@
     flex: 1;
     width: 100%;
     border: none;
-    background-color: #ffffff;
+    background-color: light-dark(#ffffff, #18181b);
     display: block;
 }
 
