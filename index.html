@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <link rel="icon" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>sla-king's Homepage</title>
+    <title>sla-king's homepage</title>
     <link rel="stylesheet" href="https://unpkg.com/xp.css">
     <link rel="stylesheet" href="css/os.css">
     <link rel="stylesheet" href="css/apps.css">
@@ -12,7 +12,7 @@
 <body>
     <div id="drag-outline"></div>
 
-    <div class="window" id="draggable-window">
+    <div class="window" id="command-window" style="display: none;">
         <div class="title-bar">
             <div class="title-bar-text">
                 <img src="assets/command_prompt_icon_small.png" class="window-icon" alt="">
@@ -65,6 +65,30 @@
         </div>
     </div>
 
+    <div class="window" id="ie-window">
+        <div class="title-bar">
+            <div class="title-bar-text">
+                <span class="window-icon">🌐</span>
+                <span>Microsoft Internet Explorer</span>
+            </div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize" disabled></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body ie-body">
+            <div class="ie-address-bar">
+                <span class="ie-address-label">Address</span>
+                <div class="ie-address-input">
+                    <span>🌐</span>
+                    <span>https://sla-king.github.io/home.html</span>
+                </div>
+            </div>
+            <iframe src="home.html" class="ie-frame" title="Internet Explorer"></iframe>
+        </div>
+    </div>
+
     <div id="start-menu" class="start-menu">
         <div class="start-menu-header">
             <img src="assets/profile_picture.png" class="user-avatar" alt="">
@@ -72,6 +96,10 @@
         </div>
         <div class="start-menu-body">
             <div class="start-menu-left">
+                <div class="menu-item" data-action="ie">
+                    <span class="menu-icon">🌐</span>
+                    Internet Explorer
+                </div>
                 <div class="menu-item" data-action="cmd">
                     <img src="assets/command_prompt_icon_medium.png" class="menu-icon" alt="">
                     Command Prompt

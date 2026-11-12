@@ -87,7 +87,7 @@ export function initTerminal() {
 
     registerWindow({
         id: "terminal",
-        winEl: document.getElementById("draggable-window"),
+        winEl: document.getElementById("command-window"),
         onClose: reset,
         onBlur: () => cmdInput.blur()
     });

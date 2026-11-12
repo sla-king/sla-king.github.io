@@ -1,6 +1,7 @@
 import { initTerminal } from './apps/terminal.js';
 import { initExplorer, openExplorer } from './apps/explorer.js';
 import { initNotepad } from './apps/notepad.js';
+import { initIE, openIE } from './apps/ie.js';
 import {
     openWindow,
     blurAllWindows,
@@ -16,6 +17,7 @@ const startMenu = document.getElementById("start-menu");
 initTerminal();
 initExplorer();
 initNotepad();
+initIE();
 
 // Start Menu & Desktop Events
 startButton.addEventListener("pointerdown", (e) => {
@@ -39,9 +41,15 @@ document.addEventListener("pointerdown", (e) => {
     }
 });
 
+document.querySelector('.menu-item[data-action="ie"]').addEventListener("click", () => {
+    startMenu.classList.remove("show");
+    openIE();
+});
+
 document.querySelector('.menu-item[data-action="cmd"]').addEventListener("click", () => {
     startMenu.classList.remove("show");
     openWindow("terminal");
+    document.getElementById("cmd-input").focus({ preventScroll: true });
 });
 
 document.querySelector('.menu-item[data-action="documents"]').addEventListener("click", () => {

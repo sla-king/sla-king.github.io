@@ -189,6 +189,7 @@ export function registerWindow({ id, winEl, onClose, onBlur }) {
     titleBar.addEventListener("pointerdown", (e) => {
         if (e.target.closest(".title-bar-controls")) return;
         bringToFront(id);
+        titleBar.setPointerCapture(e.pointerId);
 
         const rect = winEl.getBoundingClientRect();
         dragState = {
