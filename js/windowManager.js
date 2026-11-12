@@ -39,9 +39,9 @@ function createTaskbarItem(winEl) {
     const titleClone = titleBarText.cloneNode(true);
     titleClone.querySelector(".window-icon")?.remove();
 
-    const label = document.createElement("span");
-    label.textContent = titleClone.textContent.trim();
-    taskEl.appendChild(label);
+    const taskLabel = document.createElement("span");
+    taskLabel.textContent = titleClone.textContent.trim();
+    taskEl.appendChild(taskLabel);
 
     if (winEl.style.display === "none") {
         taskEl.style.display = "none";
@@ -50,7 +50,21 @@ function createTaskbarItem(winEl) {
     }
 
     taskbarApps.appendChild(taskEl);
-    return taskEl;
+    return { taskEl, taskLabel };
+}
+
+export function setWindowTitle(id, title) {
+    const app = windows.get(id);
+    if (!app) return;
+
+    const titleBarText = app.winEl.querySelector(".title-bar-text");
+    const iconEl = titleBarText.querySelector(".window-icon");
+
+    titleBarText.textContent = "";
+    if (iconEl) titleBarText.appendChild(iconEl);
+    titleBarText.append(title);
+
+    app.taskLabel.textContent = title;
 }
 
 export function nextZIndex() {
@@ -86,13 +100,16 @@ export function isClickInsideAnyWindow(target) {
 }
 
 export function minimizeWindow(id) {
-    const { winEl, taskEl } = windows.get(id);
+    const app = windows.get(id);
+    const { winEl, taskEl } = app;
+    clearTimeout(app.animTimer);
+
     winEl.style.transformOrigin = "center center";
     winEl.style.transition = "transform 0.25s ease-in, opacity 0.25s ease-in";
     winEl.style.transform = getTaskbarTransform(winEl, taskEl);
     winEl.style.opacity = "0";
 
-    setTimeout(() => {
+    app.animTimer = setTimeout(() => {
         winEl.style.display = "none";
         winEl.style.transform = "none";
         winEl.style.opacity = "1";
@@ -102,7 +119,10 @@ export function minimizeWindow(id) {
 }
 
 export function restoreWindow(id) {
-    const { winEl, taskEl } = windows.get(id);
+    const app = windows.get(id);
+    const { winEl, taskEl } = app;
+    clearTimeout(app.animTimer);
+
     winEl.style.display = "block";
     winEl.style.transform = "none";
     winEl.style.opacity = "1";
@@ -118,14 +138,17 @@ export function restoreWindow(id) {
     winEl.style.transform = "translate(0, 0) scale(1)";
     winEl.style.opacity = "1";
 
-    setTimeout(() => {
+    app.animTimer = setTimeout(() => {
         winEl.style.transition = "none";
         winEl.style.transform = "none";
     }, 250);
 }
 
 export function openWindow(id) {
-    const { winEl, taskEl } = windows.get(id);
+    const app = windows.get(id);
+    const { winEl, taskEl } = app;
+    clearTimeout(app.animTimer);
+
     winEl.style.transition = "none";
     winEl.style.transform = "none";
     winEl.style.opacity = "1";
@@ -144,6 +167,7 @@ export function openWindow(id) {
 
 export function closeWindow(id) {
     const app = windows.get(id);
+    clearTimeout(app.animTimer);
     app.winEl.style.display = "none";
     app.taskEl.style.display = "none";
     app.taskEl.classList.remove("active");
@@ -151,8 +175,8 @@ export function closeWindow(id) {
 }
 
 export function registerWindow({ id, winEl, onClose, onBlur }) {
-    const taskEl = createTaskbarItem(winEl);
-    windows.set(id, { winEl, taskEl, onClose, onBlur });
+    const { taskEl, taskLabel } = createTaskbarItem(winEl);
+    windows.set(id, { winEl, taskEl, taskLabel, onClose, onBlur, animTimer: null });
 
     const titleBar = winEl.querySelector(".title-bar");
     const btnMin = winEl.querySelector('[aria-label="Minimize"]');

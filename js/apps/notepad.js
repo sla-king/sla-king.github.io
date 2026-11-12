@@ -1,6 +1,5 @@
-import { registerWindow, openWindow } from '../windowManager.js';
+import { registerWindow, openWindow, setWindowTitle } from '../windowManager.js';
 
-const noteTitleText = document.getElementById("notepad-title-text");
 const noteTextarea = document.getElementById("notepad-textarea");
 
 export function initNotepad() {
@@ -12,7 +11,7 @@ export function initNotepad() {
 
 export function openNotepad(filename, content) {
     const displayName = filename.replace(/\.[^/.]+$/, "");
-    noteTitleText.textContent = `${displayName} - Notepad`;
+    setWindowTitle("notepad", `${displayName} - Notepad`);
     noteTextarea.value = content || "";
     openWindow("notepad");
 }

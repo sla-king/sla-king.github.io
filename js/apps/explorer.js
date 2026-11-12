@@ -1,9 +1,9 @@
-import { getNode } from '../filesystem.js';
-import { registerWindow, openWindow } from '../windowManager.js';
+import { HOME_PATH, getNode } from '../filesystem.js';
+import { registerWindow, openWindow, setWindowTitle } from '../windowManager.js';
 import { openNotepad } from './notepad.js';
 
 const explBody = document.getElementById("explorer-body");
-let explPath = ["C:", "Documents and Settings", "sla-king", "My Documents"];
+let explPath = [...HOME_PATH, "My Documents"];
 
 function createExplorerItem(label, iconChar, onDoubleClick) {
     const item = document.createElement("div");
@@ -25,6 +25,9 @@ function renderExplorer(path) {
     const node = getNode(path);
     explBody.innerHTML = "";
     if (!node || typeof node !== "object") return;
+
+    const currentFolder = path[path.length - 1] || "Explorer";
+    setWindowTitle("explorer", currentFolder);
 
     if (path.length > 3) {
         explBody.appendChild(
@@ -58,7 +61,7 @@ export function initExplorer() {
 }
 
 export function openExplorer() {
-    explPath = ["C:", "Documents and Settings", "sla-king", "My Documents"];
+    explPath = [...HOME_PATH, "My Documents"];
     renderExplorer(explPath);
     openWindow("explorer");
 }
