@@ -5,6 +5,8 @@ body {
     min-height: 100dvh;
     overflow: hidden;
     position: relative;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* Window Frame */
@@ -101,7 +103,8 @@ body {
     filter: opacity(0.8);
 }
 
-#drag-outline {
+#drag-outline,
+#selection-box {
     position: fixed;
     box-sizing: border-box;
     border: 1px dotted #ffffff;
@@ -109,6 +112,10 @@ body {
     z-index: 9999;
     pointer-events: none;
     display: none;
+}
+
+#selection-box {
+    z-index: 5;
 }
 
 /* Icons */

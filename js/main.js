@@ -12,6 +12,10 @@ import {
 const clock = document.getElementById("clock");
 const startButton = document.getElementById("start-button");
 const startMenu = document.getElementById("start-menu");
+const taskbar = document.querySelector(".taskbar");
+const selectionBox = document.getElementById("selection-box");
+
+let selectState = null;
 
 // Initialize Apps
 initTerminal();
@@ -35,11 +39,53 @@ startMenu.addEventListener("pointerdown", (e) => {
 });
 
 document.addEventListener("pointerdown", (e) => {
-    if (!isClickInsideAnyWindow(e.target)) blurAllWindows();
-    if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
-        startMenu.classList.remove("show");
+    const clickedWindow = isClickInsideAnyWindow(e.target);
+    const clickedMenu = startMenu.contains(e.target) || startButton.contains(e.target);
+    const clickedTaskbar = taskbar.contains(e.target);
+
+    if (!clickedWindow) blurAllWindows();
+    if (!clickedMenu) startMenu.classList.remove("show");
+
+    // Start desktop selection box if clicking empty desktop with primary button
+    if (e.button === 0 && !clickedWindow && !clickedMenu && !clickedTaskbar) {
+        selectState = { startX: e.clientX, startY: e.clientY };
+        Object.assign(selectionBox.style, {
+            left: `${e.clientX}px`,
+            top: `${e.clientY}px`,
+            width: "0px",
+            height: "0px",
+            display: "block"
+        });
     }
 });
+
+document.addEventListener("pointermove", (e) => {
+    if (!selectState) return;
+
+    const currentX = Math.max(0, Math.min(e.clientX, window.innerWidth));
+    const currentY = Math.max(0, Math.min(e.clientY, window.innerHeight - 30));
+
+    const left = Math.min(selectState.startX, currentX);
+    const top = Math.min(selectState.startY, currentY);
+    const width = Math.abs(currentX - selectState.startX);
+    const height = Math.abs(currentY - selectState.startY);
+
+    Object.assign(selectionBox.style, {
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${width}px`,
+        height: `${height}px`
+    });
+});
+
+function endSelection() {
+    if (!selectState) return;
+    selectionBox.style.display = "none";
+    selectState = null;
+}
+
+document.addEventListener("pointerup", endSelection);
+document.addEventListener("pointercancel", endSelection);
 
 document.querySelector('.menu-item[data-action="ie"]').addEventListener("click", () => {
     startMenu.classList.remove("show");
