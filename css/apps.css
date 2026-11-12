@@ -2,10 +2,8 @@
 
 /* App Window Dimensions */
 #ie-window {
-    --w: 100vw;
-    --h: calc(100dvh - 30px);
-    top: 0;
-    left: 0;
+    --win-w: 720px;
+    --win-h: 500px;
 }
 
 #explorer-window {

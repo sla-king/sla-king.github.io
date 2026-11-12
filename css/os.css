@@ -20,11 +20,35 @@ body {
     box-sizing: border-box;
 }
 
+.window.maximized {
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: calc(100dvh - 30px);
+    border-radius: 0;
+}
+
 .window .window-body {
     height: calc(100% - 30px);
     margin: 0 3px 3px 3px;
     box-sizing: border-box;
 }
+
+/* 8-Way Resize Handles */
+.resize-handle {
+    position: absolute;
+    z-index: 10;
+    touch-action: none;
+}
+
+.resize-n  { top: -3px; left: 6px; right: 6px; height: 6px; cursor: ns-resize; }
+.resize-s  { bottom: -3px; left: 6px; right: 6px; height: 6px; cursor: ns-resize; }
+.resize-e  { right: -3px; top: 6px; bottom: 6px; width: 6px; cursor: ew-resize; }
+.resize-w  { left: -3px; top: 6px; bottom: 6px; width: 6px; cursor: ew-resize; }
+.resize-nw { top: -4px; left: -4px; width: 10px; height: 10px; cursor: nwse-resize; }
+.resize-se { bottom: -4px; right: -4px; width: 10px; height: 10px; cursor: nwse-resize; }
+.resize-ne { top: -4px; right: -4px; width: 10px; height: 10px; cursor: nesw-resize; }
+.resize-sw { bottom: -4px; left: -4px; width: 10px; height: 10px; cursor: nesw-resize; }
 
 .title-bar {
     touch-action: none;
