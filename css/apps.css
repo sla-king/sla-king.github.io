@@ -20,6 +20,11 @@
     --win-h: 450px;
 }
 
+#xp-error-window {
+    --win-w: 420px;
+    height: auto;
+}
+
 /* Terminal App */
 #command-window .window-body {
     background-color: #000000;
@@ -78,6 +83,210 @@
 .window .explorer-body {
     background-color: #ffffff;
     color: #000000;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.explorer-address-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 6px 3px 6px;
+    background-color: #ece9d8;
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #aca899;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.explorer-address-label {
+    color: #7f7c73;
+    padding: 0 1px;
+    flex-shrink: 0;
+}
+
+.explorer-address-combo {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.explorer-address-input {
+    height: 21px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #ffffff;
+    border: 1px solid #7f9db9;
+    padding: 1px 1px 1px 3px;
+}
+
+.xp-folder-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+#explorer-address-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    line-height: normal;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #000000;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    padding: 0;
+    margin: 0;
+}
+
+.explorer-address-bar .explorer-dropdown-btn {
+    width: 16px;
+    height: 17px;
+    min-width: 16px;
+    min-height: 17px;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #96b0e0;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #eff4ff 0%, #c6d7fb 50%, #b1c8f8 100%);
+    box-shadow: inset 1px 1px 0 #ffffff;
+    color: #4d6185;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.explorer-address-bar .explorer-dropdown-btn:hover {
+    border-color: #7a9ae0;
+    background: linear-gradient(180deg, #f5f8ff 0%, #d4e2fe 50%, #bed2fb 100%);
+    box-shadow: inset 1px 1px 0 #ffffff;
+}
+
+.explorer-address-bar .explorer-dropdown-btn:active,
+.explorer-address-bar .explorer-dropdown-btn[aria-expanded="true"] {
+    border-color: #6b89c8;
+    background: linear-gradient(180deg, #b8ccf6 0%, #cad9fc 100%);
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.14);
+}
+
+.explorer-address-bar .explorer-dropdown-btn:focus {
+    outline: none;
+    box-shadow: inset 1px 1px 0 #ffffff;
+}
+
+.explorer-address-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background-color: #ffffff;
+    border: 1px solid #7f9db9;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.22);
+    padding: 1px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.explorer-address-menu[hidden] {
+    display: none;
+}
+
+.explorer-address-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 5px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.explorer-address-option span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.explorer-address-option:hover,
+.explorer-address-option.active {
+    background-color: #316ac5;
+    color: #ffffff;
+}
+
+.explorer-address-bar .explorer-go-btn {
+    min-width: 0;
+    min-height: 0;
+    height: 21px;
+    padding: 0 6px 0 3px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    box-shadow: none;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.xp-go-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.explorer-address-bar .explorer-go-btn:hover {
+    border-color: #cecec3;
+    background: linear-gradient(180deg, #ffffff 0%, #f1efe2 100%);
+    box-shadow: none;
+}
+
+.explorer-address-bar .explorer-go-btn:active {
+    border-color: #9e9c92;
+    background: #e1dfd0;
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.12);
+}
+
+.explorer-address-bar .explorer-go-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.explorer-address-bar .explorer-go-btn:focus-visible {
+    outline: 1px dotted #000000;
+    outline-offset: -3px;
+}
+
+.explorer-items {
+    flex: 1;
     padding: 10px;
     overflow-y: auto;
     display: flex;
@@ -115,6 +324,51 @@
     font-size: 32px;
     margin-bottom: 5px;
     line-height: 1;
+}
+
+/* Address Bar Error Dialog */
+#xp-error-window .xp-error-body {
+    height: auto;
+    background-color: #ece9d8;
+    color: #000000;
+    padding: 14px 16px 12px 14px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+}
+
+.xp-error-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.xp-error-icon {
+    flex-shrink: 0;
+    font-size: 28px;
+    line-height: 1;
+    user-select: none;
+}
+
+#xp-error-message {
+    margin: 2px 0 0 0;
+    line-height: 1.4;
+    color: #000000;
+    user-select: text;
+    word-break: break-word;
+}
+
+.xp-error-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+#xp-error-ok {
+    min-width: 75px;
+    min-height: 23px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
 }
 
 /* Notepad App */

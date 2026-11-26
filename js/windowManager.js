@@ -83,7 +83,9 @@ export function setWindowTitle(id, title) {
     if (iconEl) titleBarText.appendChild(iconEl);
     titleBarText.append(title);
 
-    app.taskLabel.textContent = title;
+    if (app.taskLabel) {
+        app.taskLabel.textContent = title;
+    }
 }
 
 export function nextZIndex() {
@@ -94,7 +96,7 @@ export function bringToFront(id) {
     windows.forEach((app, appId) => {
         const isTarget = appId === id;
         app.winEl.classList.toggle("unfocused", !isTarget);
-        app.taskEl.classList.toggle("active", isTarget);
+        app.taskEl?.classList.toggle("active", isTarget);
         if (isTarget) {
             app.winEl.style.zIndex = ++zIndexCounter;
         } else {
@@ -106,7 +108,7 @@ export function bringToFront(id) {
 export function blurAllWindows() {
     windows.forEach((app) => {
         app.winEl.classList.add("unfocused");
-        app.taskEl.classList.remove("active");
+        app.taskEl?.classList.remove("active");
         app.onBlur?.();
     });
 }
@@ -118,9 +120,17 @@ export function isClickInsideAnyWindow(target) {
     return false;
 }
 
-export function toggleMaximize(id) {
+export function centerWindow(id) {
     const app = windows.get(id);
     if (!app) return;
+    const { winEl } = app;
+    winEl.style.left = `${Math.max(0, (window.innerWidth - winEl.offsetWidth) / 2)}px`;
+    winEl.style.top = `${Math.max(0, (window.innerHeight - 30 - winEl.offsetHeight) / 2)}px`;
+}
+
+export function toggleMaximize(id) {
+    const app = windows.get(id);
+    if (!app || !app.maximizable || !app.btnMax) return;
 
     const { winEl, btnMax } = app;
     clearTimeout(app.animTimer);
@@ -186,7 +196,7 @@ export function minimizeWindow(id) {
         winEl.style.transform = "none";
         winEl.style.opacity = "1";
         winEl.style.transition = "none";
-        taskEl.classList.remove("active");
+        taskEl?.classList.remove("active");
     }, 250);
 }
 
@@ -227,7 +237,7 @@ export function openWindow(id) {
     winEl.style.display = "block";
     clampToScreen(winEl);
 
-    if (taskEl.style.display === "none") {
+    if (taskEl && taskEl.style.display === "none") {
         taskbarApps.appendChild(taskEl);
         taskEl.style.display = "flex";
         taskEl.classList.remove("slide-in");
@@ -239,19 +249,33 @@ export function openWindow(id) {
 
 export function closeWindow(id) {
     const app = windows.get(id);
+    if (!app) return;
     clearTimeout(app.animTimer);
     app.winEl.style.display = "none";
-    app.taskEl.style.display = "none";
-    app.taskEl.classList.remove("active");
+    if (app.taskEl) {
+        app.taskEl.style.display = "none";
+        app.taskEl.classList.remove("active");
+    }
     app.onClose?.();
 }
 
-export function registerWindow({ id, winEl, onClose, onBlur }) {
-    const { taskEl, taskLabel } = createTaskbarItem(winEl);
+export function registerWindow({
+    id,
+    winEl,
+    onClose,
+    onBlur,
+    resizable = true,
+    maximizable = true,
+    showInTaskbar = true
+}) {
+    const { taskEl, taskLabel } = showInTaskbar
+        ? createTaskbarItem(winEl)
+        : { taskEl: null, taskLabel: null };
     const titleBar = winEl.querySelector(".title-bar");
     const btnMin = winEl.querySelector('[aria-label="Minimize"]');
     const btnMax = winEl.querySelector('[aria-label="Maximize"], [aria-label="Restore"]');
     const btnClose = winEl.querySelector('[aria-label="Close"]');
+    const canMaximize = maximizable && Boolean(btnMax);
 
     if (btnMax) {
         btnMax.setAttribute("aria-label", winEl.classList.contains("maximized") ? "Restore" : "Maximize");
@@ -262,6 +286,7 @@ export function registerWindow({ id, winEl, onClose, onBlur }) {
         taskEl,
         taskLabel,
         btnMax,
+        maximizable: canMaximize,
         onClose,
         onBlur,
         animTimer: null,
@@ -270,11 +295,13 @@ export function registerWindow({ id, winEl, onClose, onBlur }) {
 
     winEl.addEventListener("pointerdown", () => bringToFront(id));
     btnMin?.addEventListener("click", () => minimizeWindow(id));
-    btnMax?.addEventListener("click", () => toggleMaximize(id));
+    if (canMaximize) {
+        btnMax.addEventListener("click", () => toggleMaximize(id));
+    }
     btnClose?.addEventListener("click", () => closeWindow(id));
 
     titleBar.addEventListener("dblclick", (e) => {
-        if (e.target.closest(".title-bar-controls")) return;
+        if (!canMaximize || e.target.closest(".title-bar-controls")) return;
         toggleMaximize(id);
     });
 
@@ -304,48 +331,52 @@ export function registerWindow({ id, winEl, onClose, onBlur }) {
     });
 
     // Inject 8-directional resize handles
-    for (const dir of RESIZE_DIRS) {
-        const handle = document.createElement("div");
-        handle.className = `resize-handle resize-${dir}`;
-        handle.addEventListener("pointerdown", (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            bringToFront(id);
-            handle.setPointerCapture(e.pointerId);
+    if (resizable) {
+        for (const dir of RESIZE_DIRS) {
+            const handle = document.createElement("div");
+            handle.className = `resize-handle resize-${dir}`;
+            handle.addEventListener("pointerdown", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                bringToFront(id);
+                handle.setPointerCapture(e.pointerId);
 
-            const rect = winEl.getBoundingClientRect();
-            resizeState = {
-                id,
-                winEl,
-                dir,
-                startX: e.clientX,
-                startY: e.clientY,
-                startRect: rect
-            };
+                const rect = winEl.getBoundingClientRect();
+                resizeState = {
+                    id,
+                    winEl,
+                    dir,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    startRect: rect
+                };
 
-            Object.assign(outline.style, {
-                width: `${rect.width}px`,
-                height: `${rect.height}px`,
-                left: `${rect.left}px`,
-                top: `${rect.top}px`,
-                display: "block"
+                Object.assign(outline.style, {
+                    width: `${rect.width}px`,
+                    height: `${rect.height}px`,
+                    left: `${rect.left}px`,
+                    top: `${rect.top}px`,
+                    display: "block"
+                });
             });
-        });
-        winEl.appendChild(handle);
+            winEl.appendChild(handle);
+        }
     }
 
-    taskEl.addEventListener("pointerdown", (e) => {
-        e.stopPropagation();
-        startMenu.classList.remove("show");
-        if (winEl.style.display === "none") {
-            restoreWindow(id);
-            bringToFront(id);
-        } else if (!taskEl.classList.contains("active")) {
-            bringToFront(id);
-        } else {
-            minimizeWindow(id);
-        }
-    });
+    if (taskEl) {
+        taskEl.addEventListener("pointerdown", (e) => {
+            e.stopPropagation();
+            startMenu.classList.remove("show");
+            if (winEl.style.display === "none") {
+                restoreWindow(id);
+                bringToFront(id);
+            } else if (!taskEl.classList.contains("active")) {
+                bringToFront(id);
+            } else {
+                minimizeWindow(id);
+            }
+        });
+    }
 }
 
 document.addEventListener("pointermove", (e) => {
