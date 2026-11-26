@@ -79,7 +79,11 @@ export function setWindowTitle(id, title, icon) {
     const titleBarText = app.winEl.querySelector(".title-bar-text");
     const iconEl = titleBarText.querySelector(".window-icon");
     if (iconEl && icon !== undefined) {
-        iconEl.textContent = icon;
+        if (iconEl.tagName === "IMG") {
+            iconEl.setAttribute("src", icon);
+        } else {
+            iconEl.textContent = icon;
+        }
     }
 
     titleBarText.textContent = "";
@@ -91,7 +95,11 @@ export function setWindowTitle(id, title, icon) {
     }
     const taskIcon = app.taskEl?.querySelector(".taskbar-icon");
     if (taskIcon && icon !== undefined) {
-        taskIcon.textContent = icon;
+        if (taskIcon.tagName === "IMG") {
+            taskIcon.setAttribute("src", icon);
+        } else {
+            taskIcon.textContent = icon;
+        }
     }
 }
 

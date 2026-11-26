@@ -138,30 +138,15 @@
 }
 
 .explorer-nav-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    line-height: 1;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
 }
 
-.xp-up-icon {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    line-height: 1;
-    width: 18px;
-    height: 16px;
-}
-
-.xp-up-arrow {
-    position: absolute;
-    right: -2px;
-    top: -2px;
-    font-size: 9px;
-    line-height: 1;
+.explorer-forward-icon {
+    transform: scaleX(-1);
 }
 
 .explorer-split-btn {
@@ -282,11 +267,10 @@
 }
 
 .xp-address-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    line-height: 1;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    display: block;
     flex-shrink: 0;
 }
 
@@ -362,11 +346,10 @@
 }
 
 .xp-go-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    line-height: 1;
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    display: block;
     flex-shrink: 0;
 }
 
@@ -428,9 +411,11 @@
 }
 
 .explorer-icon {
-    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
     margin-bottom: 5px;
-    line-height: 1;
+    display: block;
 }
 
 /* Address Bar Error Dialog */

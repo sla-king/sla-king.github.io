@@ -60,13 +60,43 @@ function showAddressError(target, ownerId) {
     requestAnimationFrame(() => errorOkBtn?.focus());
 }
 
-function createExplorerItem(label, iconChar, onDoubleClick) {
+const SPECIAL_FOLDER_ICONS = {
+    "my documents": "assets/documents_folder.png",
+    "my music": "assets/music_folder.png",
+    "my pictures": "assets/pictures_folder.png"
+};
+
+function getFolderIcon(path) {
+    const folderName = path[path.length - 1]?.toLowerCase();
+    const hasHomePrefix = HOME_PATH.every((part, i) => path[i]?.toLowerCase() === part.toLowerCase());
+    if (!hasHomePrefix || !folderName) {
+        return "assets/folder.png";
+    }
+
+    const isHomeChild = path.length === HOME_PATH.length + 1;
+    const isMyDocsChild =
+        path.length === HOME_PATH.length + 2 &&
+        path[HOME_PATH.length]?.toLowerCase() === "my documents";
+
+    if (isHomeChild && SPECIAL_FOLDER_ICONS[folderName]) {
+        return SPECIAL_FOLDER_ICONS[folderName];
+    }
+    if (isMyDocsChild && (folderName === "my music" || folderName === "my pictures")) {
+        return SPECIAL_FOLDER_ICONS[folderName];
+    }
+
+    return "assets/folder.png";
+}
+
+function createExplorerItem(label, iconSrc, onDoubleClick) {
     const item = document.createElement("div");
     item.className = "explorer-item";
 
-    const icon = document.createElement("div");
+    const icon = document.createElement("img");
     icon.className = "explorer-icon";
-    icon.textContent = iconChar;
+    icon.src = iconSrc;
+    icon.alt = "";
+    icon.draggable = false;
 
     const text = document.createElement("div");
     text.textContent = label;
@@ -305,11 +335,11 @@ function createExplorerWindow({
         if (explorerFrame.getAttribute("src") !== HOME_PAGE_SRC) {
             explorerFrame.setAttribute("src", HOME_PAGE_SRC);
         }
-        if (addressIcon) addressIcon.textContent = "🌐";
+        if (addressIcon) addressIcon.setAttribute("src", "assets/internet_document.png");
         addressInput.value = HOME_URL;
         closeAutoComplete();
         closeHistoryMenus();
-        setWindowTitle(id, "Microsoft Internet Explorer", "🌐");
+        setWindowTitle(id, "Microsoft Internet Explorer", "assets/explorer.png");
         if (recordHistory) {
             pushHistory({ mode: "web", url: HOME_URL });
         } else {
@@ -328,18 +358,20 @@ function createExplorerWindow({
         explorerFrame.hidden = true;
         explItems.hidden = false;
         explItems.innerHTML = "";
-        if (addressIcon) addressIcon.textContent = "📁";
+        const folderIcon = getFolderIcon(path);
+        if (addressIcon) addressIcon.setAttribute("src", folderIcon);
         addressInput.value = getPathString(explPath);
         closeAutoComplete();
         closeHistoryMenus();
 
         const currentFolder = path[path.length - 1] || "Explorer";
-        setWindowTitle(id, currentFolder, "📁");
+        setWindowTitle(id, currentFolder, folderIcon);
 
         for (const [key, value] of Object.entries(node)) {
             const isDir = typeof value === "object";
+            const itemIcon = isDir ? getFolderIcon([...explPath, key]) : "assets/text_document.png";
             explItems.appendChild(
-                createExplorerItem(key, isDir ? "📁" : "📄", () => {
+                createExplorerItem(key, itemIcon, () => {
                     if (isDir) {
                         renderFolder([...explPath, key]);
                     } else {
