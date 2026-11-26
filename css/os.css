@@ -18,6 +18,8 @@ body {
     position: absolute;
     top: calc(50vh - (var(--h) / 2) - 15px);
     left: calc(50vw - (var(--w) / 2));
+    display: flex;
+    flex-direction: column;
     background-color: #0831d9;
     box-sizing: border-box;
 }
@@ -31,8 +33,9 @@ body {
 }
 
 .window .window-body {
-    height: calc(100% - 30px);
-    margin: 0 3px 3px 3px;
+    flex: 1;
+    min-height: 0;
+    margin: 0 3px;
     box-sizing: border-box;
 }
 
@@ -53,6 +56,7 @@ body {
 .resize-sw { bottom: -4px; left: -4px; width: 10px; height: 10px; cursor: nesw-resize; }
 
 .title-bar {
+    flex-shrink: 0;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
@@ -61,6 +65,13 @@ body {
 .title-bar-text {
     display: flex;
     align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.title-bar-controls {
+    flex-shrink: 0;
 }
 
 .title-bar-controls button[disabled] {
@@ -69,46 +80,20 @@ body {
 }
 
 .window.unfocused {
-    background-color: #9eb9e8;
-    border-color: #9eb9e8 #809dcd #809dcd #9eb9e8;
-    box-shadow: inset -1px -1px #809dcd, inset 1px 1px #c5d8f6, inset -2px -2px #809dcd, inset 2px 2px #9eb9e8;
+    background-color: #7586dc;
+    box-shadow: inset 1px 1px #5b68cd, inset -1px -1px #4f53bc, inset -2px -2px #6d74cd;
 }
 
 .window.unfocused .title-bar {
-    background: linear-gradient(
-        to bottom,
-        #9eb9e8 0%,
-        #aec9f5 8%,
-        #8da6d6 40%,
-        #8da6d6 88%,
-        #7c94c4 93%,
-        #5e76a6 95%,
-        #5e76a6 100%
-    );
-    border-top-color: transparent;
-    border-left-color: transparent;
-    border-right-color: transparent;
-}
-
-.window.unfocused .title-bar-text {
-    color: #e5eeff;
-}
-
-.window.unfocused .title-bar-controls button {
-    filter: opacity(0.6);
-    pointer-events: auto;
-}
-
-.window.unfocused .title-bar-controls button:hover {
-    filter: opacity(0.8);
+    filter: saturate(0.48) contrast(0.55) brightness(1.55);
 }
 
 .window.modal-blocked * {
     cursor: default !important;
 }
 
-.window.modal-blocked .title-bar-controls button:hover {
-    filter: opacity(0.6);
+.window.modal-blocked .title-bar-controls {
+    pointer-events: none;
 }
 
 @keyframes modalFlash {
@@ -144,9 +129,7 @@ body {
 .taskbar-icon,
 .start-icon,
 .menu-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     object-fit: contain;
     margin-right: 6px;
     flex-shrink: 0;
@@ -156,15 +139,12 @@ body {
 .taskbar-icon {
     width: 16px;
     height: 16px;
-    font-size: 14px;
-    vertical-align: middle;
 }
 
 .start-icon,
 .menu-icon {
     width: 24px;
     height: 24px;
-    font-size: 20px;
 }
 
 .menu-icon {

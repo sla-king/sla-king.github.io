@@ -78,11 +78,16 @@ export function setWindowTitle(id, title, icon) {
 
     const titleBarText = app.winEl.querySelector(".title-bar-text");
     const iconEl = titleBarText.querySelector(".window-icon");
-    if (iconEl && icon !== undefined) {
-        if (iconEl.tagName === "IMG") {
-            iconEl.setAttribute("src", icon);
-        } else {
-            iconEl.textContent = icon;
+    const taskIcon = app.taskEl?.querySelector(".taskbar-icon");
+
+    if (icon !== undefined) {
+        for (const el of [iconEl, taskIcon]) {
+            if (!el) continue;
+            if (el.tagName === "IMG") {
+                el.setAttribute("src", icon);
+            } else {
+                el.textContent = icon;
+            }
         }
     }
 
@@ -92,14 +97,6 @@ export function setWindowTitle(id, title, icon) {
 
     if (app.taskLabel) {
         app.taskLabel.textContent = title;
-    }
-    const taskIcon = app.taskEl?.querySelector(".taskbar-icon");
-    if (taskIcon && icon !== undefined) {
-        if (taskIcon.tagName === "IMG") {
-            taskIcon.setAttribute("src", icon);
-        } else {
-            taskIcon.textContent = icon;
-        }
     }
 }
 
@@ -272,7 +269,7 @@ export function restoreWindow(id) {
     const { winEl, taskEl } = app;
     clearTimeout(app.animTimer);
 
-    winEl.style.display = "block";
+    winEl.style.display = "flex";
     winEl.style.transform = "none";
     winEl.style.opacity = "1";
     winEl.style.transition = "none";
@@ -307,7 +304,7 @@ export function openWindow(id, options = {}) {
         winEl.style.transition = "none";
         winEl.style.transform = "none";
         winEl.style.opacity = "1";
-        winEl.style.display = "block";
+        winEl.style.display = "flex";
 
         if (options.cascadeOffset && !winEl.classList.contains("maximized")) {
             const rect = winEl.getBoundingClientRect();
