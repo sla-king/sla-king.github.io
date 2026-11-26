@@ -385,6 +385,56 @@
     display: block;
 }
 
+.explorer-items.explorer-computer-view {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 16px;
+    padding: 8px 0 12px 0;
+}
+
+.explorer-section-header {
+    position: relative;
+    padding: 0 12px 5px 12px;
+    margin-bottom: 8px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    color: #000000;
+    user-select: none;
+}
+
+.explorer-section-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: min(360px, 85%);
+    height: 1px;
+    background: linear-gradient(to right, #316ac5 0%, rgba(49, 106, 197, 0) 100%);
+}
+
+.explorer-section-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    padding: 0 14px;
+}
+
+.explorer-computer-view .explorer-item {
+    flex-direction: row;
+    width: 195px;
+    padding: 5px 8px;
+    gap: 10px;
+    text-align: left;
+}
+
+.explorer-computer-view .explorer-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
 /* Address Bar Error Dialog */
 #xp-error-window .xp-error-body {
     height: auto;

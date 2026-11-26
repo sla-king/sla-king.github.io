@@ -8,6 +8,9 @@ export const fs = {
         "AUTOEXEC.BAT": "",
         "CONFIG.SYS": "",
         "Documents and Settings": {
+            "All Users": {
+                "Documents": {}
+            },
             "sla-king": {
                 "Desktop": {},
                 "Favorites": {

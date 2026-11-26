@@ -75,6 +75,10 @@ const SPECIAL_FOLDERS = {
         large: "assets/folder_pictures.png",
         small: "assets/folder_pictures_16.png",
         tooltip: "Contains digital photos, images, and graphic files."
+    },
+    "favorites": {
+        large: "assets/folder_favorites.png",
+        small: "assets/folder_favorites_16.png"
     }
 };
 
@@ -97,6 +101,9 @@ function getSpecialFolder(path) {
 }
 
 function getFolderIcon(path, small = false) {
+    if (path.length === 1 && path[0].toUpperCase() === "C:") {
+        return small ? "assets/file_c_drive_16.png" : "assets/file_c_drive.png";
+    }
     const match = getSpecialFolder(path);
     if (match) return small ? match.small : match.large;
     return small ? "assets/folder_base_16.png" : "assets/folder_base.png";
@@ -152,7 +159,7 @@ function getItemTooltip(path, name, value) {
 
     const lines = [];
     const special = getSpecialFolder(path);
-    if (special) {
+    if (special?.tooltip) {
         lines.push(special.tooltip);
     }
 
@@ -251,13 +258,16 @@ function createExplorerWindow({
 
     function isSameEntry(a, b) {
         if (!a || !b || a.mode !== b.mode) return false;
+        if (a.mode === "computer") return true;
         if (a.mode === "web") return a.url === b.url && Boolean(a.isError) === Boolean(b.isError);
         return getPathString(a.path).toLowerCase() === getPathString(b.path).toLowerCase();
     }
 
     function getEntryLabel(entry) {
         if (!entry) return "";
+        if (entry.mode === "computer") return "My Computer";
         if (entry.mode === "web") return entry.isError ? "Cannot find server" : entry.url;
+        if (entry.path.length === 1) return `Local Disk (${entry.path[0]})`;
         return entry.path[entry.path.length - 1] || "Explorer";
     }
 
@@ -291,7 +301,9 @@ function createExplorerWindow({
             const item = document.createElement("div");
             item.className = "explorer-history-item";
             item.textContent = getEntryLabel(entry);
-            item.title = entry.mode === "web" ? entry.url : getPathString(entry.path);
+            item.title = entry.mode === "computer"
+                ? "My Computer"
+                : entry.mode === "web" ? entry.url : getPathString(entry.path);
             item.addEventListener("pointerdown", (e) => e.preventDefault());
             item.addEventListener("click", () => {
                 closeHistoryMenus();
@@ -329,8 +341,14 @@ function createExplorerWindow({
         if (homeBtn) homeBtn.hidden = !isWeb;
         if (upBtn) {
             upBtn.hidden = isWeb;
-            upBtn.disabled = isWeb || explPath.length <= 1;
+            upBtn.disabled = isWeb || currentMode === "computer";
         }
+    }
+
+    function getCurrentAddressValue() {
+        if (currentMode === "web") return currentWebUrl;
+        if (currentMode === "computer") return "My Computer";
+        return getPathString(explPath);
     }
 
     function pushHistory(entry) {
@@ -457,6 +475,73 @@ function createExplorerWindow({
         showWebView({ url: HOME_URL, isError: false, recordHistory });
     }
 
+    function renderComputer({ recordHistory = true } = {}) {
+        currentMode = "computer";
+        isWebError = false;
+        explorerFrame.hidden = true;
+        if (webErrorEl) webErrorEl.hidden = true;
+        explItems.hidden = false;
+        explItems.classList.add("explorer-computer-view");
+        explItems.innerHTML = "";
+        if (addressIcon) addressIcon.setAttribute("src", "assets/app_my_computer_16.png");
+        addressInput.value = "My Computer";
+        closeAutoComplete();
+        closeHistoryMenus();
+        setWindowTitle(id, "My Computer", "assets/app_my_computer_16.png");
+
+        const appendSection = (heading, items) => {
+            const section = document.createElement("div");
+            section.className = "explorer-section";
+
+            const header = document.createElement("div");
+            header.className = "explorer-section-header";
+            header.textContent = heading;
+
+            const grid = document.createElement("div");
+            grid.className = "explorer-section-items";
+            for (const item of items) {
+                grid.appendChild(
+                    createExplorerItem(item.label, item.icon, item.tooltip, item.onDoubleClick)
+                );
+            }
+
+            section.append(header, grid);
+            explItems.appendChild(section);
+        };
+
+        const sharedDocsPath = ["C:", "Documents and Settings", "All Users", "Documents"];
+        const userDocsPath = [...HOME_PATH, "My Documents"];
+        appendSection("Files Stored on This Computer", [
+            {
+                label: "Shared Documents",
+                icon: "assets/folder_base.png",
+                tooltip: "Contains files and folders shared between users of this computer",
+                onDoubleClick: () => renderFolder(sharedDocsPath)
+            },
+            {
+                label: "sla-king's Documents",
+                icon: "assets/folder_base.png",
+                tooltip: getItemTooltip(userDocsPath, "My Documents", getNode(userDocsPath) || {}),
+                onDoubleClick: () => renderFolder(userDocsPath)
+            }
+        ]);
+
+        appendSection("Hard Disk Drives", [
+            {
+                label: "Local Disk (C:)",
+                icon: "assets/file_c_drive.png",
+                tooltip: "Free Space: 8.84 GB\nTotal Size: 9.31 GB",
+                onDoubleClick: () => renderFolder(["C:"])
+            }
+        ]);
+
+        if (recordHistory) {
+            pushHistory({ mode: "computer" });
+        } else {
+            updateNavButtons();
+        }
+    }
+
     function renderFolder(path, { recordHistory = true } = {}) {
         const node = getNode(path);
         if (!node || typeof node !== "object") {
@@ -469,6 +554,7 @@ function createExplorerWindow({
         explorerFrame.hidden = true;
         if (webErrorEl) webErrorEl.hidden = true;
         explItems.hidden = false;
+        explItems.classList.remove("explorer-computer-view");
         explItems.innerHTML = "";
         const smallFolderIcon = getFolderIcon(path, true);
         if (addressIcon) addressIcon.setAttribute("src", smallFolderIcon);
@@ -476,7 +562,9 @@ function createExplorerWindow({
         closeAutoComplete();
         closeHistoryMenus();
 
-        const currentFolder = path[path.length - 1] || "Explorer";
+        const currentFolder = path.length === 1
+            ? `Local Disk (${path[0]})`
+            : (path[path.length - 1] || "Explorer");
         setWindowTitle(id, currentFolder, smallFolderIcon);
 
         for (const [key, value] of Object.entries(node)) {
@@ -505,7 +593,9 @@ function createExplorerWindow({
 
     function applyHistoryEntry(entry) {
         if (!entry) return;
-        if (entry.mode === "web") {
+        if (entry.mode === "computer") {
+            renderComputer({ recordHistory: false });
+        } else if (entry.mode === "web") {
             showWebView({ url: entry.url, isError: Boolean(entry.isError), recordHistory: false });
         } else {
             renderFolder([...entry.path], { recordHistory: false });
@@ -516,9 +606,14 @@ function createExplorerWindow({
         closeAutoComplete();
         const rawValue = addressInput.value.trim();
         if (!rawValue) {
-            if (currentMode === "folder") {
+            if (currentMode !== "web") {
                 showAddressError("", id);
             }
+            return;
+        }
+
+        if (rawValue.toLowerCase() === "my computer") {
+            renderComputer();
             return;
         }
 
@@ -547,7 +642,7 @@ function createExplorerWindow({
         if (typeof targetNode === "string") {
             const fileName = candidatePath[candidatePath.length - 1];
             openNotepad(fileName, targetNode, getPathString(candidatePath));
-            addressInput.value = currentMode === "folder" ? getPathString(explPath) : currentWebUrl;
+            addressInput.value = getCurrentAddressValue();
             return;
         }
 
@@ -618,6 +713,8 @@ function createExplorerWindow({
 
     if (initialMode === "web") {
         renderWeb();
+    } else if (initialMode === "computer") {
+        renderComputer();
     } else {
         renderFolder([...initialPath]);
     }
@@ -707,7 +804,7 @@ function createExplorerWindow({
                 closeAutoComplete();
             } else {
                 closeAutoComplete();
-                addressInput.value = currentMode === "folder" ? getPathString(explPath) : currentWebUrl;
+                addressInput.value = getCurrentAddressValue();
                 addressInput.select();
             }
         }
@@ -766,8 +863,11 @@ function createExplorerWindow({
     });
 
     upBtn?.addEventListener("click", () => {
-        if (currentMode === "folder" && explPath.length > 1) {
+        if (currentMode !== "folder") return;
+        if (explPath.length > 1) {
             renderFolder(explPath.slice(0, -1));
+        } else if (explPath.length === 1) {
+            renderComputer();
         }
     });
 
@@ -793,6 +893,17 @@ export function openExplorer(targetPath = [...HOME_PATH, "My Documents"]) {
     createExplorerWindow({
         initialMode: "folder",
         initialPath: targetPath
+    });
+}
+
+export function openMyComputer() {
+    const existing = findExplorer((inst) => inst.getMode() === "computer");
+    if (existing) {
+        openWindow(existing.id);
+        return;
+    }
+    createExplorerWindow({
+        initialMode: "computer"
     });
 }
 

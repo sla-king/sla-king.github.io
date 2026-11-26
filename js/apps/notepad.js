@@ -9,13 +9,37 @@ const notepadTemplate = document.getElementById("notepad-window-template");
 const startMenu = document.getElementById("start-menu");
 
 const notepadInstances = new Map();
+const recentDocuments = [];
 let notepadCounter = 0;
+
+function recordRecentDocument(filename, content, filePath) {
+    const key = (filePath || filename).toLowerCase();
+    const existingIdx = recentDocuments.findIndex((doc) => doc.key === key);
+    if (existingIdx !== -1) {
+        recentDocuments.splice(existingIdx, 1);
+    }
+    recentDocuments.unshift({
+        key,
+        filename,
+        displayName: filename.replace(/\.[^/.]+$/, ""),
+        content: content || "",
+        filePath: filePath || filename
+    });
+    if (recentDocuments.length > 15) {
+        recentDocuments.length = 15;
+    }
+}
+
+export function getRecentDocuments() {
+    return [...recentDocuments];
+}
 
 export function initNotepad() {
     // Notepad windows are created dynamically per opened file.
 }
 
 export function openNotepad(filename, content, filePath = filename) {
+    recordRecentDocument(filename, content, filePath);
     const key = (filePath || filename).toLowerCase();
     const existing = notepadInstances.get(key);
     if (existing) {
