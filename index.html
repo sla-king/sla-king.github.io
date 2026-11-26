@@ -48,6 +48,35 @@
                 </div>
             </div>
             <div class="window-body explorer-body">
+                <div class="explorer-toolbar">
+                    <div class="explorer-split-btn">
+                        <button class="explorer-nav-btn explorer-back-btn" type="button" title="Back" disabled>
+                            <span class="explorer-nav-icon" aria-hidden="true">⬅️</span>
+                            <span>Back</span>
+                        </button>
+                        <button class="explorer-nav-btn explorer-split-arrow explorer-back-menu-btn" type="button" aria-label="Back history" aria-expanded="false" disabled>▾</button>
+                        <div class="explorer-history-menu explorer-back-menu" hidden></div>
+                    </div>
+                    <div class="explorer-split-btn">
+                        <button class="explorer-nav-btn explorer-forward-btn" type="button" aria-label="Forward" title="Forward" disabled>
+                            <span class="explorer-nav-icon" aria-hidden="true">➡️</span>
+                        </button>
+                        <button class="explorer-nav-btn explorer-split-arrow explorer-forward-menu-btn" type="button" aria-label="Forward history" aria-expanded="false" disabled>▾</button>
+                        <div class="explorer-history-menu explorer-forward-menu" hidden></div>
+                    </div>
+                    <button class="explorer-nav-btn explorer-stop-btn" type="button" aria-label="Stop" title="Stop" hidden>
+                        <span class="explorer-nav-icon" aria-hidden="true">❌</span>
+                    </button>
+                    <button class="explorer-nav-btn explorer-refresh-btn" type="button" aria-label="Refresh" title="Refresh" hidden>
+                        <span class="explorer-nav-icon" aria-hidden="true">🔄</span>
+                    </button>
+                    <button class="explorer-nav-btn explorer-home-btn" type="button" aria-label="Home" title="Home" hidden>
+                        <span class="explorer-nav-icon" aria-hidden="true">🏠</span>
+                    </button>
+                    <button class="explorer-nav-btn explorer-up-btn" type="button" aria-label="Up" title="Up">
+                        <span class="xp-up-icon" aria-hidden="true">📁<span class="xp-up-arrow">⬆️</span></span>
+                    </button>
+                </div>
                 <div class="explorer-address-bar">
                     <span class="explorer-address-label">Address</span>
                     <div class="explorer-address-combo">

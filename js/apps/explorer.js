@@ -100,6 +100,17 @@ function createExplorerWindow({
     document.body.insertBefore(winEl, errorWindow || null);
 
     const id = `explorer-${++explorerCounter}`;
+    const toolbarEl = winEl.querySelector(".explorer-toolbar");
+    const backBtn = winEl.querySelector(".explorer-back-btn");
+    const backMenuBtn = winEl.querySelector(".explorer-back-menu-btn");
+    const backMenu = winEl.querySelector(".explorer-back-menu");
+    const forwardBtn = winEl.querySelector(".explorer-forward-btn");
+    const forwardMenuBtn = winEl.querySelector(".explorer-forward-menu-btn");
+    const forwardMenu = winEl.querySelector(".explorer-forward-menu");
+    const stopBtn = winEl.querySelector(".explorer-stop-btn");
+    const refreshBtn = winEl.querySelector(".explorer-refresh-btn");
+    const homeBtn = winEl.querySelector(".explorer-home-btn");
+    const upBtn = winEl.querySelector(".explorer-up-btn");
     const explItems = winEl.querySelector(".explorer-items");
     const explorerFrame = winEl.querySelector(".explorer-frame");
     const addressCombo = winEl.querySelector(".explorer-address-combo");
@@ -110,11 +121,108 @@ function createExplorerWindow({
 
     let currentMode = initialMode;
     let explPath = [...initialPath];
+    let history = [];
+    let historyIndex = -1;
     let cycleMatches = [];
     let cycleIndex = -1;
     let cyclePrefix = "";
     let hasInlineSuggestion = false;
     let justFocused = false;
+
+    function isSameEntry(a, b) {
+        if (!a || !b || a.mode !== b.mode) return false;
+        if (a.mode === "web") return a.url === b.url;
+        return getPathString(a.path).toLowerCase() === getPathString(b.path).toLowerCase();
+    }
+
+    function getEntryLabel(entry) {
+        if (!entry) return "";
+        if (entry.mode === "web") return "Microsoft Internet Explorer";
+        return entry.path[entry.path.length - 1] || "Explorer";
+    }
+
+    function closeHistoryMenus() {
+        if (backMenu) backMenu.hidden = true;
+        if (forwardMenu) forwardMenu.hidden = true;
+        backMenuBtn?.setAttribute("aria-expanded", "false");
+        forwardMenuBtn?.setAttribute("aria-expanded", "false");
+    }
+
+    function openHistoryMenu(direction) {
+        const isBack = direction === "back";
+        const menuEl = isBack ? backMenu : forwardMenu;
+        const toggleBtn = isBack ? backMenuBtn : forwardMenuBtn;
+        if (!menuEl || !toggleBtn) return;
+
+        const indices = [];
+        if (isBack) {
+            for (let i = historyIndex - 1; i >= 0; i--) indices.push(i);
+        } else {
+            for (let i = historyIndex + 1; i < history.length; i++) indices.push(i);
+        }
+        if (indices.length === 0) return;
+
+        closeAutoComplete();
+        closeHistoryMenus();
+        menuEl.innerHTML = "";
+
+        for (const idx of indices) {
+            const entry = history[idx];
+            const item = document.createElement("div");
+            item.className = "explorer-history-item";
+            item.textContent = getEntryLabel(entry);
+            item.title = entry.mode === "web" ? entry.url : getPathString(entry.path);
+            item.addEventListener("pointerdown", (e) => e.preventDefault());
+            item.addEventListener("click", () => {
+                closeHistoryMenus();
+                historyIndex = idx;
+                applyHistoryEntry(history[idx]);
+            });
+            menuEl.appendChild(item);
+        }
+
+        menuEl.hidden = false;
+        toggleBtn.setAttribute("aria-expanded", "true");
+    }
+
+    function updateNavButtons() {
+        const isWeb = currentMode === "web";
+        const canGoBack = historyIndex > 0;
+        const canGoForward = historyIndex < history.length - 1;
+
+        if (backBtn) {
+            backBtn.disabled = !canGoBack;
+            backBtn.title = canGoBack ? `Back to ${getEntryLabel(history[historyIndex - 1])}` : "Back";
+        }
+        if (backMenuBtn) {
+            backMenuBtn.disabled = !canGoBack;
+        }
+        if (forwardBtn) {
+            forwardBtn.disabled = !canGoForward;
+            forwardBtn.title = canGoForward ? `Forward to ${getEntryLabel(history[historyIndex + 1])}` : "Forward";
+        }
+        if (forwardMenuBtn) {
+            forwardMenuBtn.disabled = !canGoForward;
+        }
+        if (stopBtn) stopBtn.hidden = !isWeb;
+        if (refreshBtn) refreshBtn.hidden = !isWeb;
+        if (homeBtn) homeBtn.hidden = !isWeb;
+        if (upBtn) {
+            upBtn.hidden = isWeb;
+            upBtn.disabled = isWeb || explPath.length <= 1;
+        }
+    }
+
+    function pushHistory(entry) {
+        if (isSameEntry(history[historyIndex], entry)) {
+            updateNavButtons();
+            return;
+        }
+        history = history.slice(0, historyIndex + 1);
+        history.push(entry);
+        historyIndex = history.length - 1;
+        updateNavButtons();
+    }
 
     function getAutoCompleteMatches(rawInput) {
         if (!rawInput) return [];
@@ -190,7 +298,7 @@ function createExplorerWindow({
         addressMenu.hidden = false;
     }
 
-    function renderWeb() {
+    function renderWeb({ recordHistory = true } = {}) {
         currentMode = "web";
         explItems.hidden = true;
         explorerFrame.hidden = false;
@@ -200,10 +308,16 @@ function createExplorerWindow({
         if (addressIcon) addressIcon.textContent = "🌐";
         addressInput.value = HOME_URL;
         closeAutoComplete();
+        closeHistoryMenus();
         setWindowTitle(id, "Microsoft Internet Explorer", "🌐");
+        if (recordHistory) {
+            pushHistory({ mode: "web", url: HOME_URL });
+        } else {
+            updateNavButtons();
+        }
     }
 
-    function renderFolder(path) {
+    function renderFolder(path, { recordHistory = true } = {}) {
         const node = getNode(path);
         if (!node || typeof node !== "object") {
             return false;
@@ -217,6 +331,7 @@ function createExplorerWindow({
         if (addressIcon) addressIcon.textContent = "📁";
         addressInput.value = getPathString(explPath);
         closeAutoComplete();
+        closeHistoryMenus();
 
         const currentFolder = path[path.length - 1] || "Explorer";
         setWindowTitle(id, currentFolder, "📁");
@@ -233,7 +348,21 @@ function createExplorerWindow({
                 })
             );
         }
+        if (recordHistory) {
+            pushHistory({ mode: "folder", path: [...path] });
+        } else {
+            updateNavButtons();
+        }
         return true;
+    }
+
+    function applyHistoryEntry(entry) {
+        if (!entry) return;
+        if (entry.mode === "web") {
+            renderWeb({ recordHistory: false });
+        } else {
+            renderFolder([...entry.path], { recordHistory: false });
+        }
     }
 
     function navigateFromAddressBar() {
@@ -306,15 +435,23 @@ function createExplorerWindow({
         if (addressMenu && !addressMenu.hidden && !addressCombo?.contains(e.target)) {
             closeAutoComplete();
         }
+        if (((backMenu && !backMenu.hidden) || (forwardMenu && !forwardMenu.hidden)) &&
+            !toolbarEl?.contains(e.target)) {
+            closeHistoryMenus();
+        }
     };
     document.addEventListener("pointerdown", handleDocPointerDown);
 
     registerWindow({
         id,
         winEl,
-        onBlur: closeAutoComplete,
+        onBlur: () => {
+            closeAutoComplete();
+            closeHistoryMenus();
+        },
         onClose: () => {
             closeAutoComplete();
+            closeHistoryMenus();
             document.removeEventListener("pointerdown", handleDocPointerDown);
             explorerInstances.delete(id);
             unregisterWindow(id);
@@ -415,6 +552,68 @@ function createExplorerWindow({
                 addressInput.value = currentMode === "folder" ? getPathString(explPath) : HOME_URL;
                 addressInput.select();
             }
+        }
+    });
+
+    backBtn?.addEventListener("click", () => {
+        if (historyIndex > 0) {
+            applyHistoryEntry(history[--historyIndex]);
+        }
+    });
+
+    backMenuBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (backMenu && !backMenu.hidden) {
+            closeHistoryMenus();
+        } else {
+            openHistoryMenu("back");
+        }
+    });
+
+    forwardBtn?.addEventListener("click", () => {
+        if (historyIndex < history.length - 1) {
+            applyHistoryEntry(history[++historyIndex]);
+        }
+    });
+
+    forwardMenuBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (forwardMenu && !forwardMenu.hidden) {
+            closeHistoryMenus();
+        } else {
+            openHistoryMenu("forward");
+        }
+    });
+
+    stopBtn?.addEventListener("click", () => {
+        if (currentMode !== "web") return;
+        try {
+            explorerFrame.contentWindow?.stop?.();
+        } catch {
+            // Ignore cross-origin stop restrictions
+        }
+    });
+
+    refreshBtn?.addEventListener("click", () => {
+        if (currentMode !== "web") return;
+        try {
+            if (explorerFrame.contentWindow?.location) {
+                explorerFrame.contentWindow.location.reload();
+                return;
+            }
+        } catch {
+            // Fall back to resetting src
+        }
+        explorerFrame.setAttribute("src", HOME_PAGE_SRC);
+    });
+
+    homeBtn?.addEventListener("click", () => {
+        renderWeb();
+    });
+
+    upBtn?.addEventListener("click", () => {
+        if (currentMode === "folder" && explPath.length > 1) {
+            renderFolder(explPath.slice(0, -1));
         }
     });
 
