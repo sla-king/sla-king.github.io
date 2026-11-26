@@ -92,7 +92,58 @@ export function nextZIndex() {
     return ++zIndexCounter;
 }
 
+function setOwnerBlocked(ownerId, modalId) {
+    const owner = windows.get(ownerId);
+    if (!owner) return;
+
+    const isBlocked = Boolean(modalId);
+    owner.blockedBy = modalId || null;
+    owner.winEl.classList.toggle("modal-blocked", isBlocked);
+
+    const bodyEl = owner.winEl.querySelector(".window-body");
+    const controlsEl = owner.winEl.querySelector(".title-bar-controls");
+    if (bodyEl) bodyEl.inert = isBlocked;
+    if (controlsEl) controlsEl.inert = isBlocked;
+
+    if (isBlocked && owner.winEl.contains(document.activeElement)) {
+        document.activeElement.blur();
+    }
+}
+
+function focusModalChain(ownerId) {
+    const owner = windows.get(ownerId);
+    if (!owner?.blockedBy) return;
+
+    bringToFront(ownerId);
+
+    let modal = windows.get(owner.blockedBy);
+    while (modal?.blockedBy && windows.has(modal.blockedBy)) {
+        modal = windows.get(modal.blockedBy);
+    }
+    if (!modal) return;
+
+    modal.winEl.classList.remove("modal-flash");
+    void modal.winEl.offsetWidth;
+    modal.winEl.classList.add("modal-flash");
+    modal.onBlockedFocus?.();
+}
+
+export function isWindowBlocked(id) {
+    return Boolean(windows.get(id)?.blockedBy);
+}
+
 export function bringToFront(id) {
+    const targetApp = windows.get(id);
+    if (!targetApp) return;
+
+    if (targetApp.blockedBy && windows.has(targetApp.blockedBy)) {
+        if (targetApp.winEl.style.display !== "none") {
+            targetApp.winEl.style.zIndex = ++zIndexCounter;
+        }
+        bringToFront(targetApp.blockedBy);
+        return;
+    }
+
     windows.forEach((app, appId) => {
         const isTarget = appId === id;
         app.winEl.classList.toggle("unfocused", !isTarget);
@@ -130,7 +181,7 @@ export function centerWindow(id) {
 
 export function toggleMaximize(id) {
     const app = windows.get(id);
-    if (!app || !app.maximizable || !app.btnMax) return;
+    if (!app || app.blockedBy || !app.maximizable || !app.btnMax) return;
 
     const { winEl, btnMax } = app;
     clearTimeout(app.animTimer);
@@ -183,6 +234,7 @@ export function toggleMaximize(id) {
 
 export function minimizeWindow(id) {
     const app = windows.get(id);
+    if (!app || app.blockedBy) return;
     const { winEl, taskEl } = app;
     clearTimeout(app.animTimer);
 
@@ -228,6 +280,7 @@ export function restoreWindow(id) {
 
 export function openWindow(id) {
     const app = windows.get(id);
+    if (!app) return;
     const { winEl, taskEl } = app;
     clearTimeout(app.animTimer);
 
@@ -244,17 +297,27 @@ export function openWindow(id) {
         void taskEl.offsetWidth;
         taskEl.classList.add("slide-in");
     }
+
+    if (app.ownerId) {
+        setOwnerBlocked(app.ownerId, id);
+    }
+
     bringToFront(id);
 }
 
 export function closeWindow(id) {
     const app = windows.get(id);
-    if (!app) return;
+    if (!app || app.blockedBy) return;
     clearTimeout(app.animTimer);
     app.winEl.style.display = "none";
+    app.winEl.classList.remove("modal-flash");
     if (app.taskEl) {
         app.taskEl.style.display = "none";
         app.taskEl.classList.remove("active");
+    }
+    if (app.ownerId) {
+        setOwnerBlocked(app.ownerId, null);
+        bringToFront(app.ownerId);
     }
     app.onClose?.();
 }
@@ -264,6 +327,8 @@ export function registerWindow({
     winEl,
     onClose,
     onBlur,
+    onBlockedFocus,
+    ownerId = null,
     resizable = true,
     maximizable = true,
     showInTaskbar = true
@@ -281,17 +346,33 @@ export function registerWindow({
         btnMax.setAttribute("aria-label", winEl.classList.contains("maximized") ? "Restore" : "Maximize");
     }
 
-    windows.set(id, {
+    const appEntry = {
         winEl,
         taskEl,
         taskLabel,
         btnMax,
         maximizable: canMaximize,
+        ownerId,
+        blockedBy: null,
         onClose,
         onBlur,
+        onBlockedFocus,
         animTimer: null,
         savedRect: null
-    });
+    };
+    windows.set(id, appEntry);
+
+    for (const evtType of ["pointerdown", "mousedown", "click", "dblclick", "keydown"]) {
+        winEl.addEventListener(evtType, (e) => {
+            if (!appEntry.blockedBy) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (evtType === "pointerdown") {
+                startMenu.classList.remove("show");
+                focusModalChain(id);
+            }
+        }, true);
+    }
 
     winEl.addEventListener("pointerdown", () => bringToFront(id));
     btnMin?.addEventListener("click", () => minimizeWindow(id));
@@ -367,6 +448,11 @@ export function registerWindow({
         taskEl.addEventListener("pointerdown", (e) => {
             e.stopPropagation();
             startMenu.classList.remove("show");
+            if (appEntry.blockedBy) {
+                e.preventDefault();
+                focusModalChain(id);
+                return;
+            }
             if (winEl.style.display === "none") {
                 restoreWindow(id);
                 bringToFront(id);

@@ -4,6 +4,7 @@ import {
     openWindow,
     closeWindow,
     centerWindow,
+    isWindowBlocked,
     setWindowTitle
 } from '../windowManager.js';
 import { openNotepad } from './notepad.js';
@@ -164,9 +165,12 @@ export function initExplorer() {
     registerWindow({
         id: "xp-error",
         winEl: errorWindow,
+        ownerId: "explorer",
         resizable: false,
         maximizable: false,
-        showInTaskbar: false
+        showInTaskbar: false,
+        onBlockedFocus: () => errorOkBtn?.focus(),
+        onClose: () => requestAnimationFrame(() => addressInput?.focus())
     });
 
     addressInput?.addEventListener("keydown", (e) => {
@@ -209,6 +213,10 @@ export function initExplorer() {
 }
 
 export function openExplorer() {
+    if (isWindowBlocked("explorer")) {
+        openWindow("explorer");
+        return;
+    }
     closeAddressMenu();
     renderExplorer([...HOME_PATH, "My Documents"]);
     openWindow("explorer");

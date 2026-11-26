@@ -103,6 +103,27 @@ body {
     filter: opacity(0.8);
 }
 
+.window.modal-blocked * {
+    cursor: default !important;
+}
+
+.window.modal-blocked .title-bar-controls button:hover {
+    filter: opacity(0.6);
+}
+
+@keyframes modalFlash {
+    0%, 50%, 100% {
+        filter: brightness(1);
+    }
+    25%, 75% {
+        filter: brightness(1.22);
+    }
+}
+
+.window.modal-flash .title-bar {
+    animation: modalFlash 0.28s linear;
+}
+
 #drag-outline,
 #selection-box {
     position: fixed;
