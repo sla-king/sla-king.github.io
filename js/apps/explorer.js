@@ -13,6 +13,10 @@ const HOME_URL = "https://sla-king.github.io/home.html";
 const HOME_PAGE_SRC = "home.html";
 const WEB_URL_PATTERN = /^(?:https?:\/\/)?sla-king\.github\.io(?:\/home\.html|\/)?$/i;
 
+export function isWebUrl(input) {
+    return WEB_URL_PATTERN.test(input);
+}
+
 const explorerTemplate = document.getElementById("explorer-window-template");
 const errorWindow = document.getElementById("xp-error-window");
 const errorMessage = document.getElementById("xp-error-message");
@@ -240,7 +244,7 @@ function createExplorerWindow({
             return;
         }
 
-        if (WEB_URL_PATTERN.test(rawValue)) {
+        if (isWebUrl(rawValue)) {
             renderWeb();
             return;
         }

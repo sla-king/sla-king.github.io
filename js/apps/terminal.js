@@ -30,7 +30,37 @@ export function initTerminal() {
     const promptText = document.getElementById("prompt-text");
 
     const initialText = "Microsoft Windows XP [Version 5.1.2600]\n(C) Copyright 1985-2001 Microsoft Corp.\n\n";
-    const pathCommands = ["cd", "chdir", "dir", "ls", "type", "cat"];
+    const hiddenCommandCompletions = new Set(["explorer", "notepad"]);
+    const pathCommands = [
+        "cat",
+        "cd",
+        "chdir",
+        "dir",
+        "explorer",
+        "explorer.exe",
+        "gc",
+        "gci",
+        "get-childitem",
+        "get-content",
+        "ii",
+        "invoke-item",
+        "ls",
+        "notepad",
+        "notepad.exe",
+        "saps",
+        "set-location",
+        "sl",
+        "start",
+        "start-process",
+        "type"
+    ];
+
+    function findCommand(name) {
+        const lower = name.toLowerCase();
+        if (commands[lower]) return commands[lower];
+        const key = Object.keys(commands).find(k => k.toLowerCase() === lower);
+        return key ? commands[key] : null;
+    }
 
     let cycleMatches = [];
     let cycleIndex = -1;
@@ -95,7 +125,9 @@ export function initTerminal() {
     consoleBody.addEventListener("click", (e) => {
         if (window.getSelection().toString().length > 0) return;
         if (window.matchMedia("(pointer: fine)").matches || e.target.closest(".input-line")) {
-            cmdInput.focus({ preventScroll: true });
+            if (!document.getElementById("command-window")?.classList.contains("unfocused")) {
+                cmdInput.focus({ preventScroll: true });
+            }
         }
     });
 
@@ -173,7 +205,7 @@ export function initTerminal() {
                 const activeMatch = cycleMatches[cycleIndex];
                 const isValid = middle !== "" && (
                     isCyclingCommand
-                        ? activeMatch.startsWith(middle)
+                        ? activeMatch.toLowerCase().startsWith(middle.toLowerCase())
                         : `${activeMatch.dirPart}${activeMatch.name}`.replace(/"/g, "").toLowerCase().startsWith(middle.replace(/"/g, "").toLowerCase())
                 );
 
@@ -194,7 +226,11 @@ export function initTerminal() {
 
             if (words.length === 1) {
                 if (!currentWord) return;
-                cycleMatches = Object.keys(commands).filter(c => c.startsWith(currentWord.toLowerCase()));
+                const lowerWord = currentWord.toLowerCase();
+                cycleMatches = Object.keys(commands).filter(
+                    c => !hiddenCommandCompletions.has(c.toLowerCase()) &&
+                         c.toLowerCase().startsWith(lowerWord)
+                );
                 isCyclingCommand = true;
             } else if (pathCommands.includes(cmd)) {
                 cycleMatches = getPathMatches(currentWord);
@@ -228,23 +264,25 @@ export function initTerminal() {
 
             if (trimmedInput) {
                 const [cmdName, ...args] = parseArgs(trimmedInput);
-                const cmd = cmdName.toLowerCase();
+                const commandFn = findCommand(cmdName);
 
-                if (commands[cmd]) {
-                    commands[cmd](args, {
+                if (commandFn) {
+                    commandFn(args, {
                         print,
                         clearScreen,
                         closeWindow: () => closeWindow("terminal")
                     });
                 } else {
-                    print(`'${cmd}' is not recognized as an internal or external command,\noperable program or batch file.\n`);
+                    print(`'${cmdName}' is not recognized as an internal or external command,\noperable program or batch file.\n`);
                 }
                 await printQueue;
             }
 
             updatePrompt();
             isProcessing = false;
-            cmdInput.focus({ preventScroll: true });
+            if (!document.getElementById("command-window")?.classList.contains("unfocused")) {
+                cmdInput.focus({ preventScroll: true });
+            }
         }
     });
 
