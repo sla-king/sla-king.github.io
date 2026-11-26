@@ -139,6 +139,7 @@ function createExplorerWindow({
     const homeBtn = winEl.querySelector(".explorer-home-btn");
     const upBtn = winEl.querySelector(".explorer-up-btn");
     const explItems = winEl.querySelector(".explorer-items");
+    const webErrorEl = winEl.querySelector(".explorer-web-error");
     const explorerFrame = winEl.querySelector(".explorer-frame");
     const addressCombo = winEl.querySelector(".explorer-address-combo");
     const addressIcon = winEl.querySelector(".xp-address-icon");
@@ -147,6 +148,8 @@ function createExplorerWindow({
     const goBtn = winEl.querySelector(".explorer-go-btn");
 
     let currentMode = initialMode;
+    let currentWebUrl = HOME_URL;
+    let isWebError = false;
     let explPath = [...initialPath];
     let history = [];
     let historyIndex = -1;
@@ -158,13 +161,13 @@ function createExplorerWindow({
 
     function isSameEntry(a, b) {
         if (!a || !b || a.mode !== b.mode) return false;
-        if (a.mode === "web") return a.url === b.url;
+        if (a.mode === "web") return a.url === b.url && Boolean(a.isError) === Boolean(b.isError);
         return getPathString(a.path).toLowerCase() === getPathString(b.path).toLowerCase();
     }
 
     function getEntryLabel(entry) {
         if (!entry) return "";
-        if (entry.mode === "web") return "Microsoft Internet Explorer";
+        if (entry.mode === "web") return entry.isError ? "Cannot find server" : entry.url;
         return entry.path[entry.path.length - 1] || "Explorer";
     }
 
@@ -252,12 +255,9 @@ function createExplorerWindow({
     }
 
     function getAutoCompleteMatches(rawInput) {
-        if (!rawInput) return [];
+        if (!rawInput || currentMode !== "folder") return [];
 
         const lastSlashIdx = Math.max(rawInput.lastIndexOf("/"), rawInput.lastIndexOf("\\"));
-        if (currentMode !== "folder" && lastSlashIdx === -1 && !/^(?:[a-zA-Z]:|~)/i.test(rawInput)) {
-            return [];
-        }
 
         if (lastSlashIdx === -1 && rawInput.toLowerCase() === "c:") {
             return ["C:\\"];
@@ -325,23 +325,45 @@ function createExplorerWindow({
         addressMenu.hidden = false;
     }
 
-    function renderWeb({ recordHistory = true } = {}) {
+    function showWebView({ url = HOME_URL, isError = false, recordHistory = true } = {}) {
         currentMode = "web";
+        currentWebUrl = url;
+        isWebError = isError;
         explItems.hidden = true;
-        explorerFrame.hidden = false;
-        if (explorerFrame.getAttribute("src") !== HOME_PAGE_SRC) {
+        explorerFrame.hidden = isError;
+        if (webErrorEl) webErrorEl.hidden = !isError;
+        if (!isError && explorerFrame.getAttribute("src") !== HOME_PAGE_SRC) {
             explorerFrame.setAttribute("src", HOME_PAGE_SRC);
         }
         if (addressIcon) addressIcon.setAttribute("src", "assets/app_explorer_16.png");
-        addressInput.value = HOME_URL;
+        addressInput.value = url;
         closeAutoComplete();
         closeHistoryMenus();
-        setWindowTitle(id, `${HOME_URL} - Microsoft Internet Explorer`, "assets/app_explorer_16.png");
+        const title = isError
+            ? "Cannot find server - Microsoft Internet Explorer"
+            : `${HOME_URL} - Microsoft Internet Explorer`;
+        setWindowTitle(id, title, "assets/app_explorer_16.png");
         if (recordHistory) {
-            pushHistory({ mode: "web", url: HOME_URL });
+            pushHistory({ mode: "web", url, isError });
         } else {
             updateNavButtons();
         }
+    }
+
+    function reloadWebFrame() {
+        try {
+            if (explorerFrame.contentWindow?.location) {
+                explorerFrame.contentWindow.location.reload();
+                return;
+            }
+        } catch {
+            // Fall back to resetting src
+        }
+        explorerFrame.src = HOME_PAGE_SRC;
+    }
+
+    function renderWeb({ recordHistory = true } = {}) {
+        showWebView({ url: HOME_URL, isError: false, recordHistory });
     }
 
     function renderFolder(path, { recordHistory = true } = {}) {
@@ -351,8 +373,10 @@ function createExplorerWindow({
         }
 
         currentMode = "folder";
+        isWebError = false;
         explPath = path;
         explorerFrame.hidden = true;
+        if (webErrorEl) webErrorEl.hidden = true;
         explItems.hidden = false;
         explItems.innerHTML = "";
         const smallFolderIcon = getFolderIcon(path, true);
@@ -388,7 +412,7 @@ function createExplorerWindow({
     function applyHistoryEntry(entry) {
         if (!entry) return;
         if (entry.mode === "web") {
-            renderWeb({ recordHistory: false });
+            showWebView({ url: entry.url, isError: Boolean(entry.isError), recordHistory: false });
         } else {
             renderFolder([...entry.path], { recordHistory: false });
         }
@@ -398,12 +422,19 @@ function createExplorerWindow({
         closeAutoComplete();
         const rawValue = addressInput.value.trim();
         if (!rawValue) {
-            showAddressError("", id);
+            if (currentMode === "folder") {
+                showAddressError("", id);
+            }
             return;
         }
 
         if (isWebUrl(rawValue)) {
-            renderWeb();
+            if (currentMode === "web" && !isWebError) {
+                addressInput.value = HOME_URL;
+                reloadWebFrame();
+            } else {
+                renderWeb();
+            }
             return;
         }
 
@@ -411,14 +442,18 @@ function createExplorerWindow({
         const targetNode = getNode(candidatePath);
 
         if (targetNode === null || targetNode === undefined) {
-            showAddressError(rawValue, id);
+            if (currentMode === "web" || /^https?:\/\//i.test(rawValue)) {
+                showWebView({ url: rawValue, isError: true });
+            } else {
+                showAddressError(rawValue, id);
+            }
             return;
         }
 
         if (typeof targetNode === "string") {
             const fileName = candidatePath[candidatePath.length - 1];
             openNotepad(fileName, targetNode, getPathString(candidatePath));
-            addressInput.value = currentMode === "folder" ? getPathString(explPath) : HOME_URL;
+            addressInput.value = currentMode === "folder" ? getPathString(explPath) : currentWebUrl;
             return;
         }
 
@@ -501,7 +536,7 @@ function createExplorerWindow({
         id,
         getMode: () => currentMode,
         getPath: () => explPath,
-        getUrl: () => HOME_URL,
+        getUrl: () => currentWebUrl,
         isMaximized: () => winEl.classList.contains("maximized"),
         focusAddressInput: () => addressInput?.focus()
     });
@@ -548,7 +583,7 @@ function createExplorerWindow({
     });
 
     addressInput?.addEventListener("keydown", (e) => {
-        if (e.key === "Tab") {
+        if (e.key === "Tab" && currentMode === "folder") {
             e.preventDefault();
             stepCycle(e.shiftKey ? -1 : 1);
             return;
@@ -578,7 +613,7 @@ function createExplorerWindow({
                 closeAutoComplete();
             } else {
                 closeAutoComplete();
-                addressInput.value = currentMode === "folder" ? getPathString(explPath) : HOME_URL;
+                addressInput.value = currentMode === "folder" ? getPathString(explPath) : currentWebUrl;
                 addressInput.select();
             }
         }
@@ -625,15 +660,11 @@ function createExplorerWindow({
 
     refreshBtn?.addEventListener("click", () => {
         if (currentMode !== "web") return;
-        try {
-            if (explorerFrame.contentWindow?.location) {
-                explorerFrame.contentWindow.location.reload();
-                return;
-            }
-        } catch {
-            // Fall back to resetting src
+        if (isWebError) {
+            showWebView({ url: currentWebUrl, isError: true, recordHistory: false });
+            return;
         }
-        explorerFrame.setAttribute("src", HOME_PAGE_SRC);
+        reloadWebFrame();
     });
 
     homeBtn?.addEventListener("click", () => {

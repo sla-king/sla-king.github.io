@@ -456,8 +456,53 @@
 
 /* Explorer Web Frame */
 .explorer-items[hidden],
+.explorer-web-error[hidden],
 .explorer-frame[hidden] {
     display: none;
+}
+
+.explorer-web-error {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #ffffff;
+    color: #000000;
+    padding: 20px 24px;
+    font-family: 'Verdana', 'Arial', sans-serif;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.explorer-web-error-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.explorer-web-error-icon {
+    width: 44px;
+    height: 44px;
+    margin: -6px 0 -6px -10px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+
+.explorer-web-error h1 {
+    margin: 0;
+    font-family: 'Verdana', 'Arial', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.25;
+    color: #000000;
+}
+
+.explorer-web-error p {
+    margin: 0;
+    max-width: 430px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #000000;
 }
 
 .explorer-frame {
