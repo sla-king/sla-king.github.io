@@ -247,6 +247,39 @@ body {
     color: #0a246a;
 }
 
+.right-secondary {
+    font-weight: normal;
+}
+
+.menu-item-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.menu-item-title {
+    font-weight: bold;
+}
+
+.menu-item-subtitle {
+    color: #808080;
+    font-weight: normal;
+}
+
+.menu-item:hover .menu-item-subtitle {
+    color: #ffffff;
+}
+
+.start-menu-divider {
+    height: 1px;
+    margin: 4px 10px;
+    background: linear-gradient(to right, rgba(130, 165, 215, 0), #8fb2e3 15%, #8fb2e3 85%, rgba(130, 165, 215, 0));
+}
+
+.start-menu-divider-left {
+    background: linear-gradient(to right, rgba(210, 210, 210, 0), #c8c8c8 15%, #c8c8c8 85%, rgba(210, 210, 210, 0));
+}
+
 .menu-item:hover,
 .menu-item-has-submenu.submenu-open {
     background-color: #316ac5;

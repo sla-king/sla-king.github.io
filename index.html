@@ -122,6 +122,25 @@
         </div>
     </div>
 
+    <div class="window" id="xp-link-window" role="dialog" aria-labelledby="xp-link-title" style="display: none;">
+        <div class="title-bar">
+            <div id="xp-link-title" class="title-bar-text">Open Link</div>
+            <div class="title-bar-controls">
+                <button id="xp-link-close" aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body xp-error-body">
+            <div class="xp-error-content xp-link-content">
+                <img id="xp-link-icon" src="assets/app_github.png" class="xp-error-icon" alt="">
+                <p id="xp-link-message"></p>
+            </div>
+            <div class="xp-error-actions xp-link-actions">
+                <button id="xp-link-cancel" type="button">Cancel</button>
+                <button id="xp-link-visit" type="button"></button>
+            </div>
+        </div>
+    </div>
+
     <template id="notepad-window-template">
         <div class="window notepad-window" style="display: none;">
             <div class="title-bar">
@@ -136,7 +155,7 @@
                 </div>
             </div>
             <div class="window-body notepad-body">
-                <textarea class="notepad-textarea" readonly></textarea>
+                <textarea class="notepad-textarea"></textarea>
             </div>
         </div>
     </template>
@@ -150,11 +169,26 @@
             <div class="start-menu-left">
                 <div class="menu-item" data-action="explorer-web" title="Opens your Internet browser.">
                     <img src="assets/app_explorer.png" class="menu-icon" alt="">
-                    Internet Explorer
+                    <div class="menu-item-text">
+                        <span class="menu-item-title">Internet</span>
+                        <span class="menu-item-subtitle">Internet Explorer</span>
+                    </div>
                 </div>
+                <div class="menu-item" data-action="email" title="Opens your e-mail program so you can send or read a message.">
+                    <img src="assets/app_outlook.png" class="menu-icon" alt="">
+                    <div class="menu-item-text">
+                        <span class="menu-item-title">E-mail</span>
+                        <span class="menu-item-subtitle">Outlook Express</span>
+                    </div>
+                </div>
+                <div class="start-menu-divider start-menu-divider-left" role="separator"></div>
                 <div class="menu-item" data-action="cmd" title="Performs text-based (command-line) functions.">
                     <img src="assets/app_command_prompt.png" class="menu-icon" alt="">
                     Command Prompt
+                </div>
+                <div class="menu-item" data-action="notepad" title="Creates and edits text files using basic text formatting.">
+                    <img src="assets/app_notepad.png" class="menu-icon" alt="">
+                    Notepad
                 </div>
             </div>
             <div class="start-menu-right">
@@ -179,6 +213,15 @@
                 <div class="menu-item right-item" data-action="computer" title="Gives access to, and information about, the disk drives, cameras, scanners, and other hardware connected to your computer.">
                     <img src="assets/app_my_computer.png" class="menu-icon" alt="">
                     My Computer
+                </div>
+                <div class="start-menu-divider" role="separator"></div>
+                <div class="menu-item right-item right-secondary" data-action="linkedin" title="Visit sla-king's LinkedIn profile.">
+                    <img src="assets/app_linkedin.png" class="menu-icon" alt="">
+                    LinkedIn
+                </div>
+                <div class="menu-item right-item right-secondary" data-action="github" title="Visit sla-king's GitHub profile.">
+                    <img src="assets/app_github.png" class="menu-icon" alt="">
+                    GitHub
                 </div>
             </div>
         </div>

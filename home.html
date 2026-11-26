@@ -52,6 +52,20 @@
 
         simpleMarkdown('aboutMe', aboutMeTxt);
         simpleMarkdown('contact', contactTxt);
+
+        if (window.parent !== window) {
+            document.addEventListener("click", (e) => {
+                const link = e.target.closest("a[href]");
+                if (!link) return;
+                const href = link.getAttribute("href");
+                if (!href || !/^(?:https?:\/\/|mailto:)/i.test(href)) return;
+                e.preventDefault();
+                window.parent.postMessage(
+                    { type: "xp-open-link", href, text: link.textContent.trim() },
+                    "*"
+                );
+            });
+        }
     </script>
 </body>
 </html>

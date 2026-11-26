@@ -9,8 +9,42 @@ const notepadTemplate = document.getElementById("notepad-window-template");
 const startMenu = document.getElementById("start-menu");
 
 const notepadInstances = new Map();
+const blankNotepads = new Map();
 const recentDocuments = [];
 let notepadCounter = 0;
+
+function createNotepadWindow({ title, content = "", onClose }) {
+    if (!notepadTemplate) return;
+    const winEl = notepadTemplate.content.firstElementChild.cloneNode(true);
+    document.body.insertBefore(winEl, startMenu || null);
+
+    const id = `notepad-${++notepadCounter}`;
+    const noteTextarea = winEl.querySelector(".notepad-textarea");
+
+    if (noteTextarea) {
+        noteTextarea.value = content;
+    }
+
+    registerWindow({
+        id,
+        winEl,
+        onClose: () => {
+            onClose?.(id);
+            unregisterWindow(id);
+        }
+    });
+
+    setWindowTitle(id, title);
+
+    const openWindows = [
+        ...Array.from(notepadInstances.values(), (inst) => inst.winEl),
+        ...Array.from(blankNotepads.values())
+    ];
+    const nonMaximizedCount = openWindows.filter((el) => !el.classList.contains("maximized")).length;
+    const cascadeOffset = (nonMaximizedCount % 5) * 24;
+
+    return { id, winEl, noteTextarea, cascadeOffset };
+}
 
 function recordRecentDocument(filename, content, filePath) {
     const key = (filePath || filename).toLowerCase();
@@ -38,6 +72,18 @@ export function initNotepad() {
     // Notepad windows are created dynamically per opened file.
 }
 
+export function openBlankNotepad() {
+    const created = createNotepadWindow({
+        title: "Untitled - Notepad",
+        onClose: (id) => blankNotepads.delete(id)
+    });
+    if (!created) return;
+
+    blankNotepads.set(created.id, created.winEl);
+    openWindow(created.id, { cascadeOffset: created.cascadeOffset });
+    requestAnimationFrame(() => created.noteTextarea?.focus());
+}
+
 export function openNotepad(filename, content, filePath = filename) {
     recordRecentDocument(filename, content, filePath);
     const key = (filePath || filename).toLowerCase();
@@ -47,33 +93,14 @@ export function openNotepad(filename, content, filePath = filename) {
         return;
     }
 
-    if (!notepadTemplate) return;
-    const winEl = notepadTemplate.content.firstElementChild.cloneNode(true);
-    document.body.insertBefore(winEl, startMenu || null);
-
-    const id = `notepad-${++notepadCounter}`;
-    const noteTextarea = winEl.querySelector(".notepad-textarea");
     const displayName = filename.replace(/\.[^/.]+$/, "");
-
-    if (noteTextarea) {
-        noteTextarea.value = content || "";
-    }
-
-    registerWindow({
-        id,
-        winEl,
-        onClose: () => {
-            notepadInstances.delete(key);
-            unregisterWindow(id);
-        }
+    const created = createNotepadWindow({
+        title: `${displayName} - Notepad`,
+        content: content || "",
+        onClose: () => notepadInstances.delete(key)
     });
+    if (!created) return;
 
-    setWindowTitle(id, `${displayName} - Notepad`);
-
-    const nonMaximizedCount = Array.from(notepadInstances.values())
-        .filter((inst) => !inst.winEl.classList.contains("maximized")).length;
-    const cascadeOffset = (nonMaximizedCount % 5) * 24;
-
-    notepadInstances.set(key, { id, winEl });
-    openWindow(id, { cascadeOffset });
+    notepadInstances.set(key, { id: created.id, winEl: created.winEl });
+    openWindow(created.id, { cascadeOffset: created.cascadeOffset });
 }

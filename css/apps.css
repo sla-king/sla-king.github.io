@@ -25,6 +25,11 @@
     height: auto;
 }
 
+#xp-link-window {
+    --win-w: 400px;
+    height: auto;
+}
+
 /* Terminal App */
 #command-window .window-body {
     background-color: #000000;
@@ -436,7 +441,8 @@
 }
 
 /* Address Bar Error Dialog */
-#xp-error-window .xp-error-body {
+#xp-error-window .xp-error-body,
+#xp-link-window .xp-error-body {
     height: auto;
     background-color: #ece9d8;
     color: #000000;
@@ -451,6 +457,10 @@
     gap: 14px;
 }
 
+.xp-link-content {
+    align-items: center;
+}
+
 .xp-error-icon {
     width: 32px;
     height: 32px;
@@ -460,12 +470,17 @@
     user-select: none;
 }
 
-#xp-error-message {
+#xp-error-message,
+#xp-link-message {
     margin: 2px 0 0 0;
     line-height: 1.4;
     color: #000000;
     user-select: text;
     word-break: break-word;
+}
+
+#xp-link-message {
+    margin-top: 0;
 }
 
 .xp-error-actions {
@@ -474,7 +489,14 @@
     margin-top: 16px;
 }
 
-#xp-error-ok {
+.xp-link-actions {
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+#xp-error-ok,
+#xp-link-cancel,
+#xp-link-visit {
     min-width: 75px;
     min-height: 23px;
     font-family: 'Tahoma', sans-serif;
