@@ -58,8 +58,10 @@ function createTaskbarItem(winEl) {
     const titleClone = titleBarText.cloneNode(true);
     titleClone.querySelector(".window-icon")?.remove();
 
+    const title = titleClone.textContent.trim();
     const taskLabel = document.createElement("span");
-    taskLabel.textContent = titleClone.textContent.trim();
+    taskLabel.textContent = title;
+    taskEl.title = title;
     taskEl.appendChild(taskLabel);
 
     if (winEl.style.display === "none") {
@@ -97,6 +99,9 @@ export function setWindowTitle(id, title, icon) {
 
     if (app.taskLabel) {
         app.taskLabel.textContent = title;
+    }
+    if (app.taskEl) {
+        app.taskEl.title = title;
     }
 }
 

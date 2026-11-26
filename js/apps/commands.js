@@ -1,4 +1,4 @@
-import { currentPath, setPath, getPathString, resolvePath, getNode, fileDates, getLatestDateInNode } from '../filesystem.js';
+import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, fileDates, getLatestDateInNode } from '../filesystem.js';
 import { openExplorer, openWebExplorer, isWebUrl } from './explorer.js';
 import { openNotepad } from './notepad.js';
 
@@ -96,7 +96,7 @@ export const commands = {
         let fileCount = 0;
         let dirCount = 0;
         let currentDirBytes = 0;
-        const defaultTime = "11/01/2026  11:39 PM";
+        const defaultTime = DEFAULT_FILE_DATE;
 
         if (targetPath.length > 1) {
             const dotTime = getLatestDateInNode(node, defaultTime);

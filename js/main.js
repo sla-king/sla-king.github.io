@@ -1,3 +1,4 @@
+import { HOME_PATH } from './filesystem.js';
 import { initTerminal } from './apps/terminal.js';
 import { initExplorer, openExplorer, openWebExplorer } from './apps/explorer.js';
 import { initNotepad } from './apps/notepad.js';
@@ -9,6 +10,7 @@ import {
 } from './windowManager.js';
 
 const clock = document.getElementById("clock");
+const systemTray = clock.closest(".system-tray") || clock;
 const startButton = document.getElementById("start-button");
 const startMenu = document.getElementById("start-menu");
 const taskbar = document.querySelector(".taskbar");
@@ -101,6 +103,16 @@ document.querySelector('.menu-item[data-action="documents"]').addEventListener("
     openExplorer();
 });
 
+document.querySelector('.menu-item[data-action="pictures"]').addEventListener("click", () => {
+    startMenu.classList.remove("show");
+    openExplorer([...HOME_PATH, "My Documents", "My Pictures"]);
+});
+
+document.querySelector('.menu-item[data-action="music"]').addEventListener("click", () => {
+    startMenu.classList.remove("show");
+    openExplorer([...HOME_PATH, "My Documents", "My Music"]);
+});
+
 // System Clock
 function updateClock() {
     const now = new Date();
@@ -108,6 +120,12 @@ function updateClock() {
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const ampm = now.getHours() >= 12 ? "PM" : "AM";
     clock.textContent = `${hours}:${minutes} ${ampm}`;
+    systemTray.title = now.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
 }
 
 setInterval(updateClock, 1000);

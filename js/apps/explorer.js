@@ -1,4 +1,4 @@
-import { HOME_PATH, getNode, getPathString, resolvePath } from '../filesystem.js';
+import { HOME_PATH, DEFAULT_FILE_DATE, fileDates, getNode, getPathString, resolvePath } from '../filesystem.js';
 import {
     registerWindow,
     unregisterWindow,
@@ -60,18 +60,29 @@ function showAddressError(target, ownerId) {
     requestAnimationFrame(() => errorOkBtn?.focus());
 }
 
-const SPECIAL_FOLDER_ICONS = {
-    "my documents": { large: "assets/folder_documents.png", small: "assets/folder_documents_16.png" },
-    "my music": { large: "assets/folder_music.png", small: "assets/folder_music_16.png" },
-    "my pictures": { large: "assets/folder_pictures.png", small: "assets/folder_pictures_16.png" }
+const SPECIAL_FOLDERS = {
+    "my documents": {
+        large: "assets/folder_documents.png",
+        small: "assets/folder_documents_16.png",
+        tooltip: "Contains letters, reports, and other documents and files."
+    },
+    "my music": {
+        large: "assets/folder_music.png",
+        small: "assets/folder_music_16.png",
+        tooltip: "Contains music and other audio files"
+    },
+    "my pictures": {
+        large: "assets/folder_pictures.png",
+        small: "assets/folder_pictures_16.png",
+        tooltip: "Contains digital photos, images, and graphic files."
+    }
 };
 
-function getFolderIcon(path, small = false) {
-    const defaultIcon = small ? "assets/folder_base_16.png" : "assets/folder_base.png";
+function getSpecialFolder(path) {
     const folderName = path[path.length - 1]?.toLowerCase();
     const hasHomePrefix = HOME_PATH.every((part, i) => path[i]?.toLowerCase() === part.toLowerCase());
     if (!hasHomePrefix || !folderName) {
-        return defaultIcon;
+        return null;
     }
 
     const isHomeChild = path.length === HOME_PATH.length + 1;
@@ -79,15 +90,94 @@ function getFolderIcon(path, small = false) {
         path.length === HOME_PATH.length + 2 &&
         path[HOME_PATH.length]?.toLowerCase() === "my documents";
 
-    const match = (isHomeChild || (isMyDocsChild && (folderName === "my music" || folderName === "my pictures")))
-        ? SPECIAL_FOLDER_ICONS[folderName]
-        : null;
-    return match ? (small ? match.small : match.large) : defaultIcon;
+    if (isHomeChild || (isMyDocsChild && (folderName === "my music" || folderName === "my pictures"))) {
+        return SPECIAL_FOLDERS[folderName] || null;
+    }
+    return null;
 }
 
-function createExplorerItem(label, iconSrc, onDoubleClick) {
+function getFolderIcon(path, small = false) {
+    const match = getSpecialFolder(path);
+    if (match) return small ? match.small : match.large;
+    return small ? "assets/folder_base_16.png" : "assets/folder_base.png";
+}
+
+function formatTooltipSize(bytes) {
+    if (bytes < 1024) return `${bytes} bytes`;
+    const kb = bytes / 1024;
+    return `${kb >= 100 ? Math.round(kb) : Number(kb.toFixed(2))} KB`;
+}
+
+function formatTooltipDate(dateStr) {
+    return dateStr
+        .replace(/\s+/g, " ")
+        .replace(/^0/, "")
+        .replace(/\/0/g, "/")
+        .replace(/ 0(\d:)/, " $1");
+}
+
+function getFileTypeLabel(filename) {
+    const ext = filename.includes(".") ? filename.split(".").pop().toLowerCase() : "";
+    if (ext === "txt") return "Text Document";
+    if (ext === "bat") return "MS-DOS Batch File";
+    if (ext === "sys") return "System File";
+    return "File";
+}
+
+function getNodeSize(node) {
+    if (typeof node === "string") return node.length;
+    let total = 0;
+    for (const value of Object.values(node)) {
+        total += getNodeSize(value);
+    }
+    return total;
+}
+
+const HIDDEN_ROOT_FILES = new Set(["autoexec.bat", "config.sys"]);
+
+function isHiddenExplorerItem(parentPath, name, value) {
+    return parentPath.length === 1 &&
+        parentPath[0].toUpperCase() === "C:" &&
+        typeof value === "string" &&
+        HIDDEN_ROOT_FILES.has(name.toLowerCase());
+}
+
+function getItemTooltip(path, name, value) {
+    if (typeof value === "string") {
+        const type = getFileTypeLabel(name);
+        const dateModified = formatTooltipDate(fileDates[name] || DEFAULT_FILE_DATE);
+        const size = formatTooltipSize(value.length);
+        return `Type: ${type}\nDate Modified: ${dateModified}\nSize: ${size}`;
+    }
+
+    const lines = [];
+    const special = getSpecialFolder(path);
+    if (special) {
+        lines.push(special.tooltip);
+    }
+
+    const entries = Object.entries(value).filter(([k, v]) => !isHiddenExplorerItem(path, k, v));
+    const childFolders = entries.filter(([, v]) => typeof v === "object").map(([k]) => k);
+    const childFiles = entries.filter(([, v]) => typeof v === "string").map(([k]) => k);
+    if (childFolders.length === 0 && childFiles.length === 0) {
+        lines.push("Folder is empty");
+        return lines.join("\n");
+    }
+
+    lines.push(`Size: ${formatTooltipSize(getNodeSize(value))}`);
+    if (childFolders.length > 0) {
+        lines.push(`Folders: ${childFolders.join(", ")}`);
+    }
+    if (childFiles.length > 0) {
+        lines.push(`Files: ${childFiles.join(", ")}`);
+    }
+    return lines.join("\n");
+}
+
+function createExplorerItem(label, iconSrc, tooltip, onDoubleClick) {
     const item = document.createElement("div");
     item.className = "explorer-item";
+    item.title = tooltip;
 
     const icon = document.createElement("img");
     icon.className = "explorer-icon";
@@ -273,7 +363,8 @@ function createExplorerWindow({
 
         const lowerPrefix = prefix.replace(/"/g, "").toLowerCase();
         return Object.keys(dirNode)
-            .filter((key) => key.toLowerCase().startsWith(lowerPrefix))
+            .filter((key) => !isHiddenExplorerItem(targetDirPath, key, dirNode[key]) &&
+                key.toLowerCase().startsWith(lowerPrefix))
             .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
             .map((key) => `${dirPart}${key}`);
     }
@@ -389,14 +480,17 @@ function createExplorerWindow({
         setWindowTitle(id, currentFolder, smallFolderIcon);
 
         for (const [key, value] of Object.entries(node)) {
+            if (isHiddenExplorerItem(path, key, value)) continue;
             const isDir = typeof value === "object";
-            const itemIcon = isDir ? getFolderIcon([...explPath, key]) : "assets/file_text_doc.png";
+            const itemPath = [...explPath, key];
+            const itemIcon = isDir ? getFolderIcon(itemPath) : "assets/file_text_doc.png";
+            const itemTooltip = getItemTooltip(itemPath, key, value);
             explItems.appendChild(
-                createExplorerItem(key, itemIcon, () => {
+                createExplorerItem(key, itemIcon, itemTooltip, () => {
                     if (isDir) {
-                        renderFolder([...explPath, key]);
+                        renderFolder(itemPath);
                     } else {
-                        openNotepad(key, value, getPathString([...explPath, key]));
+                        openNotepad(key, value, getPathString(itemPath));
                     }
                 })
             );

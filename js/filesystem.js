@@ -1,6 +1,7 @@
 import { aboutMeTxt, contactTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt } from './texts.js';
 
 export const HOME_PATH = ["C:", "Documents and Settings", "sla-king"];
+export const DEFAULT_FILE_DATE = "11/01/2026  11:39 PM";
 
 export const fs = {
     "C:": {
@@ -14,6 +15,8 @@ export const fs = {
                     "regrets-of-the-dying.txt": regretsOfTheDyingTxt,
                 },
                 "My Documents": {
+                    "My Music": {},
+                    "My Pictures": {},
                     "about_me.txt": aboutMeTxt,
                     "contact.txt": contactTxt,
                     "experience.txt": experienceTxt,
