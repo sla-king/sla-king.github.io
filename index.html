@@ -34,36 +34,39 @@
         </div>
     </div>
 
-    <div class="window" id="explorer-window" style="display: none;">
-        <div class="title-bar">
-            <div class="title-bar-text">
-                <span class="window-icon">📁</span>
-                My Documents
-            </div>
-            <div class="title-bar-controls">
-                <button aria-label="Minimize"></button>
-                <button aria-label="Maximize"></button>
-                <button aria-label="Close"></button>
-            </div>
-        </div>
-        <div class="window-body explorer-body">
-            <div class="explorer-address-bar">
-                <span class="explorer-address-label">Address</span>
-                <div class="explorer-address-combo">
-                    <div class="explorer-address-input">
-                        <span class="xp-folder-icon" aria-hidden="true">📁</span>
-                        <input id="explorer-address-input" type="text" spellcheck="false" autocomplete="off" aria-label="Address" />
-                    </div>
-                    <div id="explorer-address-menu" class="explorer-address-menu" hidden></div>
+    <template id="explorer-window-template">
+        <div class="window explorer-window" style="display: none;">
+            <div class="title-bar">
+                <div class="title-bar-text">
+                    <span class="window-icon">📁</span>
+                    My Documents
                 </div>
-                <button id="explorer-go-btn" class="explorer-go-btn" type="button">
-                    <span class="xp-go-icon" aria-hidden="true">➡️</span>
-                    <span>Go</span>
-                </button>
+                <div class="title-bar-controls">
+                    <button aria-label="Minimize"></button>
+                    <button aria-label="Maximize"></button>
+                    <button aria-label="Close"></button>
+                </div>
             </div>
-            <div id="explorer-items" class="explorer-items"></div>
+            <div class="window-body explorer-body">
+                <div class="explorer-address-bar">
+                    <span class="explorer-address-label">Address</span>
+                    <div class="explorer-address-combo">
+                        <div class="explorer-address-input">
+                            <span class="xp-address-icon" aria-hidden="true">📁</span>
+                            <input class="explorer-address-field" type="text" spellcheck="false" autocomplete="off" aria-label="Address" />
+                        </div>
+                        <div class="explorer-address-menu" hidden></div>
+                    </div>
+                    <button class="explorer-go-btn" type="button">
+                        <span class="xp-go-icon" aria-hidden="true">➡️</span>
+                        <span>Go</span>
+                    </button>
+                </div>
+                <div class="explorer-items"></div>
+                <iframe class="explorer-frame" title="Explorer" hidden></iframe>
+            </div>
         </div>
-    </div>
+    </template>
 
     <div class="window" id="xp-error-window" role="dialog" aria-labelledby="xp-error-title" style="display: none;">
         <div class="title-bar">
@@ -83,46 +86,24 @@
         </div>
     </div>
 
-    <div class="window" id="notepad-window" style="display: none;">
-        <div class="title-bar">
-            <div class="title-bar-text">
-                <span class="window-icon">📄</span>
-                <span id="notepad-title-text">Notepad</span>
-            </div>
-            <div class="title-bar-controls">
-                <button aria-label="Minimize"></button>
-                <button aria-label="Maximize"></button>
-                <button aria-label="Close"></button>
-            </div>
-        </div>
-        <div class="window-body notepad-body">
-            <textarea id="notepad-textarea" readonly></textarea>
-        </div>
-    </div>
-
-    <div class="window maximized" id="ie-window">
-        <div class="title-bar">
-            <div class="title-bar-text">
-                <span class="window-icon">🌐</span>
-                <span>Microsoft Internet Explorer</span>
-            </div>
-            <div class="title-bar-controls">
-                <button aria-label="Minimize"></button>
-                <button aria-label="Maximize"></button>
-                <button aria-label="Close"></button>
-            </div>
-        </div>
-        <div class="window-body ie-body">
-            <div class="ie-address-bar">
-                <span class="ie-address-label">Address</span>
-                <div class="ie-address-input">
-                    <span>🌐</span>
-                    <span>https://sla-king.github.io/home.html</span>
+    <template id="notepad-window-template">
+        <div class="window notepad-window" style="display: none;">
+            <div class="title-bar">
+                <div class="title-bar-text">
+                    <span class="window-icon">📄</span>
+                    Notepad
+                </div>
+                <div class="title-bar-controls">
+                    <button aria-label="Minimize"></button>
+                    <button aria-label="Maximize"></button>
+                    <button aria-label="Close"></button>
                 </div>
             </div>
-            <iframe src="home.html" class="ie-frame" title="Internet Explorer"></iframe>
+            <div class="window-body notepad-body">
+                <textarea class="notepad-textarea" readonly></textarea>
+            </div>
         </div>
-    </div>
+    </template>
 
     <div id="start-menu" class="start-menu">
         <div class="start-menu-header">
@@ -131,7 +112,7 @@
         </div>
         <div class="start-menu-body">
             <div class="start-menu-left">
-                <div class="menu-item" data-action="ie">
+                <div class="menu-item" data-action="explorer-web">
                     <span class="menu-icon">🌐</span>
                     Internet Explorer
                 </div>

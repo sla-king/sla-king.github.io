@@ -1,21 +1,21 @@
 @import url('https://fonts.cdnfonts.com/css/perfect-dos-vga-437');
 
 :root {
-    color-scheme: light dark;
+    color-scheme: light;
 }
 
 /* App Window Dimensions */
-#ie-window {
-    --win-w: 720px;
-    --win-h: 500px;
-}
-
-#explorer-window {
+.explorer-window {
     --win-w: 550px;
     --win-h: 400px;
 }
 
-#notepad-window {
+.explorer-window.explorer-web-size {
+    --win-w: 720px;
+    --win-h: 500px;
+}
+
+.notepad-window {
     --win-w: 600px;
     --win-h: 450px;
 }
@@ -127,7 +127,7 @@
     padding: 1px 4px 1px 3px;
 }
 
-.xp-folder-icon {
+.xp-address-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -136,7 +136,7 @@
     flex-shrink: 0;
 }
 
-#explorer-address-input {
+.explorer-address-bar .explorer-address-input .explorer-address-field {
     flex: 1;
     min-width: 0;
     height: 100%;
@@ -332,7 +332,7 @@
     flex-direction: column;
 }
 
-#notepad-textarea {
+.notepad-textarea {
     flex: 1;
     width: 100%;
     resize: none;
@@ -346,57 +346,20 @@
     color: #000000;
 }
 
-/* Internet Explorer App */
-.window .ie-body {
-    padding: 0;
-    background-color: light-dark(#ece9d8, #27272a);
-    display: flex;
-    flex-direction: column;
+/* Explorer Web Frame */
+.explorer-items[hidden],
+.explorer-frame[hidden] {
+    display: none;
 }
 
-.ie-address-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 6px;
-    background-color: light-dark(#ece9d8, #27272a);
-    border-bottom: 1px solid light-dark(#aca899, #3f3f46);
-    font-family: 'Tahoma', sans-serif;
-    font-size: 11px;
-    color: light-dark(#000000, #e4e4e7);
-    user-select: none;
-}
-
-.ie-address-label {
-    color: light-dark(#555555, #a1a1aa);
-}
-
-.ie-address-input {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background-color: light-dark(#ffffff, #18181b);
-    border: 1px solid light-dark(#7f9db9, #52525b);
-    color: light-dark(#000000, #e4e4e7);
-    padding: 2px 4px;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.ie-frame {
+.explorer-frame {
     flex: 1;
     width: 100%;
     border: none;
-    background-color: light-dark(#ffffff, #18181b);
+    background-color: #ffffff;
     display: block;
 }
 
-.ie-content h1 {
-    margin-top: 0;
-    font-size: 22px;
-}
-
-.window.unfocused .ie-frame {
+.window.unfocused .explorer-frame {
     pointer-events: none;
 }

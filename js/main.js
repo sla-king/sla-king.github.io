@@ -1,7 +1,6 @@
 import { initTerminal } from './apps/terminal.js';
-import { initExplorer, openExplorer } from './apps/explorer.js';
+import { initExplorer, openExplorer, openWebExplorer } from './apps/explorer.js';
 import { initNotepad } from './apps/notepad.js';
-import { initIE, openIE } from './apps/ie.js';
 import {
     openWindow,
     blurAllWindows,
@@ -21,7 +20,6 @@ let selectState = null;
 initTerminal();
 initExplorer();
 initNotepad();
-initIE();
 
 // Start Menu & Desktop Events
 startButton.addEventListener("pointerdown", (e) => {
@@ -87,9 +85,9 @@ function endSelection() {
 document.addEventListener("pointerup", endSelection);
 document.addEventListener("pointercancel", endSelection);
 
-document.querySelector('.menu-item[data-action="ie"]').addEventListener("click", () => {
+document.querySelector('.menu-item[data-action="explorer-web"]').addEventListener("click", () => {
     startMenu.classList.remove("show");
-    openIE();
+    openWebExplorer();
 });
 
 document.querySelector('.menu-item[data-action="cmd"]').addEventListener("click", () => {

@@ -72,12 +72,15 @@ function createTaskbarItem(winEl) {
     return { taskEl, taskLabel };
 }
 
-export function setWindowTitle(id, title) {
+export function setWindowTitle(id, title, icon) {
     const app = windows.get(id);
     if (!app) return;
 
     const titleBarText = app.winEl.querySelector(".title-bar-text");
     const iconEl = titleBarText.querySelector(".window-icon");
+    if (iconEl && icon !== undefined) {
+        iconEl.textContent = icon;
+    }
 
     titleBarText.textContent = "";
     if (iconEl) titleBarText.appendChild(iconEl);
@@ -85,6 +88,10 @@ export function setWindowTitle(id, title) {
 
     if (app.taskLabel) {
         app.taskLabel.textContent = title;
+    }
+    const taskIcon = app.taskEl?.querySelector(".taskbar-icon");
+    if (taskIcon && icon !== undefined) {
+        taskIcon.textContent = icon;
     }
 }
 
@@ -278,31 +285,60 @@ export function restoreWindow(id) {
     }, 250);
 }
 
-export function openWindow(id) {
+export function openWindow(id, options = {}) {
     const app = windows.get(id);
     if (!app) return;
     const { winEl, taskEl } = app;
-    clearTimeout(app.animTimer);
+    const wasMinimized = winEl.style.display === "none" && taskEl && taskEl.style.display !== "none";
 
-    winEl.style.transition = "none";
-    winEl.style.transform = "none";
-    winEl.style.opacity = "1";
-    winEl.style.display = "block";
-    clampToScreen(winEl);
+    if (wasMinimized) {
+        restoreWindow(id);
+    } else {
+        clearTimeout(app.animTimer);
 
-    if (taskEl && taskEl.style.display === "none") {
-        taskbarApps.appendChild(taskEl);
-        taskEl.style.display = "flex";
-        taskEl.classList.remove("slide-in");
-        void taskEl.offsetWidth;
-        taskEl.classList.add("slide-in");
+        winEl.style.transition = "none";
+        winEl.style.transform = "none";
+        winEl.style.opacity = "1";
+        winEl.style.display = "block";
+
+        if (options.cascadeOffset && !winEl.classList.contains("maximized")) {
+            const rect = winEl.getBoundingClientRect();
+            winEl.style.left = `${rect.left + options.cascadeOffset}px`;
+            winEl.style.top = `${rect.top + options.cascadeOffset}px`;
+        }
+        clampToScreen(winEl);
+
+        if (taskEl && taskEl.style.display === "none") {
+            taskbarApps.appendChild(taskEl);
+            taskEl.style.display = "flex";
+            taskEl.classList.remove("slide-in");
+            void taskEl.offsetWidth;
+            taskEl.classList.add("slide-in");
+        }
     }
 
-    if (app.ownerId) {
-        setOwnerBlocked(app.ownerId, id);
+    const effectiveOwnerId = options.ownerId ?? app.ownerId ?? null;
+    if (app.activeOwnerId && app.activeOwnerId !== effectiveOwnerId) {
+        setOwnerBlocked(app.activeOwnerId, null);
+    }
+    app.activeOwnerId = effectiveOwnerId;
+    if (effectiveOwnerId) {
+        setOwnerBlocked(effectiveOwnerId, id);
     }
 
     bringToFront(id);
+}
+
+export function unregisterWindow(id) {
+    const app = windows.get(id);
+    if (!app) return;
+    clearTimeout(app.animTimer);
+    if (app.activeOwnerId) {
+        setOwnerBlocked(app.activeOwnerId, null);
+    }
+    app.taskEl?.remove();
+    app.winEl.remove();
+    windows.delete(id);
 }
 
 export function closeWindow(id) {
@@ -315,11 +351,13 @@ export function closeWindow(id) {
         app.taskEl.style.display = "none";
         app.taskEl.classList.remove("active");
     }
-    if (app.ownerId) {
-        setOwnerBlocked(app.ownerId, null);
-        bringToFront(app.ownerId);
+    const ownerId = app.activeOwnerId;
+    app.activeOwnerId = null;
+    if (ownerId) {
+        setOwnerBlocked(ownerId, null);
+        bringToFront(ownerId);
     }
-    app.onClose?.();
+    app.onClose?.(ownerId);
 }
 
 export function registerWindow({
@@ -353,6 +391,7 @@ export function registerWindow({
         btnMax,
         maximizable: canMaximize,
         ownerId,
+        activeOwnerId: null,
         blockedBy: null,
         onClose,
         onBlur,
