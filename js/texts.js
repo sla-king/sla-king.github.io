@@ -11,9 +11,17 @@ LinkedIn: linkedin.com/in/alexanderseidinger
 GitHub: github.com/sla-king`;
 
 export const experienceTxt = `### Experience
-SOC Analyst | UCI Office of Information Technology | May 2026 - Present
-CCDC Team Captain | Cyber@UCI | Oct 2025 - Present
-Security Risk and Compliance Intern | CyberForward | Feb 2024 - May 2024
+SOC Analyst
+UCI Office of Information Technology
+May 2026 - Present
+
+CCDC Team Captain
+Cyber@UCI
+Oct 2025 - Present
+
+Security Risk and Compliance Intern
+CyberForward
+Feb 2024 - May 2024
 
 ### Certifications
 CompTIA Security+ CE (SY0-701) | Sep 2025
