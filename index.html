@@ -383,6 +383,17 @@
         </div>
     </div>
 
+    <div id="xp-volume-popup" class="xp-volume-popup" role="dialog" aria-label="Volume" hidden>
+        <div class="xp-volume-title">Volume</div>
+        <div class="xp-volume-track-wrap">
+            <input type="range" id="xp-volume-slider" class="xp-volume-slider" min="0" max="1" step="0.01" value="0.7" aria-label="Volume">
+        </div>
+        <div class="xp-volume-mute-row">
+            <input type="checkbox" id="xp-volume-mute">
+            <label for="xp-volume-mute">Mute</label>
+        </div>
+    </div>
+
     <div class="taskbar">
         <div class="start-button" id="start-button" title="Click this to begin">
             <img src="assets/start_xp_logo.png" class="start-icon" alt="">
@@ -392,6 +403,9 @@
         <div id="taskbar-apps"></div>
 
         <div class="system-tray">
+            <button type="button" id="tray-volume-btn" class="tray-icon-btn" title="Volume" aria-label="Volume" aria-expanded="false">
+                <img src="assets/start_volume.png" class="tray-icon" alt="">
+            </button>
             <span id="clock">12:00 PM</span>
         </div>
     </div>

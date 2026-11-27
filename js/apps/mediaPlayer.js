@@ -33,6 +33,8 @@ let isPlaying = false;
 let isMuted = false;
 let isSeeking = false;
 let currentVolume = 70;
+let masterVolume = 0.7;
+let masterMuted = false;
 let pendingLoad = null;
 
 function extractYouTubeId(urlString) {
@@ -237,12 +239,22 @@ function loadFallbackIframe(videoId, autoplay) {
     hostEl.appendChild(iframe);
 }
 
+export function setMasterAudio({ volume, muted } = {}) {
+    if (typeof volume === "number" && !Number.isNaN(volume)) {
+        masterVolume = Math.max(0, Math.min(1, volume));
+    }
+    if (typeof muted === "boolean") {
+        masterMuted = muted;
+    }
+    applyAudioSettings();
+}
+
 function applyAudioSettings() {
     if (!ytPlayer || !ytReady) return;
     if (typeof ytPlayer.setVolume === "function") {
-        ytPlayer.setVolume(currentVolume);
+        ytPlayer.setVolume(Math.round(currentVolume * masterVolume));
     }
-    if (isMuted) {
+    if (isMuted || masterMuted) {
         ytPlayer.mute?.();
     } else {
         ytPlayer.unMute?.();

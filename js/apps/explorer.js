@@ -9,6 +9,7 @@ import {
 } from '../windowManager.js';
 import { openNotepad } from './notepad.js';
 import { openMediaPlayer } from './mediaPlayer.js';
+import { SOUNDS, playSound } from '../sound.js';
 
 const HOME_URL = "https://sla-king.github.io/home.html";
 const HOME_PAGE_SRC = "home.html";
@@ -58,6 +59,7 @@ function showAddressError(target, ownerId) {
     errorMessage.textContent = `Windows cannot find '${target}'. Check the spelling and try again, or try searching for the item by clicking the Start button and then clicking Search.`;
     openWindow("xp-error", { ownerId });
     centerWindow("xp-error");
+    playSound(SOUNDS.CRITICAL_STOP);
     requestAnimationFrame(() => errorOkBtn?.focus());
 }
 
@@ -476,6 +478,9 @@ function createExplorerWindow({
         } else {
             updateNavButtons();
         }
+        if (isError) {
+            playSound(SOUNDS.ERROR);
+        }
     }
 
     function reloadWebFrame() {
@@ -535,13 +540,19 @@ function createExplorerWindow({
                 label: "Shared Documents",
                 icon: "assets/folder_base.png",
                 tooltip: "Contains files and folders shared between users of this computer",
-                onDoubleClick: () => renderFolder(sharedDocsPath)
+                onDoubleClick: () => {
+                    playSound(SOUNDS.START_NAVIGATION);
+                    renderFolder(sharedDocsPath);
+                }
             },
             {
                 label: "sla-king's Documents",
                 icon: "assets/folder_base.png",
                 tooltip: MY_DOCUMENTS_TOOLTIP,
-                onDoubleClick: () => renderFolder(userDocsPath)
+                onDoubleClick: () => {
+                    playSound(SOUNDS.START_NAVIGATION);
+                    renderFolder(userDocsPath);
+                }
             }
         ]);
 
@@ -550,7 +561,10 @@ function createExplorerWindow({
                 label: "Local Disk (C:)",
                 icon: "assets/file_c_drive.png",
                 tooltip: "Free Space: 8.84 GB\nTotal Size: 9.31 GB",
-                onDoubleClick: () => renderFolder(["C:"])
+                onDoubleClick: () => {
+                    playSound(SOUNDS.START_NAVIGATION);
+                    renderFolder(["C:"]);
+                }
             }
         ]);
 
@@ -597,6 +611,7 @@ function createExplorerWindow({
             explItems.appendChild(
                 createExplorerItem(key, itemIcon, itemTooltip, () => {
                     if (isDir) {
+                        playSound(SOUNDS.START_NAVIGATION);
                         renderFolder(itemPath);
                     } else if (isAudioFile(key)) {
                         openMediaPlayer({ trackPath: getPathString(itemPath), autoplay: true });
@@ -617,10 +632,15 @@ function createExplorerWindow({
     function applyHistoryEntry(entry) {
         if (!entry) return;
         if (entry.mode === "computer") {
+            playSound(SOUNDS.START_NAVIGATION);
             renderComputer({ recordHistory: false });
         } else if (entry.mode === "web") {
+            if (!entry.isError) {
+                playSound(SOUNDS.START_NAVIGATION);
+            }
             showWebView({ url: entry.url, isError: Boolean(entry.isError), recordHistory: false });
         } else {
+            playSound(SOUNDS.START_NAVIGATION);
             renderFolder([...entry.path], { recordHistory: false });
         }
     }
@@ -636,11 +656,13 @@ function createExplorerWindow({
         }
 
         if (rawValue.toLowerCase() === "my computer") {
+            playSound(SOUNDS.START_NAVIGATION);
             renderComputer();
             return;
         }
 
         if (isWebUrl(rawValue)) {
+            playSound(SOUNDS.START_NAVIGATION);
             if (currentMode === "web" && !isWebError) {
                 addressInput.value = HOME_URL;
                 reloadWebFrame();
@@ -674,6 +696,7 @@ function createExplorerWindow({
             return;
         }
 
+        playSound(SOUNDS.START_NAVIGATION);
         renderFolder(candidatePath);
     }
 
@@ -887,14 +910,17 @@ function createExplorerWindow({
     });
 
     homeBtn?.addEventListener("click", () => {
+        playSound(SOUNDS.START_NAVIGATION);
         renderWeb();
     });
 
     upBtn?.addEventListener("click", () => {
         if (currentMode !== "folder") return;
         if (explPath.length > 1) {
+            playSound(SOUNDS.START_NAVIGATION);
             renderFolder(explPath.slice(0, -1));
         } else if (explPath.length === 1) {
+            playSound(SOUNDS.START_NAVIGATION);
             renderComputer();
         }
     });

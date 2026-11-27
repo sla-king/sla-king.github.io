@@ -1,8 +1,9 @@
 import { HOME_PATH } from './filesystem.js';
+import { SOUNDS, playSound, setSiteAudioState } from './sound.js';
 import { initTerminal } from './apps/terminal.js';
 import { initExplorer, openExplorer, openWebExplorer, openMyComputer } from './apps/explorer.js';
 import { initNotepad, openNotepad, openBlankNotepad, getRecentDocuments } from './apps/notepad.js';
-import { initMediaPlayer, openMediaPlayer } from './apps/mediaPlayer.js';
+import { initMediaPlayer, openMediaPlayer, setMasterAudio } from './apps/mediaPlayer.js';
 import {
     registerWindow,
     openWindow,
@@ -14,7 +15,11 @@ import {
 } from './windowManager.js';
 
 const clock = document.getElementById("clock");
-const systemTray = clock.closest(".system-tray") || clock;
+const trayVolumeBtn = document.getElementById("tray-volume-btn");
+const trayVolumeIcon = trayVolumeBtn?.querySelector(".tray-icon");
+const volumePopup = document.getElementById("xp-volume-popup");
+const volumeSlider = document.getElementById("xp-volume-slider");
+const volumeMuteCheckbox = document.getElementById("xp-volume-mute");
 const startButton = document.getElementById("start-button");
 const startMenu = document.getElementById("start-menu");
 const taskbar = document.querySelector(".taskbar");
@@ -99,10 +104,15 @@ const ALL_PROGRAMS_ITEMS = [
     { name: "Windows Media Player", icon: "assets/app_media_player_16.png", action: "media-player" }
 ];
 
+const LINK_DIALOG_ACTIONS = new Set(["email", "linkedin", "github"]);
+
 function launchAppAction(action) {
     const launcher = APP_LAUNCHERS[action];
     if (!launcher) return;
     closeStartMenu();
+    if (!LINK_DIALOG_ACTIONS.has(action)) {
+        playSound(SOUNDS.MENU_COMMAND);
+    }
     launcher();
 }
 
@@ -134,7 +144,12 @@ function renderAllProgramsMenu() {
     for (const prog of ALL_PROGRAMS_ITEMS) {
         const tooltip = startMenu.querySelector(`.menu-item[data-action="${prog.action}"]`)?.title || "";
         allProgramsMenu.appendChild(
-            createSubmenuEntry(prog.name, prog.icon, tooltip, () => APP_LAUNCHERS[prog.action]?.())
+            createSubmenuEntry(prog.name, prog.icon, tooltip, () => {
+                if (!LINK_DIALOG_ACTIONS.has(prog.action)) {
+                    playSound(SOUNDS.MENU_COMMAND);
+                }
+                APP_LAUNCHERS[prog.action]?.();
+            })
         );
     }
 }
@@ -156,6 +171,7 @@ function renderRecentDocumentsMenu() {
     for (const doc of docs) {
         recentDocumentsMenu.appendChild(
             createSubmenuEntry(doc.displayName, "assets/file_text_doc_16.png", doc.filePath, () => {
+                playSound(SOUNDS.MENU_COMMAND);
                 openNotepad(doc.filename, doc.content, doc.filePath);
             })
         );
@@ -261,9 +277,13 @@ powerBackdrop?.addEventListener("pointerdown", (e) => {
 powerCancelBtn?.addEventListener("click", closePowerDialog);
 
 document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && powerBackdrop?.classList.contains("show")) {
+    if (e.key !== "Escape") return;
+    if (powerBackdrop?.classList.contains("show")) {
         e.preventDefault();
         closePowerDialog();
+    } else if (volumePopup && !volumePopup.hidden) {
+        e.preventDefault();
+        closeVolumePopup();
     }
 });
 
@@ -313,6 +333,7 @@ function openLinkDialog(targetOrKey) {
 
     openWindow("xp-link");
     centerWindow("xp-link");
+    playSound(SOUNDS.EXCLAMATION);
     requestAnimationFrame(() => linkVisitBtn?.focus());
 }
 
@@ -351,12 +372,95 @@ document.addEventListener("pointerdown", (e) => {
     if (linkWindow && linkWindow.style.display !== "none" && !linkWindow.contains(e.target)) {
         closeWindow("xp-link");
     }
+    if (volumePopup && !volumePopup.hidden && !volumePopup.contains(e.target) && !trayVolumeBtn?.contains(e.target)) {
+        closeVolumePopup();
+    }
 }, true);
+
+let siteVolume = 0.7;
+let siteMuted = false;
+
+function closeVolumePopup() {
+    if (!volumePopup) return;
+    volumePopup.hidden = true;
+    trayVolumeBtn?.classList.remove("active");
+    trayVolumeBtn?.setAttribute("aria-expanded", "false");
+}
+
+function syncVolumePopupUI() {
+    const effectivelyMuted = siteMuted || siteVolume === 0;
+    if (volumeSlider) {
+        volumeSlider.value = String(siteVolume);
+    }
+    if (volumeMuteCheckbox) {
+        volumeMuteCheckbox.checked = siteMuted;
+    }
+    if (trayVolumeIcon) {
+        trayVolumeIcon.src = effectivelyMuted
+            ? "assets/start_volume_muted.png"
+            : "assets/start_volume.png";
+    }
+    if (trayVolumeBtn) {
+        trayVolumeBtn.title = effectivelyMuted ? "Volume (Muted)" : "Volume";
+    }
+    setSiteAudioState({ volume: siteVolume, muted: siteMuted });
+    setMasterAudio({ volume: siteVolume, muted: siteMuted });
+}
+
+function openVolumePopup() {
+    if (!volumePopup || !trayVolumeBtn) return;
+    closeStartMenu();
+    syncVolumePopupUI();
+    volumePopup.hidden = false;
+    trayVolumeBtn.classList.add("active");
+    trayVolumeBtn.setAttribute("aria-expanded", "true");
+
+    const btnRect = trayVolumeBtn.getBoundingClientRect();
+    const popupWidth = volumePopup.offsetWidth || 92;
+    const left = Math.max(
+        4,
+        Math.min(btnRect.left + (btnRect.width - popupWidth) / 2, window.innerWidth - popupWidth - 4)
+    );
+    volumePopup.style.left = `${Math.round(left)}px`;
+    volumePopup.style.right = "auto";
+    volumeSlider?.focus({ preventScroll: true });
+}
+
+trayVolumeBtn?.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    blurAllWindows();
+    if (volumePopup?.hidden) {
+        openVolumePopup();
+    } else {
+        closeVolumePopup();
+    }
+});
+
+volumePopup?.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+});
+
+volumeSlider?.addEventListener("input", () => {
+    siteVolume = Math.max(0, Math.min(1, Number(volumeSlider.value) || 0));
+    syncVolumePopupUI();
+});
+
+volumeSlider?.addEventListener("change", () => {
+    playSound(SOUNDS.DING);
+});
+
+volumeMuteCheckbox?.addEventListener("change", () => {
+    siteMuted = Boolean(volumeMuteCheckbox.checked);
+    syncVolumePopupUI();
+});
+
+syncVolumePopupUI();
 
 // Start Menu & Desktop Events
 startButton.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
     blurAllWindows();
+    closeVolumePopup();
     const willShow = !startMenu.classList.contains("show");
     if (willShow) {
         renderRecentDocumentsMenu();
@@ -382,10 +486,12 @@ startMenu.addEventListener("pointerover", (e) => {
 document.addEventListener("pointerdown", (e) => {
     const clickedWindow = isClickInsideAnyWindow(e.target);
     const clickedMenu = startMenu.contains(e.target) || startButton.contains(e.target);
+    const clickedVolume = volumePopup?.contains(e.target) || trayVolumeBtn?.contains(e.target);
     const clickedTaskbar = taskbar.contains(e.target);
 
     if (!clickedWindow) blurAllWindows();
     if (!clickedMenu) closeStartMenu();
+    if (!clickedVolume) closeVolumePopup();
 
     // Start desktop selection box if clicking empty desktop with primary button
     if (e.button === 0 && !clickedWindow && !clickedMenu && !clickedTaskbar) {
@@ -440,26 +546,31 @@ setupSubmenu(allProgramsMenuItem, allProgramsMenu);
 
 document.querySelector('.menu-item[data-action="documents"]').addEventListener("click", () => {
     closeStartMenu();
+    playSound(SOUNDS.MENU_COMMAND);
     openExplorer();
 });
 
 document.querySelector('.menu-item[data-action="pictures"]').addEventListener("click", () => {
     closeStartMenu();
+    playSound(SOUNDS.MENU_COMMAND);
     openExplorer([...HOME_PATH, "My Documents", "My Pictures"]);
 });
 
 document.querySelector('.menu-item[data-action="music"]').addEventListener("click", () => {
     closeStartMenu();
+    playSound(SOUNDS.MENU_COMMAND);
     openExplorer([...HOME_PATH, "My Documents", "My Music"]);
 });
 
 document.querySelector('.menu-item[data-action="computer"]').addEventListener("click", () => {
     closeStartMenu();
+    playSound(SOUNDS.MENU_COMMAND);
     openMyComputer();
 });
 
 document.querySelectorAll('.start-footer-btn[data-power-action]').forEach((btn) => {
     btn.addEventListener("click", () => {
+        playSound(SOUNDS.MENU_COMMAND);
         openPowerDialog(btn.dataset.powerAction);
     });
 });
@@ -471,7 +582,7 @@ function updateClock() {
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const ampm = now.getHours() >= 12 ? "PM" : "AM";
     clock.textContent = `${hours}:${minutes} ${ampm}`;
-    systemTray.title = now.toLocaleDateString("en-US", {
+    clock.title = now.toLocaleDateString("en-US", {
         weekday: "long",
         year: "numeric",
         month: "long",

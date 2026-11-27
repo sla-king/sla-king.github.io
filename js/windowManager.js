@@ -1,3 +1,5 @@
+import { SOUNDS, playSound } from './sound.js';
+
 const outline = document.getElementById("drag-outline");
 const taskbarApps = document.getElementById("taskbar-apps");
 const startMenu = document.getElementById("start-menu");
@@ -142,6 +144,7 @@ function focusModalChain(ownerId) {
     modal.winEl.classList.remove("modal-flash");
     void modal.winEl.offsetWidth;
     modal.winEl.classList.add("modal-flash");
+    playSound(SOUNDS.DING);
     modal.onBlockedFocus?.();
 }
 
@@ -216,6 +219,9 @@ export function toggleMaximize(id) {
     const isMaximizing = !winEl.classList.contains("maximized");
     winEl.classList.toggle("maximized", isMaximizing);
     btnMax?.setAttribute("aria-label", isMaximizing ? "Restore" : "Maximize");
+    if (!isMaximizing) {
+        playSound(SOUNDS.RESTORE);
+    }
 
     winEl.style.transition = "left 0.2s ease-out, top 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out";
 
@@ -253,6 +259,9 @@ export function minimizeWindow(id) {
     const app = windows.get(id);
     if (!app || app.blockedBy) return;
     const { winEl, taskEl } = app;
+    if (winEl.style.display !== "none") {
+        playSound(SOUNDS.MINIMIZE);
+    }
     clearTimeout(app.animTimer);
 
     winEl.style.transformOrigin = "center center";
@@ -272,6 +281,7 @@ export function minimizeWindow(id) {
 export function restoreWindow(id) {
     const app = windows.get(id);
     const { winEl, taskEl } = app;
+    playSound(SOUNDS.RESTORE);
     clearTimeout(app.animTimer);
 
     winEl.style.display = "flex";
