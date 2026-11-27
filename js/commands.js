@@ -1,8 +1,17 @@
-import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, isFileNode, isFolderNode, getLatestDateInNode, isAudioFile, isImageFile } from '../filesystem.js';
-import { openExplorer, openWebExplorer, isWebUrl } from './explorer.js';
-import { openNotepad } from './notepad.js';
-import { openMediaPlayer } from './mediaPlayer.js';
-import { openPictureViewer } from './pictureViewer.js';
+import {
+    DEFAULT_FILE_DATE,
+    currentPath,
+    setPath,
+    getPathString,
+    resolvePath,
+    getNode,
+    isFileNode,
+    isFolderNode,
+    getLatestDateInNode
+} from './filesystem.js';
+import { openFileNode } from './launcher.js';
+import { openExplorer, openWebExplorer, isWebUrl } from './apps/ExplorerWindow.js';
+import { openNotepad } from './apps/NotepadWindow.js';
 
 function resolveFileTarget(args, context) {
     const pathString = args.join(" ");
@@ -45,15 +54,7 @@ function openTarget(pathString, context, notFoundMessage) {
         return;
     }
 
-    const fileName = targetPath[targetPath.length - 1];
-    const fullPath = getPathString(targetPath);
-    if (isAudioFile(fileName)) {
-        openMediaPlayer({ trackPath: fullPath, autoplay: true });
-    } else if (isImageFile(fileName)) {
-        openPictureViewer({ imagePath: fullPath });
-    } else {
-        openNotepad(fileName, node.content, fullPath);
-    }
+    openFileNode(targetPath, node, { autoplay: true });
 }
 
 export const commands = {
@@ -62,6 +63,7 @@ export const commands = {
         context.print("CLS       Clears the screen.");
         context.print("DIR       Displays a list of files and subdirectories in a directory.");
         context.print("EXIT      Quits the CMD.EXE program (command interpreter).");
+        context.print("START     Starts a separate window to run a specified program or command.")
         context.print("TYPE      Displays the contents of a text file.");
         context.print("");
     },

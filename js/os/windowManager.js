@@ -1,17 +1,39 @@
-import { SOUNDS, playSound } from './sound.js';
+import { SOUNDS, playSound } from './AudioMixer.js';
 
 const outline = document.getElementById("drag-outline");
 const taskbarApps = document.getElementById("taskbar-apps");
-const startMenu = document.getElementById("start-menu");
 
 const windows = new Map();
 let zIndexCounter = 10;
 let dragState = null;
 let resizeState = null;
+let interactionHandler = null;
 
 const MIN_WIDTH = 360;
 const MIN_HEIGHT = 240;
 const RESIZE_DIRS = ["n", "s", "e", "w", "ne", "nw", "se", "sw"];
+
+// Runs a callback when clicking the taskbar or a blocked window (used to close menus)
+export function setWindowInteractionHandler(fn) {
+    interactionHandler = typeof fn === "function" ? fn : null;
+}
+
+// Closes a popup or dropdown menu when the user clicks outside of it
+export function registerDismissiblePopup({
+    isOpen,
+    containsTarget,
+    onClose,
+    capture = false
+}) {
+    const handler = (e) => {
+        if (!isOpen()) return;
+        if (!containsTarget(e.target)) {
+            onClose();
+        }
+    };
+    document.addEventListener("pointerdown", handler, capture);
+    return () => document.removeEventListener("pointerdown", handler, capture);
+}
 
 function clampToScreen(winEl) {
     const rect = winEl.getBoundingClientRect();
@@ -438,7 +460,7 @@ export function registerWindow({
             e.preventDefault();
             e.stopPropagation();
             if (evtType === "pointerdown") {
-                startMenu.classList.remove("show");
+                interactionHandler?.();
                 focusModalChain(id);
             }
         }, true);
@@ -481,7 +503,6 @@ export function registerWindow({
         e.preventDefault();
     });
 
-    // Inject 8-directional resize handles
     if (resizable) {
         for (const dir of RESIZE_DIRS) {
             const handle = document.createElement("div");
@@ -517,7 +538,7 @@ export function registerWindow({
     if (taskEl) {
         taskEl.addEventListener("pointerdown", (e) => {
             e.stopPropagation();
-            startMenu.classList.remove("show");
+            interactionHandler?.();
             if (appEntry.blockedBy) {
                 e.preventDefault();
                 focusModalChain(id);

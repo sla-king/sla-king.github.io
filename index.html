@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>sla-king's homepage</title>
     <link rel="stylesheet" href="https://unpkg.com/xp.css">
-    <link rel="stylesheet" href="css/os.css">
-    <link rel="stylesheet" href="css/apps.css">
-    <link rel="stylesheet" href="css/wmp.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div id="drag-outline"></div>
@@ -399,11 +397,11 @@
             </div>
         </div>
         <div class="start-menu-footer">
-            <button type="button" class="start-footer-btn" data-power-action="logoff" title="Provides options for closing your programs and logging off, or for leaving your programs running and switching to another user.">
+            <button type="button" class="xp-reset-btn start-footer-btn" data-power-action="logoff" title="Provides options for closing your programs and logging off, or for leaving your programs running and switching to another user.">
                 <img src="assets/start_logoff.png" class="start-footer-icon" alt="">
                 <span>Log Off</span>
             </button>
-            <button type="button" class="start-footer-btn" data-power-action="turnoff" title="Provides options for turning off or restarting your computer, or for activating Stand By or Hibernate modes.">
+            <button type="button" class="xp-reset-btn start-footer-btn" data-power-action="turnoff" title="Provides options for turning off or restarting your computer, or for activating Stand By or Hibernate modes.">
                 <img src="assets/start_turnoff.png" class="start-footer-icon" alt="">
                 <span>Turn Off Computer</span>
             </button>
@@ -468,7 +466,7 @@
                 </div>
                 <div class="xp-logon-divider" aria-hidden="true"></div>
                 <div class="xp-logon-right">
-                    <button type="button" id="xp-logon-user" class="xp-logon-user-btn">
+                    <button type="button" id="xp-logon-user" class="xp-reset-btn xp-logon-user-btn">
                         <img src="assets/start_profile_picture.png" class="xp-logon-avatar" alt="">
                         <span class="xp-logon-user-info">
                             <span class="xp-logon-username">sla-king</span>
@@ -479,7 +477,7 @@
             </div>
             <div class="xp-luna-streak xp-luna-streak-bottom" aria-hidden="true"></div>
             <div class="xp-luna-band xp-luna-bottom xp-logon-footer">
-                <button type="button" id="xp-logon-turnoff" class="xp-logon-turnoff-btn">
+                <button type="button" id="xp-logon-turnoff" class="xp-reset-btn xp-logon-turnoff-btn">
                     <img src="assets/start_turnoff.png" class="xp-logon-turnoff-icon" alt="">
                     <span>Turn off computer</span>
                 </button>
@@ -508,7 +506,7 @@
         <div id="xp-poweroff-view" class="xp-black-screen" hidden>
             <div class="xp-poweroff-center">
                 <p class="xp-poweroff-text">Computer is powered off.</p>
-                <button type="button" id="xp-poweron-btn" class="xp-poweron-btn">
+                <button type="button" id="xp-poweron-btn" class="xp-reset-btn xp-poweron-btn">
                     <img src="assets/start_turnoff.png" class="xp-poweron-icon" alt="">
                     <span>Power on</span>
                 </button>
@@ -536,7 +534,7 @@
         <div id="taskbar-apps"></div>
 
         <div class="system-tray">
-            <button type="button" id="tray-volume-btn" class="tray-icon-btn" title="Volume" aria-label="Volume" aria-expanded="false">
+            <button type="button" id="tray-volume-btn" class="xp-reset-btn tray-icon-btn" title="Volume" aria-label="Volume" aria-expanded="false">
                 <img src="assets/start_volume.png" class="tray-icon" alt="">
             </button>
             <span id="clock">12:00 PM</span>

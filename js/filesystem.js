@@ -2,6 +2,9 @@ import { aboutMeTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt } from './te
 
 export const HOME_PATH = ["C:", "Documents and Settings", "sla-king"];
 export const DEFAULT_FILE_DATE = "11/01/2026  11:39 PM";
+export const MY_DOCUMENTS_TOOLTIP = "Contains letters, reports, and other documents and files.";
+
+const MAX_TOOLTIP_LINE_LENGTH = 64;
 
 const SIZE_UNITS = {
     b: 1,
@@ -187,4 +190,177 @@ export function getLatestDateInNode(node, defaultDate) {
         }
     }
     return maxDateStr;
+}
+
+// Returns matching files inside a folder along with their paths
+export function listFilesInFolder(folderPath, predicate = () => true) {
+    const folderNode = getNode(folderPath);
+    if (!isFolderNode(folderNode)) return [];
+
+    const results = [];
+    for (const [name, value] of Object.entries(folderNode)) {
+        if (!isFileNode(value) || !predicate(name, value)) continue;
+        const path = [...folderPath, name];
+        results.push({
+            name,
+            node: value,
+            path,
+            pathString: getPathString(path)
+        });
+    }
+    return results;
+}
+
+// Folder icons, file type labels, and hover tooltips
+
+const SPECIAL_FOLDERS = {
+    "my documents": {
+        large: "assets/folder_documents.png",
+        small: "assets/folder_documents_16.png"
+    },
+    "my music": {
+        large: "assets/folder_music.png",
+        small: "assets/folder_music_16.png",
+        tooltip: "Contains music and other audio files"
+    },
+    "my pictures": {
+        large: "assets/folder_pictures.png",
+        small: "assets/folder_pictures_16.png",
+        tooltip: "Contains digital photos, images, and graphic files."
+    },
+    "favorites": {
+        large: "assets/folder_favorites.png",
+        small: "assets/folder_favorites_16.png"
+    }
+};
+
+const FILE_TYPE_LABELS = {
+    txt: "Text Document",
+    bat: "MS-DOS Batch File",
+    sys: "System File",
+    mp3: "MP3 Format Sound",
+    wma: "Windows Media Audio file",
+    wav: "Wave Sound",
+    ogg: "Ogg Vorbis Audio",
+    png: "PNG Image",
+    jpg: "JPEG Image",
+    jpeg: "JPEG Image",
+    gif: "GIF Image",
+    bmp: "Bitmap Image"
+};
+
+const HIDDEN_ROOT_FILES = new Set(["autoexec.bat", "config.sys"]);
+
+export function getSpecialFolder(path) {
+    const folderName = path[path.length - 1]?.toLowerCase();
+    const hasHomePrefix = HOME_PATH.every((part, i) => path[i]?.toLowerCase() === part.toLowerCase());
+    if (!hasHomePrefix || !folderName) {
+        return null;
+    }
+
+    const isHomeChild = path.length === HOME_PATH.length + 1;
+    const isMyDocsChild =
+        path.length === HOME_PATH.length + 2 &&
+        path[HOME_PATH.length]?.toLowerCase() === "my documents";
+
+    if (isHomeChild || (isMyDocsChild && (folderName === "my music" || folderName === "my pictures"))) {
+        return SPECIAL_FOLDERS[folderName] || null;
+    }
+    return null;
+}
+
+export function getFolderIcon(path, small = false) {
+    if (path.length === 1 && path[0].toUpperCase() === "C:") {
+        return small ? "assets/file_c_drive_16.png" : "assets/file_c_drive.png";
+    }
+    const match = getSpecialFolder(path);
+    if (match) return small ? match.small : match.large;
+    return small ? "assets/folder_base_16.png" : "assets/folder_base.png";
+}
+
+export function isHiddenExplorerItem(parentPath, name, value) {
+    return parentPath.length === 1 &&
+        parentPath[0].toUpperCase() === "C:" &&
+        isFileNode(value) &&
+        HIDDEN_ROOT_FILES.has(name.toLowerCase());
+}
+
+export function formatTooltipSize(bytes) {
+    if (bytes < 1024) return `${bytes} bytes`;
+    const units = ["KB", "MB", "GB"];
+    let value = bytes / 1024;
+    let unitIdx = 0;
+    while (value >= 1024 && unitIdx < units.length - 1) {
+        value /= 1024;
+        unitIdx++;
+    }
+    return `${value >= 100 ? Math.round(value) : Number(value.toFixed(2))} ${units[unitIdx]}`;
+}
+
+export function formatTooltipDate(dateStr) {
+    return dateStr
+        .replace(/\s+/g, " ")
+        .replace(/^0/, "")
+        .replace(/\/0/g, "/")
+        .replace(/ 0(\d:)/, " $1");
+}
+
+export function getFileTypeLabel(filename) {
+    const ext = filename.includes(".") ? filename.split(".").pop().toLowerCase() : "";
+    if (FILE_TYPE_LABELS[ext]) return FILE_TYPE_LABELS[ext];
+    if (isAudioFile(filename)) return "Audio File";
+    if (isImageFile(filename)) return "Image File";
+    return "File";
+}
+
+export function getNodeSize(node) {
+    if (isFileNode(node)) return node.size;
+    let total = 0;
+    for (const value of Object.values(node)) {
+        total += getNodeSize(value);
+    }
+    return total;
+}
+
+export function getItemTooltip(path, name, value) {
+    if (isFileNode(value)) {
+        const type = getFileTypeLabel(name);
+        const dateModified = formatTooltipDate(value.date);
+        const size = formatTooltipSize(value.size);
+        return `Type: ${type}\nDate Modified: ${dateModified}\nSize: ${size}`;
+    }
+
+    const lines = [];
+    const special = getSpecialFolder(path);
+    if (special?.tooltip) {
+        lines.push(special.tooltip);
+    }
+
+    const entries = Object.entries(value).filter(([k, v]) => !isHiddenExplorerItem(path, k, v));
+    const childFolders = entries.filter(([, v]) => isFolderNode(v)).map(([k]) => k);
+    const childFiles = entries.filter(([, v]) => isFileNode(v)).map(([k]) => k);
+    if (childFolders.length === 0 && childFiles.length === 0) {
+        lines.push("Folder is empty");
+        return lines.join("\n");
+    }
+
+    lines.push(`Size: ${formatTooltipSize(getNodeSize(value))}`);
+    if (childFolders.length > 0) {
+        lines.push(`Folders: ${childFolders.join(", ")}`);
+    }
+    if (childFiles.length > 0) {
+        lines.push(`Files: ${childFiles.join(", ")}`);
+    }
+    return lines.join("\n");
+}
+
+export function truncateTooltipLines(tooltip, maxLength = MAX_TOOLTIP_LINE_LENGTH) {
+    return tooltip
+        .split("\n")
+        .map((line) => (
+            line.length > maxLength
+                ? `${line.slice(0, maxLength - 3).trimEnd()}...`
+                : line
+        ))
+        .join("\n");
 }
