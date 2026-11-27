@@ -4,6 +4,7 @@ import { registerDismissiblePopup } from '../os/windowManager.js';
 import {
     HOME_PATH,
     MY_DOCUMENTS_TOOLTIP,
+    getDriveTooltip,
     getFolderIcon,
     getItemTooltip,
     getNode,
@@ -440,7 +441,7 @@ export class ExplorerWindow extends XPWindow {
             {
                 label: "Local Disk (C:)",
                 icon: "assets/file_c_drive.png",
-                tooltip: "Free Space: 8.84 GB\nTotal Size: 9.31 GB",
+                tooltip: getDriveTooltip("C:"),
                 onDoubleClick: () => {
                     playSound(SOUNDS.START_NAVIGATION);
                     this.renderFolder(["C:"]);

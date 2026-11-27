@@ -15,6 +15,8 @@ const SIZE_UNITS = {
     gb: 1024 * 1024 * 1024
 };
 
+export const DRIVE_TOTAL_BYTES = Math.round(28.9 * SIZE_UNITS.gb);
+
 function parseFileSize(size, fallbackBytes) {
     if (size === undefined) return fallbackBytes;
     if (typeof size === "number") {
@@ -331,6 +333,16 @@ export function getNodeSize(node) {
         total += getNodeSize(value);
     }
     return total;
+}
+
+export function getDriveFreeBytes(drive = "C:") {
+    const driveNode = fs[drive];
+    const usedBytes = isFolderNode(driveNode) ? getNodeSize(driveNode) : 0;
+    return Math.max(0, DRIVE_TOTAL_BYTES - usedBytes);
+}
+
+export function getDriveTooltip(drive = "C:") {
+    return `Free Space: ${formatTooltipSize(getDriveFreeBytes(drive))}\nTotal Size: ${formatTooltipSize(DRIVE_TOTAL_BYTES)}`;
 }
 
 export function getItemTooltip(path, name, value) {

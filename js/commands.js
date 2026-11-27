@@ -7,6 +7,7 @@ import {
     getNode,
     isFileNode,
     isFolderNode,
+    getDriveFreeBytes,
     getLatestDateInNode
 } from './filesystem.js';
 import { openFileNode } from './launcher.js';
@@ -133,7 +134,7 @@ export const commands = {
             }
         }
 
-        const freeBytes = 140123308032;
+        const freeBytes = getDriveFreeBytes(targetPath[0]);
         const fileSummaryCount = fileCount.toString().padStart(16);
         const dirSummaryCount = dirCount.toString().padStart(16);
         const fileSummaryBytes = currentDirBytes.toLocaleString("en-US").padStart(15);
