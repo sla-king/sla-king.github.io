@@ -124,16 +124,20 @@ export const commands = {
                 dirCount++;
             } else {
                 const time = value.date;
-                const size = value.content.length;
+                const size = value.size;
                 currentDirBytes += size;
-                context.print(`${time}    ${size.toString().padStart(14)} ${key}`);
+                context.print(`${time}    ${size.toLocaleString("en-US").padStart(14)} ${key}`);
                 fileCount++;
             }
         }
 
-        const freeBytes = 150160100;
-        context.print(`               ${fileCount} File(s) ${currentDirBytes.toString().padStart(14)} bytes`);
-        context.print(`               ${dirCount} Dir(s)  ${freeBytes.toLocaleString("en-US").padStart(14)} bytes free\n`);
+        const freeBytes = 140123308032;
+        const fileSummaryCount = fileCount.toString().padStart(16);
+        const dirSummaryCount = dirCount.toString().padStart(16);
+        const fileSummaryBytes = currentDirBytes.toLocaleString("en-US").padStart(15);
+        const freeSummaryBytes = freeBytes.toLocaleString("en-US").padStart(15);
+        context.print(`${fileSummaryCount} File(s)${fileSummaryBytes} bytes`);
+        context.print(`${dirSummaryCount} Dir(s) ${freeSummaryBytes} bytes free\n`);
     },
 
     exit: (args, context) => {

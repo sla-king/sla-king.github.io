@@ -117,8 +117,14 @@ function getFolderIcon(path, small = false) {
 
 function formatTooltipSize(bytes) {
     if (bytes < 1024) return `${bytes} bytes`;
-    const kb = bytes / 1024;
-    return `${kb >= 100 ? Math.round(kb) : Number(kb.toFixed(2))} KB`;
+    const units = ["KB", "MB", "GB"];
+    let value = bytes / 1024;
+    let unitIdx = 0;
+    while (value >= 1024 && unitIdx < units.length - 1) {
+        value /= 1024;
+        unitIdx++;
+    }
+    return `${value >= 100 ? Math.round(value) : Number(value.toFixed(2))} ${units[unitIdx]}`;
 }
 
 function formatTooltipDate(dateStr) {
@@ -148,7 +154,7 @@ function getFileTypeLabel(filename) {
 }
 
 function getNodeSize(node) {
-    if (isFileNode(node)) return node.content.length;
+    if (isFileNode(node)) return node.size;
     let total = 0;
     for (const value of Object.values(node)) {
         total += getNodeSize(value);
@@ -169,7 +175,7 @@ function getItemTooltip(path, name, value) {
     if (isFileNode(value)) {
         const type = getFileTypeLabel(name);
         const dateModified = formatTooltipDate(value.date);
-        const size = formatTooltipSize(value.content.length);
+        const size = formatTooltipSize(value.size);
         return `Type: ${type}\nDate Modified: ${dateModified}\nSize: ${size}`;
     }
 

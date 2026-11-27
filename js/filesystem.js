@@ -3,8 +3,36 @@ import { aboutMeTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt } from './te
 export const HOME_PATH = ["C:", "Documents and Settings", "sla-king"];
 export const DEFAULT_FILE_DATE = "11/01/2026  11:39 PM";
 
+const SIZE_UNITS = {
+    b: 1,
+    byte: 1,
+    bytes: 1,
+    kb: 1024,
+    mb: 1024 * 1024,
+    gb: 1024 * 1024 * 1024
+};
+
+function parseFileSize(size, fallbackBytes) {
+    if (size === undefined) return fallbackBytes;
+    if (typeof size === "number") {
+        if (!Number.isFinite(size) || size < 0) {
+            throw new Error(`File size must be a non-negative number (received ${JSON.stringify(size)}).`);
+        }
+        return Math.round(size);
+    }
+    if (typeof size === "string") {
+        const match = size.trim().match(/^(\d+(?:\.\d+)?)\s*(b|bytes?|kb|mb|gb)?$/i);
+        if (match) {
+            const amount = Number(match[1]);
+            const unit = (match[2] || "b").toLowerCase();
+            return Math.round(amount * SIZE_UNITS[unit]);
+        }
+    }
+    throw new Error(`Invalid file size (received ${JSON.stringify(size)}).`);
+}
+
 class VfsFile {
-    constructor(content, date) {
+    constructor(content, date, size) {
         if (typeof content !== "string") {
             throw new Error("File content must be a string.");
         }
@@ -13,11 +41,12 @@ class VfsFile {
         }
         this.content = content;
         this.date = date;
+        this.size = parseFileSize(size, content.length);
     }
 }
 
-export function file(content, date) {
-    return new VfsFile(content, date);
+export function file(content, date, size) {
+    return new VfsFile(content, date, size);
 }
 
 export function isFileNode(node) {
@@ -52,19 +81,19 @@ export const fs = {
                 },
                 "My Documents": {
                     "My Music": {
-                        "After You've Gone - Emmet Choen.mp3": file("https://www.youtube.com/watch?v=984ksjle4YA", "04/21/2021  09:20 AM"),
-                        "Backlight - Ado.mp3": file("https://www.youtube.com/watch?v=gt-v_YCkaMY", "07/06/2022  04:00 AM"),
-                        "Gira Gira - Ado.mp3": file("https://www.youtube.com/watch?v=sOiMD45QGLs", "02/14/2021  03:00 AM"),
-                        "Naked Hero - Vaundy.mp3": file("https://www.youtube.com/watch?v=FT0GKCuSaW0", "01/28/2022  03:00 AM"),
-                        "Oddtaxi - Skirt&PUNPEE.mp3": file("https://www.youtube.com/watch?v=_pxsIRHq-M0", "04/06/2021  03:20 AM"),
-                        "Odo - Ado.mp3": file("https://www.youtube.com/watch?v=YnSW8ian29w", "04/27/2021  04:00 AM"),
-                        "Show - Ado.mp3": file("https://www.youtube.com/watch?v=pgXpM4l_MwI", "09/06/2023  02:00 AM"),
-                        "Tank! - Seatbelts.mp3": file("https://www.youtube.com/watch?v=UFFa0QoHWvE", "05/21/1998  12:00 AM"),
-                        "The 1 - munque.mp3": file("https://www.youtube.com/watch?v=NefIygtTu-8", "04/27/2025  03:03 AM"),
-                        "The World's Continuation - Ado.mp3": file("https://www.youtube.com/watch?v=b3GCfyNKeLs", "08/10/2022  03:30 AM"),
+                        "After You've Gone - Emmet Choen.mp3": file("https://www.youtube.com/watch?v=984ksjle4YA", "04/21/2021  09:20 AM", 20373766),
+                        "Backlight - Ado.mp3": file("https://www.youtube.com/watch?v=gt-v_YCkaMY", "07/06/2022  04:00 AM", 5999941),
+                        "Gira Gira - Ado.mp3": file("https://www.youtube.com/watch?v=sOiMD45QGLs", "02/14/2021  03:00 AM", 6641926),
+                        "Naked Hero - Vaundy.mp3": file("https://www.youtube.com/watch?v=FT0GKCuSaW0", "01/28/2022  03:00 AM", 3209854),
+                        "Oddtaxi - Skirt&PUNPEE.mp3": file("https://www.youtube.com/watch?v=_pxsIRHq-M0", "04/06/2021  03:20 AM", 4882736),
+                        "Odo - Ado.mp3": file("https://www.youtube.com/watch?v=YnSW8ian29w", "04/27/2021  04:00 AM", 3529803),
+                        "Show - Ado.mp3": file("https://www.youtube.com/watch?v=pgXpM4l_MwI", "09/06/2023  02:00 AM", 4547950),
+                        "Tank! - Seatbelts.mp3": file("https://www.youtube.com/watch?v=UFFa0QoHWvE", "05/21/1998  12:00 AM", 5049261),
+                        "The 1 - munque.mp3": file("https://www.youtube.com/watch?v=NefIygtTu-8", "04/27/2025  03:03 AM", 3274749),
+                        "The World's Continuation - Ado.mp3": file("https://www.youtube.com/watch?v=b3GCfyNKeLs", "08/10/2022  03:30 AM", 7083291),
                     },
                     "My Pictures": {
-                        "profile_picture.png": file("assets/start_profile_picture.png", "11/27/2026  09:51 AM"),
+                        "profile_picture.png": file("assets/start_profile_picture.png", "11/27/2026  09:51 AM", 7975),
                     },
                     "about_me.txt": file(aboutMeTxt, "11/26/2026  07:24 PM"),
                     "experience.txt": file(experienceTxt, "11/15/2026  04:22 PM"),
