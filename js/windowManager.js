@@ -380,6 +380,17 @@ export function closeWindow(id) {
     app.onClose?.(ownerId);
 }
 
+export function closeAllWindows() {
+    for (const [id, app] of Array.from(windows.entries())) {
+        app.blockedBy = null;
+        if (app.activeOwnerId) {
+            setOwnerBlocked(app.activeOwnerId, null);
+            app.activeOwnerId = null;
+        }
+        closeWindow(id);
+    }
+}
+
 export function registerWindow({
     id,
     winEl,

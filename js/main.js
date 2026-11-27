@@ -3,11 +3,12 @@ import { SOUNDS, playSound, setSiteAudioState } from './sound.js';
 import { initTerminal } from './apps/terminal.js';
 import { initExplorer, openExplorer, openWebExplorer, openMyComputer } from './apps/explorer.js';
 import { initNotepad, openNotepad, openBlankNotepad, getRecentDocuments } from './apps/notepad.js';
-import { initMediaPlayer, openMediaPlayer, setMasterAudio } from './apps/mediaPlayer.js';
+import { initMediaPlayer, openMediaPlayer, setMasterAudio, resetMediaPlayerSession } from './apps/mediaPlayer.js';
 import {
     registerWindow,
     openWindow,
     closeWindow,
+    closeAllWindows,
     centerWindow,
     blurAllWindows,
     isClickInsideAnyWindow,
@@ -37,20 +38,57 @@ const powerBackdrop = document.getElementById("xp-power-backdrop");
 const powerTitle = document.getElementById("xp-power-title");
 const powerOptions = document.getElementById("xp-power-options");
 const powerCancelBtn = document.getElementById("xp-power-cancel");
+const powerBalloon = document.getElementById("xp-power-balloon");
+const powerBalloonTitle = document.getElementById("xp-power-balloon-title");
+const powerBalloonBody = document.getElementById("xp-power-balloon-body");
+const systemScreen = document.getElementById("xp-system-screen");
+const statusView = document.getElementById("xp-status-view");
+const statusText = document.getElementById("xp-status-text");
+const logonView = document.getElementById("xp-logon-view");
+const logonUserBtn = document.getElementById("xp-logon-user");
+const logonStatusEl = document.getElementById("xp-logon-status");
+const logonTurnOffBtn = document.getElementById("xp-logon-turnoff");
+const bootView = document.getElementById("xp-boot-view");
+const poweroffView = document.getElementById("xp-poweroff-view");
+const powerOnBtn = document.getElementById("xp-poweron-btn");
 
 const POWER_DIALOGS = {
     logoff: {
         title: "Log Off Windows",
         options: [
-            { label: "Switch User", icon: "assets/start_switch_user.png" },
-            { label: "Log Off", icon: "assets/start_logoff.png" }
+            {
+                action: "switch-user",
+                label: "Switch User",
+                icon: "assets/start_switch_user.png",
+                disabled: false,
+                tooltip: "Lets another user log on while your programs and files remain open."
+            },
+            {
+                action: "logoff",
+                label: "Log Off",
+                icon: "assets/start_logoff.png",
+                disabled: false,
+                tooltip: "Closes your programs and ends your Windows session."
+            }
         ]
     },
     turnoff: {
         title: "Turn off computer",
         options: [
-            { label: "Turn Off", icon: "assets/start_turnoff.png" },
-            { label: "Restart", icon: "assets/start_restart.png" }
+            {
+                action: "turnoff",
+                label: "Turn Off",
+                icon: "assets/start_turnoff.png",
+                disabled: false,
+                tooltip: "Shuts down Windows so that you can safely turn off the computer."
+            },
+            {
+                action: "restart",
+                label: "Restart",
+                icon: "assets/start_restart.png",
+                disabled: false,
+                tooltip: "Shuts down Windows and then starts Windows again."
+            }
         ]
     }
 };
@@ -223,7 +261,236 @@ function setupSubmenu(menuItemEl, submenuEl) {
     });
 }
 
+let systemTimers = [];
+
+function clearSystemTimers() {
+    for (const timer of systemTimers) {
+        clearTimeout(timer);
+    }
+    systemTimers = [];
+}
+
+function scheduleSystemStep(delayMs, fn) {
+    const timer = setTimeout(fn, delayMs);
+    systemTimers.push(timer);
+}
+
+function showSystemView(activeView, message = "", { welcomeOnly = false } = {}) {
+    if (!systemScreen) return;
+    for (const view of [statusView, logonView, bootView, poweroffView]) {
+        if (view) view.hidden = view !== activeView;
+    }
+    if (statusView) {
+        statusView.classList.toggle("xp-welcome-mode", activeView === statusView && welcomeOnly);
+    }
+    if (statusText && activeView === statusView) {
+        statusText.textContent = message;
+    }
+    systemScreen.hidden = false;
+}
+
+function hideSystemScreen() {
+    clearSystemTimers();
+    document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
+    if (!systemScreen) return;
+    systemScreen.hidden = true;
+    for (const view of [statusView, logonView, bootView, poweroffView]) {
+        if (view) view.hidden = true;
+    }
+}
+
+function teardownUserSession() {
+    document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
+    closePowerDialog();
+    closeStartMenu();
+    closeVolumePopup();
+    resetMediaPlayerSession();
+    closeAllWindows();
+}
+
+let isSwitchedUserSession = false;
+let isLoggingOn = false;
+
+function setLogonStatus(message = "") {
+    if (logonStatusEl) {
+        logonStatusEl.textContent = message;
+    }
+}
+
+function runBootSequence() {
+    clearSystemTimers();
+    document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
+    isSwitchedUserSession = false;
+    isLoggingOn = false;
+    setLogonStatus("");
+    showSystemView(bootView);
+    scheduleSystemStep(7000, () => {
+        showSystemView(statusView, "welcome", { welcomeOnly: true });
+    });
+    scheduleSystemStep(9000, () => {
+        hideSystemScreen();
+        playSound(SOUNDS.STARTUP);
+    });
+}
+
+function runSwitchUser() {
+    clearSystemTimers();
+    closePowerDialog();
+    closeStartMenu();
+    closeVolumePopup();
+    blurAllWindows();
+    isSwitchedUserSession = true;
+    isLoggingOn = false;
+    setLogonStatus("Logged on");
+    document.body.classList.add("xp-session-closing");
+    scheduleSystemStep(500, () => {
+        document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
+        playSound(SOUNDS.LOGOFF);
+        showSystemView(logonView);
+    });
+}
+
+function runLogOff() {
+    clearSystemTimers();
+    teardownUserSession();
+    isSwitchedUserSession = false;
+    isLoggingOn = false;
+    setLogonStatus("");
+    document.body.classList.add("xp-session-closing");
+
+    scheduleSystemStep(1000, () => {
+        document.body.classList.add("xp-wallpaper-only");
+    });
+    scheduleSystemStep(2000, () => {
+        document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
+        playSound(SOUNDS.SHUTDOWN);
+        showSystemView(statusView, "Logging off...");
+    });
+    scheduleSystemStep(7000, () => {
+        showSystemView(statusView, "Saving your settings...");
+    });
+    scheduleSystemStep(7100, () => {
+        showSystemView(logonView);
+    });
+}
+
+function runLogOn() {
+    if (isLoggingOn) return;
+    clearSystemTimers();
+
+    if (isSwitchedUserSession) {
+        isSwitchedUserSession = false;
+        isLoggingOn = false;
+        setLogonStatus("");
+        hideSystemScreen();
+        scheduleSystemStep(500, () => {
+            playSound(SOUNDS.LOGON);
+        });
+        return;
+    }
+
+    isLoggingOn = true;
+    setLogonStatus("Loading your personal settings...");
+    scheduleSystemStep(800, () => {
+        isLoggingOn = false;
+        setLogonStatus("");
+        hideSystemScreen();
+        playSound(SOUNDS.STARTUP);
+    });
+}
+
+function runShutdownFlow({ restart = false } = {}) {
+    const fromLogonScreen = Boolean(systemScreen && !systemScreen.hidden && logonView && !logonView.hidden);
+    const needsLogoffSteps = !fromLogonScreen || isSwitchedUserSession;
+
+    clearSystemTimers();
+    teardownUserSession();
+    isSwitchedUserSession = false;
+    isLoggingOn = false;
+    setLogonStatus("");
+
+    let offset = 0;
+    if (!needsLogoffSteps) {
+        playSound(SOUNDS.SHUTDOWN);
+        showSystemView(statusView, "Windows is shutting down...");
+    } else {
+        if (!fromLogonScreen) {
+            hideSystemScreen();
+            document.body.classList.add("xp-session-closing");
+            scheduleSystemStep(1000, () => {
+                document.body.classList.add("xp-wallpaper-only");
+            });
+            offset = 2000;
+        }
+        scheduleSystemStep(offset, () => {
+            document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
+            playSound(SOUNDS.SHUTDOWN);
+            showSystemView(statusView, "Logging off...");
+        });
+        offset += 4000;
+        scheduleSystemStep(offset, () => {
+            showSystemView(statusView, "Saving your settings...");
+        });
+        offset += 100;
+        scheduleSystemStep(offset, () => {
+            showSystemView(statusView, "Windows is shutting down...");
+        });
+    }
+
+    scheduleSystemStep(offset + 7000, () => {
+        showSystemView(null);
+    });
+    scheduleSystemStep(offset + 11000, () => {
+        if (restart) {
+            runBootSequence();
+        } else {
+            showSystemView(poweroffView);
+        }
+    });
+}
+
+function executePowerAction(action) {
+    if (action === "logoff") {
+        runLogOff();
+    } else if (action === "switch-user") {
+        runSwitchUser();
+    } else if (action === "turnoff") {
+        runShutdownFlow({ restart: false });
+    } else if (action === "restart") {
+        runShutdownFlow({ restart: true });
+    }
+}
+
+let powerBalloonTimer = null;
+
+function hidePowerBalloon() {
+    clearTimeout(powerBalloonTimer);
+    powerBalloonTimer = null;
+    if (powerBalloon) {
+        powerBalloon.hidden = true;
+    }
+}
+
+function showPowerBalloon(btn, option) {
+    if (!powerBalloon || !powerBalloonTitle || !powerBalloonBody || !option.tooltip) return;
+    powerBalloonTitle.textContent = option.label;
+    powerBalloonBody.textContent = option.tooltip;
+    powerBalloon.hidden = false;
+
+    const iconEl = btn.querySelector(".xp-power-option-icon") || btn;
+    const anchorRect = iconEl.getBoundingClientRect();
+    const balloonWidth = powerBalloon.offsetWidth || 240;
+    const left = Math.max(
+        6,
+        Math.min(anchorRect.left + anchorRect.width / 2 - 16, window.innerWidth - balloonWidth - 6)
+    );
+    const top = Math.min(anchorRect.bottom + 14, window.innerHeight - powerBalloon.offsetHeight - 6);
+    powerBalloon.style.left = `${Math.round(left)}px`;
+    powerBalloon.style.top = `${Math.round(top)}px`;
+}
+
 function closePowerDialog() {
+    hidePowerBalloon();
     if (!powerBackdrop) return;
     powerBackdrop.classList.remove("desaturated", "show");
     powerBackdrop.hidden = true;
@@ -233,6 +500,7 @@ function openPowerDialog(mode) {
     const config = POWER_DIALOGS[mode];
     if (!config || !powerBackdrop || !powerTitle || !powerOptions) return;
 
+    hidePowerBalloon();
     closeStartMenu();
     blurAllWindows();
     powerTitle.textContent = config.title;
@@ -242,7 +510,7 @@ function openPowerDialog(mode) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "xp-power-option";
-        btn.disabled = true;
+        btn.disabled = Boolean(option.disabled);
 
         const icon = document.createElement("img");
         icon.className = "xp-power-option-icon";
@@ -254,6 +522,19 @@ function openPowerDialog(mode) {
         label.textContent = option.label;
 
         btn.append(icon, label);
+        if (!option.disabled) {
+            btn.addEventListener("click", () => {
+                hidePowerBalloon();
+                executePowerAction(option.action);
+            });
+            btn.addEventListener("pointerenter", () => {
+                clearTimeout(powerBalloonTimer);
+                powerBalloonTimer = setTimeout(() => {
+                    showPowerBalloon(btn, option);
+                }, 280);
+            });
+            btn.addEventListener("pointerleave", hidePowerBalloon);
+        }
         powerOptions.appendChild(btn);
     }
 
@@ -275,6 +556,12 @@ powerBackdrop?.addEventListener("pointerdown", (e) => {
 });
 
 powerCancelBtn?.addEventListener("click", closePowerDialog);
+logonUserBtn?.addEventListener("click", runLogOn);
+logonTurnOffBtn?.addEventListener("click", () => openPowerDialog("turnoff"));
+powerOnBtn?.addEventListener("click", runBootSequence);
+systemScreen?.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+});
 
 document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;

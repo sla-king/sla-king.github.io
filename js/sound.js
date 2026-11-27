@@ -3,10 +3,14 @@ export const SOUNDS = {
     DING: "assets/audio/Windows XP Ding.mp3",
     ERROR: "assets/audio/Windows XP Error.mp3",
     EXCLAMATION: "assets/audio/Windows XP Exclamation.mp3",
+    LOGOFF: "assets/audio/Windows XP Logoff Sound.mp3",
+    LOGON: "assets/audio/Windows XP Logon Sound.mp3",
     MENU_COMMAND: "assets/audio/Windows XP Menu Command.mp3",
     MINIMIZE: "assets/audio/Windows XP Minimize.mp3",
     RESTORE: "assets/audio/Windows XP Restore.mp3",
-    START_NAVIGATION: "assets/audio/Windows XP Start.mp3"
+    SHUTDOWN: "assets/audio/Windows XP Shutdown.mp3",
+    START_NAVIGATION: "assets/audio/Windows XP Start.mp3",
+    STARTUP: "assets/audio/Windows XP Startup.mp3"
 };
 
 let siteVolume = 0.7;

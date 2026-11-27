@@ -226,6 +226,21 @@ function destroyPlayer() {
     }
 }
 
+export function resetMediaPlayerSession() {
+    destroyPlayer();
+    currentTrack = null;
+    setStoppedScreen(true);
+    updatePlayButtonUI(false);
+    updateStatusUI("Ready", "&#9632;");
+    if (trackTimeEl) {
+        trackTimeEl.textContent = "0:00";
+    }
+    if (seekEl) {
+        seekEl.max = "100";
+        seekEl.value = "0";
+    }
+}
+
 function loadFallbackIframe(videoId, autoplay) {
     if (!hostEl) return;
     hostEl.textContent = "";

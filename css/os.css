@@ -531,6 +531,25 @@ body {
     font-family: 'Tahoma', sans-serif;
     font-size: 11px;
     font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.xp-power-option:not(:disabled):hover .xp-power-option-icon {
+    filter: brightness(1.12) drop-shadow(0 0 6px rgba(255, 255, 255, 0.55));
+}
+
+.xp-power-option:not(:disabled):hover .xp-power-option-label {
+    text-decoration: underline;
+}
+
+.xp-power-option:focus {
+    outline: none;
+}
+
+.xp-power-option:focus-visible .xp-power-option-label {
+    outline: 1px dotted #ffffff;
+    outline-offset: 2px;
 }
 
 .xp-power-option:disabled {
@@ -543,6 +562,7 @@ body {
     height: 36px;
     object-fit: contain;
     display: block;
+    transition: filter 0.12s ease;
 }
 
 .xp-power-option:disabled .xp-power-option-icon {
@@ -569,6 +589,453 @@ body {
     font-family: 'Tahoma', sans-serif;
     font-size: 11px;
     cursor: pointer;
+}
+
+.xp-power-balloon {
+    position: fixed;
+    max-width: 268px;
+    padding: 9px 12px;
+    background-color: #ffffe1;
+    border: 1px solid #000000;
+    border-radius: 6px;
+    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.35);
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+    pointer-events: none;
+    z-index: 100000;
+    box-sizing: border-box;
+}
+
+.xp-power-balloon[hidden] {
+    display: none;
+}
+
+.xp-power-balloon-tail {
+    position: absolute;
+    top: -13px;
+    left: 15px;
+    display: block;
+}
+
+.xp-power-balloon-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.xp-power-balloon-body {
+    font-weight: 400;
+    line-height: 1.3;
+}
+
+/* Full-screen XP Log Off / Welcome / Boot / Shut Down Views */
+body.xp-session-closing {
+    pointer-events: none;
+}
+
+body.xp-wallpaper-only .taskbar,
+body.xp-wallpaper-only .window {
+    display: none !important;
+}
+
+.xp-system-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99995;
+    background-color: #000000;
+    font-family: 'Tahoma', sans-serif;
+    user-select: none;
+}
+
+.xp-system-screen[hidden] {
+    display: none;
+}
+
+.xp-luna-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.xp-luna-screen[hidden] {
+    display: none;
+}
+
+.xp-luna-band {
+    height: 12%;
+    min-height: 58px;
+    background: #003399;
+    flex-shrink: 0;
+}
+
+.xp-luna-bottom {
+    background: linear-gradient(90deg, #3c42b6 0%, #233fa9 32%, #003399 100%);
+}
+
+.xp-luna-streak {
+    height: 2px;
+    flex-shrink: 0;
+    background: linear-gradient(90deg, rgba(184, 210, 251, 0.45) 0%, #ffffff 30%, #ffffff 70%, rgba(184, 210, 251, 0.35) 100%);
+}
+
+.xp-luna-streak-bottom {
+    background: linear-gradient(90deg, rgba(244, 154, 62, 0.3) 0%, #f79d42 25%, #f79d42 75%, rgba(244, 154, 62, 0.25) 100%);
+}
+
+.xp-luna-stage {
+    flex: 1;
+    background: radial-gradient(circle at 11% 14%, #cbe2ff 0%, #96bdfa 10%, #6d9cf0 24%, #5985e1 52%, #4f7bd8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: #ffffff;
+}
+
+.xp-status-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.xp-luna-screen.xp-welcome-mode .xp-status-box {
+    align-items: center;
+}
+
+.xp-luna-screen.xp-welcome-mode .xp-status-brand {
+    display: none;
+}
+
+.xp-luna-screen.xp-welcome-mode .xp-status-text {
+    font-family: 'Arial', 'Tahoma', sans-serif;
+    font-size: clamp(34px, 4.5vw, 44px);
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-shadow: 2px 3px 3px rgba(0, 42, 128, 0.55);
+}
+
+.xp-status-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.xp-status-logo {
+    width: 58px;
+    height: auto;
+    display: block;
+}
+
+.xp-status-wordmark {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.xp-brand-ms {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+.xp-brand-win {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.xp-brand-xp {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff6b2b;
+    margin-left: 2px;
+    vertical-align: super;
+}
+
+.xp-status-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+    min-height: 24px;
+}
+
+.xp-logon-stage {
+    gap: 28px;
+}
+
+.xp-logon-left {
+    width: min(320px, 42vw);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 14px;
+}
+
+.xp-logon-prompt {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.xp-logon-divider {
+    width: 1px;
+    height: min(320px, 52vh);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0) 100%);
+    flex-shrink: 0;
+}
+
+.xp-logon-right {
+    width: min(320px, 42vw);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.xp-logon-user-btn {
+    min-width: 230px;
+    min-height: 0;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent !important;
+    box-shadow: none !important;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.xp-logon-user-btn:hover,
+.xp-logon-user-btn:focus:hover {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+.xp-logon-user-btn:hover .xp-logon-avatar {
+    border-color: #ffcf4d;
+}
+
+.xp-logon-user-btn:focus {
+    outline: none;
+}
+
+.xp-logon-avatar {
+    width: 54px;
+    height: 54px;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+}
+
+.xp-logon-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.xp-logon-username {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.xp-logon-status {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #002b8c;
+}
+
+.xp-logon-status:empty {
+    display: none;
+}
+
+.xp-logon-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    gap: 16px;
+}
+
+.xp-logon-turnoff-btn {
+    min-width: 0;
+    min-height: 0;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    background: transparent !important;
+    box-shadow: none !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.xp-logon-turnoff-btn:hover,
+.xp-logon-turnoff-btn:focus:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.xp-logon-turnoff-btn:focus {
+    outline: none;
+}
+
+.xp-logon-turnoff-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+}
+
+.xp-logon-hint {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 11px;
+    line-height: 1.35;
+    text-align: right;
+}
+
+/* Boot & Powered Off Black Screens */
+.xp-black-screen {
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.xp-black-screen[hidden] {
+    display: none;
+}
+
+.xp-boot-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 34px;
+}
+
+.xp-boot-logo {
+    width: 72px;
+    height: auto;
+    display: block;
+}
+
+.xp-boot-bar-track {
+    width: 170px;
+    height: 14px;
+    padding: 2px;
+    border: 1px solid #8a8a8a;
+    border-radius: 4px;
+    background: #000000;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.xp-boot-bar-runner {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    display: flex;
+    gap: 3px;
+    animation: xpBootSlide 1.5s linear infinite;
+}
+
+.xp-boot-bar-runner span {
+    width: 10px;
+    height: 100%;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #77b4ff 0%, #2b6be6 55%, #1948b5 100%);
+}
+
+@keyframes xpBootSlide {
+    from {
+        left: -42px;
+    }
+    to {
+        left: 172px;
+    }
+}
+
+.xp-boot-footer {
+    position: absolute;
+    bottom: 24px;
+    left: 28px;
+    color: #9e9e9e;
+    font-size: 11px;
+}
+
+.xp-poweroff-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    text-align: center;
+    padding: 20px;
+}
+
+.xp-poweroff-text {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #d8892b;
+}
+
+.xp-poweron-btn {
+    min-width: 0;
+    min-height: 0;
+    padding: 8px 14px;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    background: #141414 !important;
+    box-shadow: none !important;
+    color: #d8d8d8;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.xp-poweron-btn:hover,
+.xp-poweron-btn:focus:hover {
+    border-color: #7a7a7a;
+    background: #222222 !important;
+    color: #ffffff;
+}
+
+.xp-poweron-btn:focus {
+    outline: none;
+}
+
+.xp-poweron-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    display: block;
 }
 
 /* Taskbar */
