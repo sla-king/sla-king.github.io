@@ -284,7 +284,7 @@
 
     <div id="start-menu" class="start-menu">
         <div class="start-menu-header">
-            <img src="assets/profile_picture.png" class="user-avatar" alt="">
+            <img src="assets/start_profile_picture.png" class="user-avatar" alt="">
             <span class="user-name">sla-king</span>
         </div>
         <div class="start-menu-body">
@@ -315,6 +315,12 @@
                 <div class="menu-item" data-action="media-player" title="Plays your digital media including music, videos, CDs, DVDs, and Internet Radio.">
                     <img src="assets/app_media_player.png" class="menu-icon" alt="">
                     Windows Media Player
+                </div>
+                <div class="start-menu-divider start-menu-divider-left start-all-programs-divider" role="separator"></div>
+                <div class="menu-item menu-item-has-submenu start-all-programs" data-action="all-programs">
+                    <span class="start-all-programs-label">All Programs</span>
+                    <img src="assets/app_all_programs.png" class="start-all-programs-arrow" alt="">
+                    <div class="start-submenu start-submenu-bottom" id="all-programs-menu"></div>
                 </div>
             </div>
             <div class="start-menu-right">
@@ -351,12 +357,35 @@
                 </div>
             </div>
         </div>
-        <div class="start-menu-footer"></div>
+        <div class="start-menu-footer">
+            <button type="button" class="start-footer-btn" data-power-action="logoff" title="Provides options for closing your programs and logging off, or for leaving your programs running and switching to another user.">
+                <img src="assets/start_logoff.png" class="start-footer-icon" alt="">
+                <span>Log Off</span>
+            </button>
+            <button type="button" class="start-footer-btn" data-power-action="turnoff" title="Provides options for turning off or restarting your computer, or for activating Stand By or Hibernate modes.">
+                <img src="assets/start_turnoff.png" class="start-footer-icon" alt="">
+                <span>Turn Off Computer</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="xp-power-backdrop" class="xp-power-backdrop" hidden>
+        <div id="xp-power-dialog" class="xp-power-dialog" role="dialog" aria-modal="true" aria-labelledby="xp-power-title">
+            <div class="xp-power-header">
+                <span id="xp-power-title" class="xp-power-title"></span>
+                <img src="assets/start_xp_logo.png" class="xp-power-logo" alt="">
+            </div>
+            <div class="xp-power-streak" aria-hidden="true"></div>
+            <div id="xp-power-options" class="xp-power-body"></div>
+            <div class="xp-power-footer">
+                <button type="button" id="xp-power-cancel" class="xp-power-cancel">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <div class="taskbar">
         <div class="start-button" id="start-button" title="Click this to begin">
-            <img src="assets/xp_logo.png" class="start-icon" alt="">
+            <img src="assets/start_xp_logo.png" class="start-icon" alt="">
             start
         </div>
 

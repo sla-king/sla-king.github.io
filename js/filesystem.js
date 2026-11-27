@@ -1,4 +1,4 @@
-import { aboutMeTxt, contactTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt } from './texts.js';
+import { aboutMeTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt } from './texts.js';
 
 export const HOME_PATH = ["C:", "Documents and Settings", "sla-king"];
 export const DEFAULT_FILE_DATE = "11/01/2026  11:39 PM";
@@ -59,8 +59,7 @@ export const fs = {
                         "The World's Continuation - Ado.mp3": file("https://www.youtube.com/watch?v=b3GCfyNKeLs", "08/10/2022 03:30 AM"),
                     },
                     "My Pictures": {},
-                    "about_me.txt": file(aboutMeTxt, "11/11/2026  09:33 PM"),
-                    "contact.txt": file(contactTxt, "11/02/2026  11:43 PM"),
+                    "about_me.txt": file(aboutMeTxt, "11/26/2026  07:24 PM"),
                     "experience.txt": file(experienceTxt, "11/15/2026  04:22 PM"),
                 }
             }

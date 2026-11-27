@@ -4,11 +4,11 @@ Currently:
 - SOC Analyst at UCI OIT
 - Team Captain of Cyber@UCI's CCDC Team
 - Vice President of Cyber@UCI
-`;
 
-export const contactTxt = `Email: alex.l.seidinger@gmail.com
-LinkedIn: linkedin.com/in/alexanderseidinger
-GitHub: github.com/sla-king`;
+Contact:
+- Email: alex.l.seidinger@gmail.com
+- LinkedIn: linkedin.com/in/alexanderseidinger
+- GitHub: github.com/sla-king`;
 
 export const experienceTxt = `### Experience
 SOC Analyst

@@ -1,3 +1,4 @@
+import { HOME_PATH, getNode, getPathString, isFileNode } from '../filesystem.js';
 import {
     registerWindow,
     unregisterWindow,
@@ -68,8 +69,16 @@ export function getRecentDocuments() {
     return [...recentDocuments];
 }
 
+const DEFAULT_RECENT_DOCUMENTS = ["experience.txt", "about_me.txt"];
+
 export function initNotepad() {
-    // Notepad windows are created dynamically per opened file.
+    for (const filename of DEFAULT_RECENT_DOCUMENTS) {
+        const pathParts = [...HOME_PATH, "My Documents", filename];
+        const node = getNode(pathParts);
+        if (isFileNode(node)) {
+            recordRecentDocument(filename, node.content, getPathString(pathParts));
+        }
+    }
 }
 
 export function openBlankNotepad() {

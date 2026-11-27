@@ -21,11 +21,34 @@ const taskbar = document.querySelector(".taskbar");
 const selectionBox = document.getElementById("selection-box");
 const recentMenuItem = document.querySelector('.menu-item[data-action="recent-documents"]');
 const recentDocumentsMenu = document.getElementById("recent-documents-menu");
+const allProgramsMenuItem = document.querySelector('.menu-item[data-action="all-programs"]');
+const allProgramsMenu = document.getElementById("all-programs-menu");
 const linkWindow = document.getElementById("xp-link-window");
 const linkIcon = document.getElementById("xp-link-icon");
 const linkMessage = document.getElementById("xp-link-message");
 const linkCancelBtn = document.getElementById("xp-link-cancel");
 const linkVisitBtn = document.getElementById("xp-link-visit");
+const powerBackdrop = document.getElementById("xp-power-backdrop");
+const powerTitle = document.getElementById("xp-power-title");
+const powerOptions = document.getElementById("xp-power-options");
+const powerCancelBtn = document.getElementById("xp-power-cancel");
+
+const POWER_DIALOGS = {
+    logoff: {
+        title: "Log Off Windows",
+        options: [
+            { label: "Switch User", icon: "assets/start_switch_user.png" },
+            { label: "Log Off", icon: "assets/start_logoff.png" }
+        ]
+    },
+    turnoff: {
+        title: "Turn off computer",
+        options: [
+            { label: "Turn Off", icon: "assets/start_turnoff.png" },
+            { label: "Restart", icon: "assets/start_restart.png" }
+        ]
+    }
+};
 
 const EXTERNAL_LINKS = {
     email: {
@@ -50,8 +73,71 @@ const EXTERNAL_LINKS = {
 
 let pendingLinkUrl = "";
 let selectState = null;
-let recentHoverTimer = null;
-const RECENT_MENU_DELAY_MS = 350;
+const submenuTimers = new Map();
+const SUBMENU_DELAY_MS = 350;
+
+const APP_LAUNCHERS = {
+    "explorer-web": () => openWebExplorer(),
+    "email": () => openLinkDialog("email"),
+    "cmd": () => {
+        openWindow("terminal");
+        document.getElementById("cmd-input").focus({ preventScroll: true });
+    },
+    "notepad": () => openBlankNotepad(),
+    "media-player": () => openMediaPlayer(),
+    "linkedin": () => openLinkDialog("linkedin"),
+    "github": () => openLinkDialog("github")
+};
+
+const ALL_PROGRAMS_ITEMS = [
+    { name: "Command Prompt", icon: "assets/app_command_prompt_16.png", action: "cmd" },
+    { name: "GitHub", icon: "assets/app_github.png", action: "github" },
+    { name: "Internet Explorer", icon: "assets/app_explorer_16.png", action: "explorer-web" },
+    { name: "LinkedIn", icon: "assets/app_linkedin.png", action: "linkedin" },
+    { name: "Notepad", icon: "assets/app_notepad_16.png", action: "notepad" },
+    { name: "Outlook Express", icon: "assets/app_outlook.png", action: "email" },
+    { name: "Windows Media Player", icon: "assets/app_media_player_16.png", action: "media-player" }
+];
+
+function launchAppAction(action) {
+    const launcher = APP_LAUNCHERS[action];
+    if (!launcher) return;
+    closeStartMenu();
+    launcher();
+}
+
+function createSubmenuEntry(labelText, iconSrc, tooltip, onClick) {
+    const item = document.createElement("div");
+    item.className = "start-submenu-item";
+    if (tooltip) item.title = tooltip;
+
+    const icon = document.createElement("img");
+    icon.src = iconSrc;
+    icon.className = "start-submenu-icon";
+    icon.alt = "";
+
+    const label = document.createElement("span");
+    label.textContent = labelText;
+
+    item.append(icon, label);
+    item.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeStartMenu();
+        onClick();
+    });
+    return item;
+}
+
+function renderAllProgramsMenu() {
+    if (!allProgramsMenu) return;
+    allProgramsMenu.innerHTML = "";
+    for (const prog of ALL_PROGRAMS_ITEMS) {
+        const tooltip = startMenu.querySelector(`.menu-item[data-action="${prog.action}"]`)?.title || "";
+        allProgramsMenu.appendChild(
+            createSubmenuEntry(prog.name, prog.icon, tooltip, () => APP_LAUNCHERS[prog.action]?.())
+        );
+    }
+}
 
 function renderRecentDocumentsMenu() {
     if (!recentDocumentsMenu) return;
@@ -68,34 +154,118 @@ function renderRecentDocumentsMenu() {
     }
 
     for (const doc of docs) {
-        const item = document.createElement("div");
-        item.className = "start-submenu-item";
-        item.title = doc.filePath;
+        recentDocumentsMenu.appendChild(
+            createSubmenuEntry(doc.displayName, "assets/file_text_doc_16.png", doc.filePath, () => {
+                openNotepad(doc.filename, doc.content, doc.filePath);
+            })
+        );
+    }
+}
 
-        const icon = document.createElement("img");
-        icon.src = "assets/file_text_doc_16.png";
-        icon.className = "start-submenu-icon";
-        icon.alt = "";
-
-        const label = document.createElement("span");
-        label.textContent = doc.displayName;
-
-        item.append(icon, label);
-        item.addEventListener("click", (e) => {
-            e.stopPropagation();
-            closeStartMenu();
-            openNotepad(doc.filename, doc.content, doc.filePath);
-        });
-        recentDocumentsMenu.appendChild(item);
+function closeOtherSubmenus(exceptEl = null) {
+    for (const [el, timer] of submenuTimers.entries()) {
+        if (el !== exceptEl) {
+            clearTimeout(timer);
+            submenuTimers.delete(el);
+            el.classList.remove("submenu-open");
+        }
     }
 }
 
 function closeStartMenu() {
-    clearTimeout(recentHoverTimer);
-    recentHoverTimer = null;
+    closeOtherSubmenus(null);
     startMenu.classList.remove("show");
-    recentMenuItem?.classList.remove("submenu-open");
 }
+
+function setupSubmenu(menuItemEl, submenuEl) {
+    if (!menuItemEl) return;
+
+    menuItemEl.addEventListener("pointerenter", (e) => {
+        clearTimeout(submenuTimers.get(menuItemEl));
+        closeOtherSubmenus(menuItemEl);
+        if (e.pointerType !== "touch" && !menuItemEl.classList.contains("submenu-open")) {
+            const timer = setTimeout(() => {
+                menuItemEl.classList.add("submenu-open");
+            }, SUBMENU_DELAY_MS);
+            submenuTimers.set(menuItemEl, timer);
+        }
+    });
+
+    menuItemEl.addEventListener("pointerleave", () => {
+        clearTimeout(submenuTimers.get(menuItemEl));
+        const timer = setTimeout(() => {
+            menuItemEl.classList.remove("submenu-open");
+        }, 250);
+        submenuTimers.set(menuItemEl, timer);
+    });
+
+    menuItemEl.addEventListener("click", (e) => {
+        if (submenuEl?.contains(e.target)) return;
+        clearTimeout(submenuTimers.get(menuItemEl));
+        closeOtherSubmenus(menuItemEl);
+        menuItemEl.classList.toggle("submenu-open");
+    });
+}
+
+function closePowerDialog() {
+    if (!powerBackdrop) return;
+    powerBackdrop.classList.remove("desaturated", "show");
+    powerBackdrop.hidden = true;
+}
+
+function openPowerDialog(mode) {
+    const config = POWER_DIALOGS[mode];
+    if (!config || !powerBackdrop || !powerTitle || !powerOptions) return;
+
+    closeStartMenu();
+    blurAllWindows();
+    powerTitle.textContent = config.title;
+    powerOptions.innerHTML = "";
+
+    for (const option of config.options) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "xp-power-option";
+        btn.disabled = true;
+
+        const icon = document.createElement("img");
+        icon.className = "xp-power-option-icon";
+        icon.src = option.icon;
+        icon.alt = "";
+
+        const label = document.createElement("span");
+        label.className = "xp-power-option-label";
+        label.textContent = option.label;
+
+        btn.append(icon, label);
+        powerOptions.appendChild(btn);
+    }
+
+    powerBackdrop.classList.remove("desaturated");
+    powerBackdrop.hidden = false;
+    powerBackdrop.classList.add("show");
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (powerBackdrop.classList.contains("show")) {
+                powerBackdrop.classList.add("desaturated");
+            }
+        });
+    });
+    powerCancelBtn?.focus();
+}
+
+powerBackdrop?.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+});
+
+powerCancelBtn?.addEventListener("click", closePowerDialog);
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && powerBackdrop?.classList.contains("show")) {
+        e.preventDefault();
+        closePowerDialog();
+    }
+});
 
 // Initialize Apps
 initTerminal();
@@ -204,9 +374,8 @@ startMenu.addEventListener("pointerdown", (e) => {
 
 startMenu.addEventListener("pointerover", (e) => {
     const item = e.target.closest(".menu-item");
-    if (item && item !== recentMenuItem) {
-        clearTimeout(recentHoverTimer);
-        recentMenuItem?.classList.remove("submenu-open");
+    if (item) {
+        closeOtherSubmenus(item);
     }
 });
 
@@ -259,57 +428,19 @@ function endSelection() {
 document.addEventListener("pointerup", endSelection);
 document.addEventListener("pointercancel", endSelection);
 
-document.querySelector('.menu-item[data-action="explorer-web"]').addEventListener("click", () => {
-    closeStartMenu();
-    openWebExplorer();
+Object.keys(APP_LAUNCHERS).forEach((action) => {
+    document.querySelector(`.menu-item[data-action="${action}"]`)?.addEventListener("click", () => {
+        launchAppAction(action);
+    });
 });
 
-document.querySelector('.menu-item[data-action="email"]').addEventListener("click", () => {
-    closeStartMenu();
-    openLinkDialog("email");
-});
-
-document.querySelector('.menu-item[data-action="cmd"]').addEventListener("click", () => {
-    closeStartMenu();
-    openWindow("terminal");
-    document.getElementById("cmd-input").focus({ preventScroll: true });
-});
-
-document.querySelector('.menu-item[data-action="notepad"]').addEventListener("click", () => {
-    closeStartMenu();
-    openBlankNotepad();
-});
-
-document.querySelector('.menu-item[data-action="media-player"]').addEventListener("click", () => {
-    closeStartMenu();
-    openMediaPlayer();
-});
+renderAllProgramsMenu();
+setupSubmenu(recentMenuItem, recentDocumentsMenu);
+setupSubmenu(allProgramsMenuItem, allProgramsMenu);
 
 document.querySelector('.menu-item[data-action="documents"]').addEventListener("click", () => {
     closeStartMenu();
     openExplorer();
-});
-
-recentMenuItem?.addEventListener("pointerenter", (e) => {
-    clearTimeout(recentHoverTimer);
-    if (e.pointerType !== "touch" && !recentMenuItem.classList.contains("submenu-open")) {
-        recentHoverTimer = setTimeout(() => {
-            recentMenuItem.classList.add("submenu-open");
-        }, RECENT_MENU_DELAY_MS);
-    }
-});
-
-recentMenuItem?.addEventListener("pointerleave", () => {
-    clearTimeout(recentHoverTimer);
-    recentHoverTimer = setTimeout(() => {
-        recentMenuItem.classList.remove("submenu-open");
-    }, 250);
-});
-
-recentMenuItem?.addEventListener("click", (e) => {
-    if (recentDocumentsMenu?.contains(e.target)) return;
-    clearTimeout(recentHoverTimer);
-    recentMenuItem.classList.toggle("submenu-open");
 });
 
 document.querySelector('.menu-item[data-action="pictures"]').addEventListener("click", () => {
@@ -327,14 +458,10 @@ document.querySelector('.menu-item[data-action="computer"]').addEventListener("c
     openMyComputer();
 });
 
-document.querySelector('.menu-item[data-action="linkedin"]').addEventListener("click", () => {
-    closeStartMenu();
-    openLinkDialog("linkedin");
-});
-
-document.querySelector('.menu-item[data-action="github"]').addEventListener("click", () => {
-    closeStartMenu();
-    openLinkDialog("github");
+document.querySelectorAll('.start-footer-btn[data-power-action]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+        openPowerDialog(btn.dataset.powerAction);
+    });
 });
 
 // System Clock
