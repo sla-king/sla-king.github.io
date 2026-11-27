@@ -2,6 +2,7 @@ import { HOME_PATH } from './filesystem.js';
 import { initTerminal } from './apps/terminal.js';
 import { initExplorer, openExplorer, openWebExplorer, openMyComputer } from './apps/explorer.js';
 import { initNotepad, openNotepad, openBlankNotepad, getRecentDocuments } from './apps/notepad.js';
+import { initMediaPlayer, openMediaPlayer } from './apps/mediaPlayer.js';
 import {
     registerWindow,
     openWindow,
@@ -100,6 +101,7 @@ function closeStartMenu() {
 initTerminal();
 initExplorer();
 initNotepad();
+initMediaPlayer();
 
 if (linkWindow) {
     registerWindow({
@@ -276,6 +278,11 @@ document.querySelector('.menu-item[data-action="cmd"]').addEventListener("click"
 document.querySelector('.menu-item[data-action="notepad"]').addEventListener("click", () => {
     closeStartMenu();
     openBlankNotepad();
+});
+
+document.querySelector('.menu-item[data-action="media-player"]').addEventListener("click", () => {
+    closeStartMenu();
+    openMediaPlayer();
 });
 
 document.querySelector('.menu-item[data-action="documents"]').addEventListener("click", () => {

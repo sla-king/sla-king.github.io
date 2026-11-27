@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/xp.css">
     <link rel="stylesheet" href="css/os.css">
     <link rel="stylesheet" href="css/apps.css">
+    <link rel="stylesheet" href="css/wmp.css">
 </head>
 <body>
     <div id="drag-outline"></div>
@@ -141,6 +142,127 @@
         </div>
     </div>
 
+    <div class="window wmp-corona-window" id="media-player-window" style="display: none;">
+        <div class="title-bar wmp-corona-top">
+            <div class="title-bar-text wmp-sr-only">
+                <img src="assets/app_media_player_16.png" class="window-icon" alt="">
+                Windows Media Player
+            </div>
+            <div class="wmp-corona-top-dark" aria-hidden="true"></div>
+            <div class="wmp-corona-top-row">
+                <div class="wmp-corona-top-thin"></div>
+                <svg class="wmp-corona-top-slant" viewBox="0 0 36 36" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="wmpLightTopSlantGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="36">
+                            <stop offset="0%" stop-color="#f8fbff"/>
+                            <stop offset="55%" stop-color="#e3ecfb"/>
+                            <stop offset="100%" stop-color="#cde0f7"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M 0 27 C 14 27 22 0 36 0 L 36 36 L 0 36 Z" fill="url(#wmpLightTopSlantGrad)"/>
+                    <path d="M 0 27.5 C 14 27.5 22 0.5 36 0.5" fill="none" stroke="#ffffff" stroke-width="1"/>
+                </svg>
+                <div class="wmp-corona-top-main">
+                    <div class="wmp-corona-drag-spacer"></div>
+                    <div class="wmp-mode-dropdown">
+                        <button type="button" class="wmp-mode-select" aria-haspopup="menu" aria-expanded="false">
+                            <img class="wmp-mode-icon" src="assets/wmp_now_playing_16.png" alt="">
+                            <span class="wmp-mode-label">Now Playing</span>
+                            <span class="wmp-mode-caret">&#9662;</span>
+                        </button>
+                        <div class="wmp-mode-menu" role="menu" hidden>
+                            <button type="button" class="wmp-mode-option active" data-wmp-view="now-playing" data-icon="assets/wmp_now_playing_16.png" role="menuitem">
+                                <img class="wmp-mode-option-icon" src="assets/wmp_now_playing_16.png" alt="">
+                                <span>Now Playing</span>
+                            </button>
+                            <button type="button" class="wmp-mode-option" data-wmp-view="playlist" data-icon="assets/wmp_all_songs_16.png" role="menuitem">
+                                <img class="wmp-mode-option-icon" src="assets/wmp_all_songs_16.png" alt="">
+                                <span>My Music</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="title-bar-controls wmp-corona-winbtns">
+                        <span class="wmp-winbtns-sep" aria-hidden="true"></span>
+                        <button aria-label="Minimize"></button>
+                        <button aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="window-body wmp-corona-body">
+            <div class="wmp-corona-middle">
+                <div class="wmp-corona-rail-left"></div>
+                <div class="wmp-player-col">
+                    <div class="wmp-screen">
+                        <div class="wmp-stopped-title" hidden></div>
+                        <div id="wmp-yt-host" class="wmp-frame-host"></div>
+                    </div>
+                    <div class="wmp-corona-ticker">
+                        <span class="wmp-ticker-left">
+                            <span class="wmp-status-glyph">&#9654;</span>
+                            <span class="wmp-status-text">Ready</span>
+                        </span>
+                        <span class="wmp-tracktime">0:00</span>
+                    </div>
+                </div>
+                <div class="wmp-playlist-col" hidden>
+                    <div class="wmp-playlist-header">My Music</div>
+                    <div class="wmp-playlist"></div>
+                </div>
+                <div class="wmp-corona-rail-right"></div>
+            </div>
+            <div class="wmp-corona-bottom-shell">
+                <div class="wmp-seek-row">
+                    <button type="button" class="wmp-mini-pill wmp-rew-btn" title="Rewind 10s" aria-label="Rewind">
+                        <img class="wmp-pill-icon" src="assets/wmp_fast_forward.png" alt="">
+                    </button>
+                    <input type="range" class="wmp-seek" min="0" max="100" step="1" value="0" aria-label="Seek">
+                    <button type="button" class="wmp-mini-pill wmp-ff-btn" title="Fast Forward 10s" aria-label="Fast Forward">
+                        <img class="wmp-pill-icon" src="assets/wmp_fast_forward.png" alt="">
+                    </button>
+                </div>
+                <div class="wmp-corona-deck-row">
+                    <div class="wmp-corona-deck-left">
+                        <button type="button" class="wmp-btn wmp-play-btn" title="Play" aria-label="Play">
+                            <img class="wmp-btn-icon" src="assets/wmp_play.png" alt="">
+                        </button>
+                        <button type="button" class="wmp-btn wmp-stop-btn" title="Stop" aria-label="Stop">
+                            <img class="wmp-btn-icon" src="assets/wmp_stop.png" alt="">
+                        </button>
+                        <div class="wmp-skip-pair">
+                            <button type="button" class="wmp-btn wmp-prev-btn" title="Previous" aria-label="Previous">
+                                <img class="wmp-btn-icon" src="assets/wmp_next.png" alt="">
+                            </button>
+                            <button type="button" class="wmp-btn wmp-next-btn" title="Next" aria-label="Next">
+                                <img class="wmp-btn-icon" src="assets/wmp_next.png" alt="">
+                            </button>
+                        </div>
+                        <button type="button" class="wmp-btn wmp-mute-btn" title="Mute" aria-label="Mute">
+                            <img class="wmp-btn-icon" src="assets/wmp_sound.png" alt="">
+                        </button>
+                        <div class="wmp-volume-wrap">
+                            <input type="range" class="wmp-volume" min="0" max="1" step="0.05" value="0.7" aria-label="Volume">
+                        </div>
+                    </div>
+                    <svg class="wmp-corona-bottom-slant" viewBox="0 0 42 44" preserveAspectRatio="none" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="wmpLightBottomSlantGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="44">
+                                <stop offset="0%" stop-color="#e1ebfa"/>
+                                <stop offset="55%" stop-color="#cde0f7"/>
+                                <stop offset="100%" stop-color="#b7cdeb"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M 0 0 L 42 0 L 42 3 C 24 3 16 44 0 44 Z" fill="url(#wmpLightBottomSlantGrad)"/>
+                        <path d="M 0 43.2 C 16 43.2 24 2.2 42 2.2" fill="none" stroke="#ffffff" stroke-width="1" stroke-opacity="0.75"/>
+                    </svg>
+                    <div class="wmp-corona-deck-right">
+                        <div class="corona-grippy" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <template id="notepad-window-template">
         <div class="window notepad-window" style="display: none;">
             <div class="title-bar">
@@ -189,6 +311,10 @@
                 <div class="menu-item" data-action="notepad" title="Creates and edits text files using basic text formatting.">
                     <img src="assets/app_notepad.png" class="menu-icon" alt="">
                     Notepad
+                </div>
+                <div class="menu-item" data-action="media-player" title="Plays your digital media including music, videos, CDs, DVDs, and Internet Radio.">
+                    <img src="assets/app_media_player.png" class="menu-icon" alt="">
+                    Windows Media Player
                 </div>
             </div>
             <div class="start-menu-right">

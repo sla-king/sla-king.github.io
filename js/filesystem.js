@@ -3,6 +3,10 @@ import { aboutMeTxt, contactTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt 
 export const HOME_PATH = ["C:", "Documents and Settings", "sla-king"];
 export const DEFAULT_FILE_DATE = "11/01/2026  11:39 PM";
 
+export function isAudioFile(filename) {
+    return /\.(mp3|wav|ogg|wma|m4a|flac)$/i.test(filename);
+}
+
 export const fs = {
     "C:": {
         "AUTOEXEC.BAT": "",
@@ -18,7 +22,13 @@ export const fs = {
                     "regrets-of-the-dying.txt": regretsOfTheDyingTxt,
                 },
                 "My Documents": {
-                    "My Music": {},
+                    "My Music": {
+                        "Show - Ado.mp3": "https://www.youtube.com/watch?v=pgXpM4l_MwI",
+                        "The 1 - munque.mp3": "https://www.youtube.com/watch?v=NefIygtTu-8",
+                        "Naked Hero - Vaundy.mp3": "https://www.youtube.com/watch?v=FT0GKCuSaW0",
+                        "Oddtaxi - Skirt&PUNPEE.mp3": "https://www.youtube.com/watch?v=_pxsIRHq-M0",
+                        "Hanezeve Caradhina - Kevin Penkin.mp3": "https://www.youtube.com/watch?v=mnRoh0lGxwM"
+                    },
                     "My Pictures": {},
                     "about_me.txt": aboutMeTxt,
                     "contact.txt": contactTxt,
@@ -35,6 +45,11 @@ export const fileDates = {
     "experience.txt": "11/15/2026  04:22 PM",
     "bidoof.txt": "11/03/2026  01:31 PM",
     "regrets-of-the-dying.txt": "11/03/2026  12:08 AM",
+    "Show - Ado.mp3": "09/06/2023  2:00 AM",
+    "The 1 - munque.mp3": "04/27/2025  3:03 AM",
+    "Naked Hero - Vaundy.mp3": "01/28/2022  3:00 AM",
+    "Oddtaxi - Skirt&PUNPEE.mp3": "04/06/2021  3:20 AM",
+    "Hanezeve Caradhina - Kevin Penkin.mp3": "09/27/2017  12:00 AM"
 };
 
 export let currentPath = [...HOME_PATH];

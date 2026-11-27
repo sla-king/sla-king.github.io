@@ -1,4 +1,4 @@
-import { HOME_PATH, DEFAULT_FILE_DATE, fileDates, getNode, getPathString, resolvePath } from '../filesystem.js';
+import { HOME_PATH, DEFAULT_FILE_DATE, fileDates, getNode, getPathString, resolvePath, isAudioFile } from '../filesystem.js';
 import {
     registerWindow,
     unregisterWindow,
@@ -8,6 +8,7 @@ import {
     setWindowTitle
 } from '../windowManager.js';
 import { openNotepad } from './notepad.js';
+import { openMediaPlayer } from './mediaPlayer.js';
 
 const HOME_URL = "https://sla-king.github.io/home.html";
 const HOME_PAGE_SRC = "home.html";
@@ -128,6 +129,11 @@ function getFileTypeLabel(filename) {
     if (ext === "txt") return "Text Document";
     if (ext === "bat") return "MS-DOS Batch File";
     if (ext === "sys") return "System File";
+    if (ext === "mp3") return "MP3 Format Sound";
+    if (ext === "wma") return "Windows Media Audio file";
+    if (ext === "wav") return "Wave Sound";
+    if (ext === "ogg") return "Ogg Vorbis Audio";
+    if (isAudioFile(filename)) return "Audio File";
     return "File";
 }
 
@@ -571,12 +577,16 @@ function createExplorerWindow({
             if (isHiddenExplorerItem(path, key, value)) continue;
             const isDir = typeof value === "object";
             const itemPath = [...explPath, key];
-            const itemIcon = isDir ? getFolderIcon(itemPath) : "assets/file_text_doc.png";
+            const itemIcon = isDir
+                ? getFolderIcon(itemPath)
+                : (isAudioFile(key) ? "assets/file_sound.png" : "assets/file_text_doc.png");
             const itemTooltip = getItemTooltip(itemPath, key, value);
             explItems.appendChild(
                 createExplorerItem(key, itemIcon, itemTooltip, () => {
                     if (isDir) {
                         renderFolder(itemPath);
+                    } else if (isAudioFile(key)) {
+                        openMediaPlayer({ trackPath: getPathString(itemPath), autoplay: true });
                     } else {
                         openNotepad(key, value, getPathString(itemPath));
                     }
@@ -641,7 +651,12 @@ function createExplorerWindow({
 
         if (typeof targetNode === "string") {
             const fileName = candidatePath[candidatePath.length - 1];
-            openNotepad(fileName, targetNode, getPathString(candidatePath));
+            const fullPath = getPathString(candidatePath);
+            if (isAudioFile(fileName)) {
+                openMediaPlayer({ trackPath: fullPath, autoplay: true });
+            } else {
+                openNotepad(fileName, targetNode, fullPath);
+            }
             addressInput.value = getCurrentAddressValue();
             return;
         }

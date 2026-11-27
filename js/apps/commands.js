@@ -1,6 +1,7 @@
-import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, fileDates, getLatestDateInNode } from '../filesystem.js';
+import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, fileDates, getLatestDateInNode, isAudioFile } from '../filesystem.js';
 import { openExplorer, openWebExplorer, isWebUrl } from './explorer.js';
 import { openNotepad } from './notepad.js';
+import { openMediaPlayer } from './mediaPlayer.js';
 
 function resolveFileTarget(args, context) {
     const pathString = args.join(" ");
@@ -44,7 +45,12 @@ function openTarget(pathString, context, notFoundMessage) {
     }
 
     const fileName = targetPath[targetPath.length - 1];
-    openNotepad(fileName, node, getPathString(targetPath));
+    const fullPath = getPathString(targetPath);
+    if (isAudioFile(fileName)) {
+        openMediaPlayer({ trackPath: fullPath, autoplay: true });
+    } else {
+        openNotepad(fileName, node, fullPath);
+    }
 }
 
 export const commands = {
