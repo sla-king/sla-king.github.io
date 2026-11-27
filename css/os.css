@@ -715,6 +715,7 @@ body.xp-wallpaper-only .window {
     font-weight: 700;
     letter-spacing: 0.4px;
     text-shadow: 2px 3px 3px rgba(0, 42, 128, 0.55);
+    transform: translateX(clamp(24px, 7vw, 96px));
 }
 
 .xp-status-brand {
