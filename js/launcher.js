@@ -6,7 +6,9 @@ import {
     isAudioFile,
     isFileNode,
     isFolderNode,
-    isImageFile
+    isImageFile,
+    isUrlFile,
+    parseUrlFileContent
 } from './filesystem.js';
 import { SOUNDS, playSound } from './os/AudioMixer.js';
 import { openWindow } from './os/windowManager.js';
@@ -108,10 +110,11 @@ export function getNodeIcon(itemPath, name, value) {
     if (isFolderNode(value)) return getFolderIcon(itemPath);
     if (isAudioFile(name)) return "assets/file_sound.png";
     if (isImageFile(name)) return "assets/file_image.png";
+    if (isUrlFile(name)) return "assets/file_internet_doc.png";
     return "assets/file_text_doc.png";
 }
 
-// Opens a file in Media Player, Picture Viewer, or Notepad based on its extension
+// Opens a file in Media Player, Picture Viewer, Internet Explorer, or Notepad based on its extension
 export function openFileNode(targetPath, node = getNode(targetPath), { autoplay = true } = {}) {
     if (!isFileNode(node)) return false;
 
@@ -122,6 +125,9 @@ export function openFileNode(targetPath, node = getNode(targetPath), { autoplay 
         openMediaPlayer({ trackPath: fullPath, autoplay });
     } else if (isImageFile(fileName)) {
         openPictureViewer({ imagePath: fullPath });
+    } else if (isUrlFile(fileName)) {
+        const url = parseUrlFileContent(node.content);
+        if (url) openWebExplorer({ url });
     } else {
         openNotepad(fileName, node.content, fullPath);
     }

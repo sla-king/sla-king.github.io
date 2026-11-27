@@ -21,9 +21,22 @@ import { SOUNDS, playSound } from '../os/AudioMixer.js';
 const HOME_URL = "https://sla-king.github.io/home.html";
 const HOME_PAGE_SRC = "home.html";
 const WEB_URL_PATTERN = /^(?:https?:\/\/)?sla-king\.github\.io(?:\/home\.html|\/)?$/i;
+const BRONNIE_URL = "https://bronnieware.com/blog/regrets-of-the-dying";
+const BRONNIE_PAGE_SRC = "pages/regrets-of-the-dying.html";
+const BRONNIE_URL_PATTERN = /^(?:https?:\/\/)?(?:www\.)?bronnieware\.com\/blog\/regrets-of-the-dying\/?$/i;
+
+function resolveWebTarget(input) {
+    if (WEB_URL_PATTERN.test(input)) {
+        return { url: HOME_URL, frameSrc: HOME_PAGE_SRC };
+    }
+    if (BRONNIE_URL_PATTERN.test(input)) {
+        return { url: BRONNIE_URL, frameSrc: BRONNIE_PAGE_SRC };
+    }
+    return null;
+}
 
 export function isWebUrl(input) {
-    return WEB_URL_PATTERN.test(input);
+    return Boolean(resolveWebTarget(input));
 }
 
 const explorerInstances = new Map();
@@ -88,6 +101,7 @@ export class ExplorerWindow extends XPWindow {
 
         this.mode = initialMode;
         this.webUrl = HOME_URL;
+        this.webFrameSrc = HOME_PAGE_SRC;
         this.isWebError = false;
         this.path = [...initialPath];
         this.history = [];
@@ -314,28 +328,33 @@ export class ExplorerWindow extends XPWindow {
         this.addressMenu.hidden = false;
     }
 
-    showWebView({ url = HOME_URL, isError = false, recordHistory = true } = {}) {
+    showWebView({ url = HOME_URL, frameSrc = null, isError = false, recordHistory = true } = {}) {
+        const target = resolveWebTarget(url);
+        const resolvedUrl = target ? target.url : url;
+        const resolvedSrc = frameSrc || target?.frameSrc || resolvedUrl;
+
         this.mode = "web";
-        this.webUrl = url;
+        this.webUrl = resolvedUrl;
+        this.webFrameSrc = resolvedSrc;
         this.isWebError = isError;
         this.explItems.hidden = true;
         this.explorerFrame.hidden = isError;
         if (this.webErrorEl) this.webErrorEl.hidden = !isError;
-        if (!isError && this.explorerFrame.getAttribute("src") !== HOME_PAGE_SRC) {
-            this.explorerFrame.setAttribute("src", HOME_PAGE_SRC);
+        if (!isError && this.explorerFrame.getAttribute("src") !== resolvedSrc) {
+            this.explorerFrame.setAttribute("src", resolvedSrc);
         }
         this.addressIcon?.setAttribute("src", "assets/app_explorer_16.png");
-        this.addressInput.value = url;
+        this.addressInput.value = resolvedUrl;
         this.closeAutoComplete();
         this.closeHistoryMenus();
 
         const title = isError
             ? "Cannot find server - Microsoft Internet Explorer"
-            : `${HOME_URL} - Microsoft Internet Explorer`;
+            : `${resolvedUrl} - Microsoft Internet Explorer`;
         this.setTitle(title, "assets/app_explorer_16.png");
 
         if (recordHistory) {
-            this.pushHistory({ mode: "web", url, isError });
+            this.pushHistory({ mode: "web", url: resolvedUrl, frameSrc: resolvedSrc, isError });
         } else {
             this.updateNavButtons();
         }
@@ -353,7 +372,7 @@ export class ExplorerWindow extends XPWindow {
         } catch {
             // Reset the iframe src if reload is blocked
         }
-        this.explorerFrame.src = HOME_PAGE_SRC;
+        this.explorerFrame.src = this.webFrameSrc || HOME_PAGE_SRC;
     }
 
     renderWeb({ recordHistory = true } = {}) {
@@ -495,7 +514,12 @@ export class ExplorerWindow extends XPWindow {
             if (!entry.isError) {
                 playSound(SOUNDS.START_NAVIGATION);
             }
-            this.showWebView({ url: entry.url, isError: Boolean(entry.isError), recordHistory: false });
+            this.showWebView({
+                url: entry.url,
+                frameSrc: entry.frameSrc,
+                isError: Boolean(entry.isError),
+                recordHistory: false
+            });
         } else {
             playSound(SOUNDS.START_NAVIGATION);
             this.renderFolder([...entry.path], { recordHistory: false });
@@ -518,13 +542,14 @@ export class ExplorerWindow extends XPWindow {
             return;
         }
 
-        if (isWebUrl(rawValue)) {
+        const webTarget = resolveWebTarget(rawValue);
+        if (webTarget) {
             playSound(SOUNDS.START_NAVIGATION);
-            if (this.mode === "web" && !this.isWebError) {
-                this.addressInput.value = HOME_URL;
+            if (this.mode === "web" && !this.isWebError && this.webUrl === webTarget.url) {
+                this.addressInput.value = webTarget.url;
                 this.reloadWebFrame();
             } else {
-                this.renderWeb();
+                this.showWebView({ url: webTarget.url, frameSrc: webTarget.frameSrc });
             }
             return;
         }
@@ -781,13 +806,34 @@ export function openMyComputer() {
     createAndOpenExplorer({ initialMode: "computer" });
 }
 
-export function openWebExplorer({ maximized = false } = {}) {
+export function openWebExplorer({ maximized = false, url = HOME_URL } = {}) {
+    const target = resolveWebTarget(url);
+    const resolvedUrl = target ? target.url : url;
+    const resolvedSrc = target ? target.frameSrc : url;
+    const isError = !target && !/^https?:\/\//i.test(resolvedUrl);
+
     const existing = findExplorer(
-        (inst) => inst.mode === "web" && inst.webUrl === HOME_URL
+        (inst) => inst.mode === "web" && inst.webUrl === resolvedUrl && !inst.isWebError
     );
     if (existing) {
         existing.open();
         return;
     }
-    createAndOpenExplorer({ initialMode: "web", maximized, isWebSize: true });
+
+    const anyWeb = findExplorer((inst) => inst.mode === "web");
+    if (anyWeb) {
+        anyWeb.open();
+        anyWeb.showWebView({ url: resolvedUrl, frameSrc: resolvedSrc, isError });
+        return;
+    }
+
+    const id = createAndOpenExplorer({ initialMode: "web", maximized, isWebSize: true });
+    if (resolvedUrl !== HOME_URL || isError) {
+        explorerInstances.get(id)?.showWebView({
+            url: resolvedUrl,
+            frameSrc: resolvedSrc,
+            isError,
+            recordHistory: false
+        });
+    }
 }

@@ -1,4 +1,4 @@
-import { aboutMeTxt, experienceTxt, bidoofTxt, regretsOfTheDyingTxt } from './texts.js';
+import { aboutMeTxt, experienceTxt } from './texts.js';
 
 export const HOME_PATH = ["C:", "Documents and Settings", "sla-king"];
 export const DEFAULT_FILE_DATE = "11/01/2026  11:39 PM";
@@ -68,6 +68,16 @@ export function isImageFile(filename) {
     return /\.(png|jpg|jpeg|gif|bmp|webp)$/i.test(filename);
 }
 
+export function isUrlFile(filename) {
+    return /\.url$/i.test(filename);
+}
+
+export function parseUrlFileContent(content) {
+    const raw = String(content || "").trim();
+    const iniMatch = raw.match(/^URL=(.+)$/im);
+    return (iniMatch ? iniMatch[1] : raw).trim();
+}
+
 export const fs = {
     "C:": {
         "AUTOEXEC.BAT": file("", "11/01/2026  11:39 PM"),
@@ -79,8 +89,8 @@ export const fs = {
             "sla-king": {
                 "Desktop": {},
                 "Favorites": {
-                    "bidoof.txt": file(bidoofTxt, "11/03/2026  01:31 PM"),
-                    "regrets-of-the-dying.txt": file(regretsOfTheDyingTxt, "11/03/2026  12:08 AM"),
+                    "Regrets of the Dying - Bronnie Ware.url": file("https://bronnieware.com/blog/regrets-of-the-dying", "11/27/2026  01:49 PM"),
+                    "sla-king's homepage.url": file("https://sla-king.github.io/home.html", "11/27/2026  01:49 PM"),
                 },
                 "My Documents": {
                     "My Music": {
@@ -246,7 +256,8 @@ const FILE_TYPE_LABELS = {
     jpg: "JPEG Image",
     jpeg: "JPEG Image",
     gif: "GIF Image",
-    bmp: "Bitmap Image"
+    bmp: "Bitmap Image",
+    url: "Internet Shortcut"
 };
 
 const HIDDEN_ROOT_FILES = new Set(["autoexec.bat", "config.sys"]);
