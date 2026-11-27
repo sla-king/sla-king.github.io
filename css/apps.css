@@ -588,3 +588,124 @@
 .window.unfocused .explorer-frame {
     pointer-events: none;
 }
+
+/* Windows Picture and Fax Viewer */
+.picviewer-window {
+    --win-w: 580px;
+    --win-h: 450px;
+}
+
+.picviewer-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    background-color: #eef3fa;
+    overflow: hidden;
+}
+
+.picviewer-stage {
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+.picviewer-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    transform-origin: center center;
+    transition: transform 0.14s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.picviewer-img.actual-size {
+    max-width: none;
+    max-height: none;
+}
+
+.picviewer-toolbar {
+    flex-shrink: 0;
+    margin: 0 auto 10px;
+    padding: 4px 6px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.picviewer-toolbar .picviewer-btn {
+    min-width: 24px;
+    min-height: 22px;
+    width: 24px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: transparent;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.picviewer-toolbar .picviewer-btn:not(:disabled):hover {
+    border-color: #d2cec2;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfbf6 65%, #f1ede0 100%);
+    box-shadow: inset 0 1px 0 #ffffff, inset -1px -1px 0 rgba(0, 0, 0, 0.04);
+}
+
+.picviewer-toolbar .picviewer-btn.active {
+    border-color: #cbc7ba;
+    background: linear-gradient(180deg, #faf8f1 0%, #f1ede0 100%);
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.picviewer-toolbar .picviewer-btn:not(:disabled):active {
+    border-color: #b8b4a7;
+    background: #efece0;
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.picviewer-toolbar .picviewer-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.picviewer-toolbar .picviewer-btn:disabled {
+    opacity: 0.45;
+    filter: grayscale(40%);
+    cursor: default;
+}
+
+.picviewer-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.picviewer-icon-flip {
+    transform: scaleX(-1);
+}
+
+.picviewer-sep {
+    width: 1px;
+    height: 18px;
+    margin: 0 5px;
+    background-color: #aca899;
+}

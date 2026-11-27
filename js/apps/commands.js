@@ -1,7 +1,8 @@
-import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, isFileNode, isFolderNode, getLatestDateInNode, isAudioFile } from '../filesystem.js';
+import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, isFileNode, isFolderNode, getLatestDateInNode, isAudioFile, isImageFile } from '../filesystem.js';
 import { openExplorer, openWebExplorer, isWebUrl } from './explorer.js';
 import { openNotepad } from './notepad.js';
 import { openMediaPlayer } from './mediaPlayer.js';
+import { openPictureViewer } from './pictureViewer.js';
 
 function resolveFileTarget(args, context) {
     const pathString = args.join(" ");
@@ -48,6 +49,8 @@ function openTarget(pathString, context, notFoundMessage) {
     const fullPath = getPathString(targetPath);
     if (isAudioFile(fileName)) {
         openMediaPlayer({ trackPath: fullPath, autoplay: true });
+    } else if (isImageFile(fileName)) {
+        openPictureViewer({ imagePath: fullPath });
     } else {
         openNotepad(fileName, node.content, fullPath);
     }
@@ -128,7 +131,7 @@ export const commands = {
             }
         }
 
-        const freeBytes = 9498362732;
+        const freeBytes = 150160100;
         context.print(`               ${fileCount} File(s) ${currentDirBytes.toString().padStart(14)} bytes`);
         context.print(`               ${dirCount} Dir(s)  ${freeBytes.toLocaleString("en-US").padStart(14)} bytes free\n`);
     },

@@ -4,6 +4,7 @@ import { initTerminal } from './apps/terminal.js';
 import { initExplorer, openExplorer, openWebExplorer, openMyComputer } from './apps/explorer.js';
 import { initNotepad, openNotepad, openBlankNotepad, getRecentDocuments } from './apps/notepad.js';
 import { initMediaPlayer, openMediaPlayer, setMasterAudio, resetMediaPlayerSession } from './apps/mediaPlayer.js';
+import { initPictureViewer } from './apps/pictureViewer.js';
 import {
     registerWindow,
     openWindow,
@@ -579,6 +580,7 @@ initTerminal();
 initExplorer();
 initNotepad();
 initMediaPlayer();
+initPictureViewer();
 
 if (linkWindow) {
     registerWindow({

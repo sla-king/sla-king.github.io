@@ -1,4 +1,4 @@
-import { HOME_PATH, DEFAULT_FILE_DATE, getNode, getPathString, resolvePath, isAudioFile, isFileNode, isFolderNode } from '../filesystem.js';
+import { HOME_PATH, DEFAULT_FILE_DATE, getNode, getPathString, resolvePath, isAudioFile, isImageFile, isFileNode, isFolderNode } from '../filesystem.js';
 import {
     registerWindow,
     unregisterWindow,
@@ -9,6 +9,7 @@ import {
 } from '../windowManager.js';
 import { openNotepad } from './notepad.js';
 import { openMediaPlayer } from './mediaPlayer.js';
+import { openPictureViewer } from './pictureViewer.js';
 import { SOUNDS, playSound } from '../sound.js';
 
 const HOME_URL = "https://sla-king.github.io/home.html";
@@ -138,6 +139,11 @@ function getFileTypeLabel(filename) {
     if (ext === "wav") return "Wave Sound";
     if (ext === "ogg") return "Ogg Vorbis Audio";
     if (isAudioFile(filename)) return "Audio File";
+    if (ext === "png") return "PNG Image";
+    if (ext === "jpg" || ext === "jpeg") return "JPEG Image";
+    if (ext === "gif") return "GIF Image";
+    if (ext === "bmp") return "Bitmap Image";
+    if (isImageFile(filename)) return "Image File";
     return "File";
 }
 
@@ -604,9 +610,14 @@ function createExplorerWindow({
             if (isHiddenExplorerItem(path, key, value)) continue;
             const isDir = isFolderNode(value);
             const itemPath = [...explPath, key];
-            const itemIcon = isDir
-                ? getFolderIcon(itemPath)
-                : (isAudioFile(key) ? "assets/file_sound.png" : "assets/file_text_doc.png");
+            let itemIcon = "assets/file_text_doc.png";
+            if (isDir) {
+                itemIcon = getFolderIcon(itemPath);
+            } else if (isAudioFile(key)) {
+                itemIcon = "assets/file_sound.png";
+            } else if (isImageFile(key)) {
+                itemIcon = "assets/file_image.png";
+            }
             const itemTooltip = getItemTooltip(itemPath, key, value);
             explItems.appendChild(
                 createExplorerItem(key, itemIcon, itemTooltip, () => {
@@ -615,6 +626,8 @@ function createExplorerWindow({
                         renderFolder(itemPath);
                     } else if (isAudioFile(key)) {
                         openMediaPlayer({ trackPath: getPathString(itemPath), autoplay: true });
+                    } else if (isImageFile(key)) {
+                        openPictureViewer({ imagePath: getPathString(itemPath) });
                     } else {
                         openNotepad(key, value.content, getPathString(itemPath));
                     }
@@ -689,6 +702,8 @@ function createExplorerWindow({
             const fullPath = getPathString(candidatePath);
             if (isAudioFile(fileName)) {
                 openMediaPlayer({ trackPath: fullPath, autoplay: true });
+            } else if (isImageFile(fileName)) {
+                openPictureViewer({ imagePath: fullPath });
             } else {
                 openNotepad(fileName, targetNode.content, fullPath);
             }

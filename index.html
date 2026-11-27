@@ -282,6 +282,47 @@
         </div>
     </template>
 
+    <div class="window picviewer-window" id="picture-viewer-window" tabindex="-1" style="display: none;">
+        <div class="title-bar">
+            <div class="title-bar-text">
+                <img src="assets/app_.picture_viewer_16png.png" class="window-icon" alt="">
+                Windows Picture and Fax Viewer
+            </div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body picviewer-body">
+            <div class="picviewer-stage">
+                <img id="picviewer-img" class="picviewer-img" alt="">
+            </div>
+            <div class="picviewer-toolbar" role="toolbar" aria-label="Image controls">
+                <button type="button" class="picviewer-btn" id="picviewer-prev" title="Previous Image" aria-label="Previous Image">
+                    <img src="assets/pv_next_picture.png" class="picviewer-icon picviewer-icon-flip" alt="">
+                </button>
+                <button type="button" class="picviewer-btn" id="picviewer-next" title="Next Image" aria-label="Next Image">
+                    <img src="assets/pv_next_picture.png" class="picviewer-icon" alt="">
+                </button>
+                <span class="picviewer-sep" aria-hidden="true"></span>
+                <button type="button" class="picviewer-btn" id="picviewer-best-fit" title="Best Fit" aria-label="Best Fit">
+                    <img src="assets/pv_best_fit.png" class="picviewer-icon" alt="">
+                </button>
+                <button type="button" class="picviewer-btn" id="picviewer-actual" title="Actual Size" aria-label="Actual Size">
+                    <img src="assets/pv_actual_size.png" class="picviewer-icon" alt="">
+                </button>
+                <span class="picviewer-sep" aria-hidden="true"></span>
+                <button type="button" class="picviewer-btn" id="picviewer-zoom-in" title="Zoom In" aria-label="Zoom In">
+                    <img src="assets/pv_zoom_in.png" class="picviewer-icon" alt="">
+                </button>
+                <button type="button" class="picviewer-btn" id="picviewer-zoom-out" title="Zoom Out" aria-label="Zoom Out">
+                    <img src="assets/pv_zoom_out.png" class="picviewer-icon" alt="">
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="start-menu" class="start-menu">
         <div class="start-menu-header">
             <img src="assets/start_profile_picture.png" class="user-avatar" alt="">
