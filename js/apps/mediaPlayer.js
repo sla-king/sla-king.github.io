@@ -1,5 +1,5 @@
 import { registerWindow, openWindow, setWindowTitle } from "../windowManager.js";
-import { HOME_PATH, getNode, getPathString, isAudioFile, resolvePath } from "../filesystem.js";
+import { HOME_PATH, getNode, getPathString, isAudioFile, isFileNode, isFolderNode, resolvePath } from "../filesystem.js";
 
 const MUSIC_FOLDER_PATH = [...HOME_PATH, "My Documents", "My Music"];
 
@@ -66,16 +66,16 @@ function formatTime(totalSeconds) {
 
 function collectTracksFromMusicFolder() {
     const musicNode = getNode(MUSIC_FOLDER_PATH);
-    if (!musicNode || typeof musicNode !== "object") {
+    if (!isFolderNode(musicNode)) {
         return [];
     }
     const tracks = [];
     for (const [name, value] of Object.entries(musicNode)) {
-        if (typeof value === "string" && isAudioFile(name) && extractYouTubeId(value)) {
+        if (isFileNode(value) && isAudioFile(name) && extractYouTubeId(value.content)) {
             tracks.push({
                 name,
-                url: value,
-                videoId: extractYouTubeId(value),
+                url: value.content,
+                videoId: extractYouTubeId(value.content),
                 pathString: getPathString([...MUSIC_FOLDER_PATH, name])
             });
         }
@@ -539,14 +539,14 @@ export function openMediaPlayer({ trackPath = null, autoplay = Boolean(trackPath
 
     const parts = Array.isArray(trackPath) ? trackPath : resolvePath(trackPath);
     const node = parts ? getNode(parts) : null;
-    const videoId = typeof node === "string" ? extractYouTubeId(node) : "";
+    const videoId = isFileNode(node) ? extractYouTubeId(node.content) : "";
     if (!videoId) {
         return;
     }
 
     const filename = parts[parts.length - 1];
     const pathString = getPathString(parts);
-    currentTrack = { name: filename, url: node, videoId, pathString };
+    currentTrack = { name: filename, url: node.content, videoId, pathString };
 
     if (!playlistTracks.some(t => t.pathString.toLowerCase() === pathString.toLowerCase())) {
         playlistTracks.unshift(currentTrack);

@@ -1,5 +1,5 @@
 import { commands } from './commands.js';
-import { HOME_PATH, getPathString, setPath, getNode, resolvePath } from '../filesystem.js';
+import { HOME_PATH, getPathString, setPath, getNode, isFolderNode, resolvePath } from '../filesystem.js';
 import { registerWindow, closeWindow } from '../windowManager.js';
 
 function parseArgs(input) {
@@ -150,7 +150,7 @@ export function initTerminal() {
         const filePart = lastSlashIdx !== -1 ? input.substring(lastSlashIdx + 1) : input;
 
         const currentNode = getNode(resolvePath(dirPart.replace(/"/g, "")));
-        if (!currentNode || typeof currentNode !== "object") return [];
+        if (!isFolderNode(currentNode)) return [];
 
         const cleanFile = filePart.replace(/"/g, "");
         const names = (cleanFile === "." || cleanFile === "..")

@@ -1,4 +1,4 @@
-import { HOME_PATH, DEFAULT_FILE_DATE, fileDates, getNode, getPathString, resolvePath, isAudioFile } from '../filesystem.js';
+import { HOME_PATH, DEFAULT_FILE_DATE, getNode, getPathString, resolvePath, isAudioFile, isFileNode, isFolderNode } from '../filesystem.js';
 import {
     registerWindow,
     unregisterWindow,
@@ -61,11 +61,13 @@ function showAddressError(target, ownerId) {
     requestAnimationFrame(() => errorOkBtn?.focus());
 }
 
+const MY_DOCUMENTS_TOOLTIP = "Contains letters, reports, and other documents and files.";
+const MAX_TOOLTIP_LINE_LENGTH = 64;
+
 const SPECIAL_FOLDERS = {
     "my documents": {
         large: "assets/folder_documents.png",
-        small: "assets/folder_documents_16.png",
-        tooltip: "Contains letters, reports, and other documents and files."
+        small: "assets/folder_documents_16.png"
     },
     "my music": {
         large: "assets/folder_music.png",
@@ -138,7 +140,7 @@ function getFileTypeLabel(filename) {
 }
 
 function getNodeSize(node) {
-    if (typeof node === "string") return node.length;
+    if (isFileNode(node)) return node.content.length;
     let total = 0;
     for (const value of Object.values(node)) {
         total += getNodeSize(value);
@@ -151,15 +153,15 @@ const HIDDEN_ROOT_FILES = new Set(["autoexec.bat", "config.sys"]);
 function isHiddenExplorerItem(parentPath, name, value) {
     return parentPath.length === 1 &&
         parentPath[0].toUpperCase() === "C:" &&
-        typeof value === "string" &&
+        isFileNode(value) &&
         HIDDEN_ROOT_FILES.has(name.toLowerCase());
 }
 
 function getItemTooltip(path, name, value) {
-    if (typeof value === "string") {
+    if (isFileNode(value)) {
         const type = getFileTypeLabel(name);
-        const dateModified = formatTooltipDate(fileDates[name] || DEFAULT_FILE_DATE);
-        const size = formatTooltipSize(value.length);
+        const dateModified = formatTooltipDate(value.date);
+        const size = formatTooltipSize(value.content.length);
         return `Type: ${type}\nDate Modified: ${dateModified}\nSize: ${size}`;
     }
 
@@ -170,8 +172,8 @@ function getItemTooltip(path, name, value) {
     }
 
     const entries = Object.entries(value).filter(([k, v]) => !isHiddenExplorerItem(path, k, v));
-    const childFolders = entries.filter(([, v]) => typeof v === "object").map(([k]) => k);
-    const childFiles = entries.filter(([, v]) => typeof v === "string").map(([k]) => k);
+    const childFolders = entries.filter(([, v]) => isFolderNode(v)).map(([k]) => k);
+    const childFiles = entries.filter(([, v]) => isFileNode(v)).map(([k]) => k);
     if (childFolders.length === 0 && childFiles.length === 0) {
         lines.push("Folder is empty");
         return lines.join("\n");
@@ -187,10 +189,21 @@ function getItemTooltip(path, name, value) {
     return lines.join("\n");
 }
 
+function truncateTooltipLines(tooltip, maxLength = MAX_TOOLTIP_LINE_LENGTH) {
+    return tooltip
+        .split("\n")
+        .map((line) => (
+            line.length > maxLength
+                ? `${line.slice(0, maxLength - 3).trimEnd()}...`
+                : line
+        ))
+        .join("\n");
+}
+
 function createExplorerItem(label, iconSrc, tooltip, onDoubleClick) {
     const item = document.createElement("div");
     item.className = "explorer-item";
-    item.title = tooltip;
+    item.title = truncateTooltipLines(tooltip);
 
     const icon = document.createElement("img");
     icon.className = "explorer-icon";
@@ -383,7 +396,7 @@ function createExplorerWindow({
 
         const targetDirPath = dirPart ? resolvePath(dirPart.replace(/"/g, ""), explPath) : explPath;
         const dirNode = getNode(targetDirPath);
-        if (!dirNode || typeof dirNode !== "object") return [];
+        if (!isFolderNode(dirNode)) return [];
 
         const lowerPrefix = prefix.replace(/"/g, "").toLowerCase();
         return Object.keys(dirNode)
@@ -527,7 +540,7 @@ function createExplorerWindow({
             {
                 label: "sla-king's Documents",
                 icon: "assets/folder_base.png",
-                tooltip: getItemTooltip(userDocsPath, "My Documents", getNode(userDocsPath) || {}),
+                tooltip: MY_DOCUMENTS_TOOLTIP,
                 onDoubleClick: () => renderFolder(userDocsPath)
             }
         ]);
@@ -550,7 +563,7 @@ function createExplorerWindow({
 
     function renderFolder(path, { recordHistory = true } = {}) {
         const node = getNode(path);
-        if (!node || typeof node !== "object") {
+        if (!isFolderNode(node)) {
             return false;
         }
 
@@ -575,7 +588,7 @@ function createExplorerWindow({
 
         for (const [key, value] of Object.entries(node)) {
             if (isHiddenExplorerItem(path, key, value)) continue;
-            const isDir = typeof value === "object";
+            const isDir = isFolderNode(value);
             const itemPath = [...explPath, key];
             const itemIcon = isDir
                 ? getFolderIcon(itemPath)
@@ -588,7 +601,7 @@ function createExplorerWindow({
                     } else if (isAudioFile(key)) {
                         openMediaPlayer({ trackPath: getPathString(itemPath), autoplay: true });
                     } else {
-                        openNotepad(key, value, getPathString(itemPath));
+                        openNotepad(key, value.content, getPathString(itemPath));
                     }
                 })
             );
@@ -649,13 +662,13 @@ function createExplorerWindow({
             return;
         }
 
-        if (typeof targetNode === "string") {
+        if (isFileNode(targetNode)) {
             const fileName = candidatePath[candidatePath.length - 1];
             const fullPath = getPathString(candidatePath);
             if (isAudioFile(fileName)) {
                 openMediaPlayer({ trackPath: fullPath, autoplay: true });
             } else {
-                openNotepad(fileName, targetNode, fullPath);
+                openNotepad(fileName, targetNode.content, fullPath);
             }
             addressInput.value = getCurrentAddressValue();
             return;

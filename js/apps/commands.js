@@ -1,4 +1,4 @@
-import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, fileDates, getLatestDateInNode, isAudioFile } from '../filesystem.js';
+import { DEFAULT_FILE_DATE, currentPath, setPath, getPathString, resolvePath, getNode, isFileNode, isFolderNode, getLatestDateInNode, isAudioFile } from '../filesystem.js';
 import { openExplorer, openWebExplorer, isWebUrl } from './explorer.js';
 import { openNotepad } from './notepad.js';
 import { openMediaPlayer } from './mediaPlayer.js';
@@ -17,7 +17,7 @@ function resolveFileTarget(args, context) {
         context.print("The system cannot find the file specified.\n");
         return null;
     }
-    if (typeof node === "object") {
+    if (isFolderNode(node)) {
         context.print("Access is denied.\n");
         return null;
     }
@@ -39,7 +39,7 @@ function openTarget(pathString, context, notFoundMessage) {
         return;
     }
 
-    if (typeof node === "object") {
+    if (isFolderNode(node)) {
         openExplorer(targetPath);
         return;
     }
@@ -49,7 +49,7 @@ function openTarget(pathString, context, notFoundMessage) {
     if (isAudioFile(fileName)) {
         openMediaPlayer({ trackPath: fullPath, autoplay: true });
     } else {
-        openNotepad(fileName, node, fullPath);
+        openNotepad(fileName, node.content, fullPath);
     }
 }
 
@@ -73,7 +73,7 @@ export const commands = {
         const targetPath = resolvePath(pathString);
         const node = getNode(targetPath);
 
-        if (node === null || typeof node === "string") {
+        if (node === null || isFileNode(node)) {
             context.print("The system cannot find the path specified.\n");
             return;
         }
@@ -90,7 +90,7 @@ export const commands = {
         const targetPath = pathString ? resolvePath(pathString) : currentPath;
         const node = getNode(targetPath);
 
-        if (node === null || typeof node === "string") {
+        if (node === null || isFileNode(node)) {
             context.print("File Not Found\n");
             return;
         }
@@ -115,13 +115,13 @@ export const commands = {
         }
 
         for (const [key, value] of Object.entries(node)) {
-            if (typeof value === "object") {
+            if (isFolderNode(value)) {
                 const folderTime = getLatestDateInNode(value, defaultTime);
                 context.print(`${folderTime}    <DIR>          ${key}`);
                 dirCount++;
             } else {
-                const time = fileDates[key] || defaultTime;
-                const size = value.length;
+                const time = value.date;
+                const size = value.content.length;
                 currentDirBytes += size;
                 context.print(`${time}    ${size.toString().padStart(14)} ${key}`);
                 fileCount++;
@@ -152,7 +152,7 @@ export const commands = {
         if (!target) return;
 
         const fileName = target.targetPath[target.targetPath.length - 1];
-        openNotepad(fileName, target.node, getPathString(target.targetPath));
+        openNotepad(fileName, target.node.content, getPathString(target.targetPath));
     },
 
     start: (args, context) => {
@@ -182,7 +182,7 @@ export const commands = {
         const target = resolveFileTarget(args, context);
         if (!target) return;
 
-        context.print(target.node ? `${target.node}\n` : "");
+        context.print(target.node.content ? `${target.node.content}\n` : "");
     }
 };
 
