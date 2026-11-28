@@ -127,15 +127,15 @@ export class DialogManager {
     initFrameLinkListener() {
         window.addEventListener("message", (e) => {
             if (e.data?.type !== "xp-open-link") return;
-            const isExplorerFrame = Array.from(document.querySelectorAll(".explorer-frame"))
-                .some((frame) => frame.contentWindow === e.source);
-            if (!isExplorerFrame) return;
+            const isAllowedFrame = Array.from(
+                document.querySelectorAll(".explorer-frame, .minesweeper-frame, .solitaire-frame")
+            ).some((frame) => frame.contentWindow === e.source);
+            if (!isAllowedFrame) return;
 
-            const href = typeof e.data.href === "string" ? e.data.href.trim() : "";
-            if (!/^(?:https?:\/\/|mailto:)/i.test(href)) return;
-
-            const text = typeof e.data.text === "string" ? e.data.text.trim() : "";
-            this.openLink(this.resolveLinkTarget(href, text));
+            openExternalUrl(
+                e.data.href,
+                typeof e.data.text === "string" ? e.data.text : ""
+            );
         });
     }
 
@@ -200,4 +200,12 @@ export function showAddressError(target, ownerId, onAfterClose) {
 
 export function openLinkDialog(targetOrKey) {
     dialogManager.openLink(targetOrKey);
+}
+
+export function openExternalUrl(href, label = "") {
+    if (typeof href !== "string") return false;
+    const cleanHref = href.trim();
+    if (!/^(?:https?:\/\/|mailto:)/i.test(cleanHref)) return false;
+    dialogManager.openLink(dialogManager.resolveLinkTarget(cleanHref, label.trim()));
+    return true;
 }

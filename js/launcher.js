@@ -16,6 +16,8 @@ import { openExplorer, openMyComputer, openWebExplorer } from './apps/ExplorerWi
 import { openBlankNotepad, openNotepad } from './apps/NotepadWindow.js';
 import { openMediaPlayer } from './apps/MediaPlayerApp.js';
 import { openPictureViewer } from './apps/PictureViewerApp.js';
+import { openMinesweeper } from './apps/MinesweeperApp.js';
+import { openSolitaire } from './apps/SolitaireApp.js';
 import { openLinkDialog } from './os/DialogManager.js';
 
 // Apps and folders shown in the Start Menu and All Programs
@@ -68,6 +70,18 @@ export const APP_ACTIONS = {
         isLinkDialog: true,
         launch: () => openLinkDialog("github")
     },
+    minesweeper: {
+        name: "Minesweeper",
+        icon: "assets/app_minesweeper_16.png",
+        tooltip: "Begins a game of Minesweeper.",
+        launch: () => openMinesweeper()
+    },
+    solitaire: {
+        name: "Solitaire",
+        icon: "assets/app_solitaire_16.png",
+        tooltip: "Begins the Solitaire card game.",
+        launch: () => openSolitaire()
+    },
     documents: {
         name: "My Documents",
         launch: () => openExplorer()
@@ -89,7 +103,7 @@ export const APP_ACTIONS = {
 export const ALL_PROGRAMS_SECTIONS = [
     ["cmd", "explorer-web", "notepad", "media-player"],
     ["email", "linkedin", "github"],
-    [] // Programs not already on the Start menu
+    ["minesweeper", "solitaire"]
 ];
 
 export function launchAppAction(action) {

@@ -98,8 +98,18 @@ button.xp-reset-btn:not(:disabled) {
 .title-bar-text {
     display: flex;
     align-items: center;
+    flex: 1;
+    min-width: 0;
+    margin-right: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.title-bar-label {
+    flex: 1;
     min-width: 0;
     overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -1329,6 +1339,16 @@ body.xp-wallpaper-only .window {
     --win-h: 450px;
 }
 
+.minesweeper-window {
+    --win-w: 188px;
+    --win-h: 270px;
+}
+
+.solitaire-window {
+    --win-w: 640px;
+    --win-h: 480px;
+}
+
 #xp-error-window {
     --win-w: 420px;
     height: auto;
@@ -1894,7 +1914,33 @@ body.xp-wallpaper-only .window {
     display: block;
 }
 
-.window.unfocused .explorer-frame {
+.window .minesweeper-body,
+.window .solitaire-body {
+    padding: 0;
+    background-color: #bdbdbd;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.window .solitaire-body,
+.solitaire-frame {
+    background-color: #008000;
+}
+
+.minesweeper-frame,
+.solitaire-frame {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #bdbdbd;
+    display: block;
+}
+
+.window.unfocused .explorer-frame,
+.window.unfocused .minesweeper-frame,
+.window.unfocused .solitaire-frame {
     pointer-events: none;
 }
 

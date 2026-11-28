@@ -321,6 +321,40 @@
         </div>
     </div>
 
+    <div class="window minesweeper-window" id="minesweeper-window" tabindex="-1" style="display: none;">
+        <div class="title-bar">
+            <div class="title-bar-text">
+                <img src="assets/app_minesweeper_16.png" class="window-icon" alt="">
+                Minesweeper
+            </div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize" disabled></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body minesweeper-body">
+            <iframe id="minesweeper-frame" class="minesweeper-frame" title="Minesweeper"></iframe>
+        </div>
+    </div>
+
+    <div class="window solitaire-window" id="solitaire-window" tabindex="-1" style="display: none;">
+        <div class="title-bar">
+            <div class="title-bar-text">
+                <img src="assets/app_solitaire_16.png" class="window-icon" alt="">
+                Solitaire
+            </div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body solitaire-body">
+            <iframe id="solitaire-frame" class="solitaire-frame" title="Solitaire"></iframe>
+        </div>
+    </div>
+
     <div id="start-menu" class="start-menu">
         <div class="start-menu-header">
             <img src="assets/start_profile_picture.png" class="user-avatar" alt="">

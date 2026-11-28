@@ -8,6 +8,8 @@ import { initExplorer } from './apps/ExplorerWindow.js';
 import { initNotepad } from './apps/NotepadWindow.js';
 import { initMediaPlayer } from './apps/MediaPlayerApp.js';
 import { initPictureViewer } from './apps/PictureViewerApp.js';
+import { initMinesweeper } from './apps/MinesweeperApp.js';
+import { initSolitaire } from './apps/SolitaireApp.js';
 
 initDialogs();
 
@@ -16,6 +18,8 @@ initExplorer();
 initNotepad();
 initMediaPlayer();
 initPictureViewer();
+initMinesweeper();
+initSolitaire();
 
 let startMenu = null;
 let trayVolume = null;

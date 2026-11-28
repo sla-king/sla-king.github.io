@@ -66,6 +66,24 @@ function getDefaultRestoreRect(winEl) {
     };
 }
 
+function extractTitleBarText(titleBarText) {
+    const titleClone = titleBarText.cloneNode(true);
+    titleClone.querySelector(".window-icon")?.remove();
+    return titleClone.textContent.trim();
+}
+
+function setTitleBarContent(titleBarText, iconEl, title) {
+    let labelEl = titleBarText.querySelector(".title-bar-label");
+    if (!labelEl) {
+        labelEl = document.createElement("span");
+        labelEl.className = "title-bar-label";
+    }
+    labelEl.textContent = title;
+    titleBarText.textContent = "";
+    if (iconEl) titleBarText.appendChild(iconEl);
+    titleBarText.appendChild(labelEl);
+}
+
 function createTaskbarItem(winEl) {
     const titleBarText = winEl.querySelector(".title-bar-text");
     const iconEl = titleBarText.querySelector(".window-icon");
@@ -79,10 +97,7 @@ function createTaskbarItem(winEl) {
         taskEl.appendChild(taskIcon);
     }
 
-    const titleClone = titleBarText.cloneNode(true);
-    titleClone.querySelector(".window-icon")?.remove();
-
-    const title = titleClone.textContent.trim();
+    const title = extractTitleBarText(titleBarText);
     const taskLabel = document.createElement("span");
     taskLabel.textContent = title;
     taskEl.title = title;
@@ -117,9 +132,7 @@ export function setWindowTitle(id, title, icon) {
         }
     }
 
-    titleBarText.textContent = "";
-    if (iconEl) titleBarText.appendChild(iconEl);
-    titleBarText.append(title);
+    setTitleBarContent(titleBarText, iconEl, title);
 
     if (app.taskLabel) {
         app.taskLabel.textContent = title;
@@ -428,10 +441,19 @@ export function registerWindow({
         ? createTaskbarItem(winEl)
         : { taskEl: null, taskLabel: null };
     const titleBar = winEl.querySelector(".title-bar");
+    const titleBarText = winEl.querySelector(".title-bar-text");
+    if (titleBarText) {
+        setTitleBarContent(
+            titleBarText,
+            titleBarText.querySelector(".window-icon"),
+            extractTitleBarText(titleBarText)
+        );
+    }
     const btnMin = winEl.querySelector('[aria-label="Minimize"]');
     const btnMax = winEl.querySelector('[aria-label="Maximize"], [aria-label="Restore"]');
     const btnClose = winEl.querySelector('[aria-label="Close"]');
     const canMaximize = maximizable && Boolean(btnMax);
+    const canResize = resizable && canMaximize;
 
     if (btnMax) {
         btnMax.setAttribute("aria-label", winEl.classList.contains("maximized") ? "Restore" : "Maximize");
@@ -503,7 +525,7 @@ export function registerWindow({
         e.preventDefault();
     });
 
-    if (resizable) {
+    if (canResize) {
         for (const dir of RESIZE_DIRS) {
             const handle = document.createElement("div");
             handle.className = `resize-handle resize-${dir}`;
