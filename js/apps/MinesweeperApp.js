@@ -49,12 +49,18 @@ export class MinesweeperApp extends IframeAppWindow {
         if (!this.frameEl || !Number.isFinite(contentWidth) || !Number.isFinite(contentHeight)) {
             return;
         }
-        let menuHeight = 20;
+        let menuHeight = 0;
         try {
-            const menuEl = this.frameEl.contentDocument?.querySelector(".menus");
-            if (menuEl?.offsetHeight) menuHeight = menuEl.offsetHeight;
+            const innerMenuEl = this.frameEl.contentDocument?.querySelector(".menus");
+            if (innerMenuEl?.offsetHeight) {
+                menuHeight = innerMenuEl.offsetHeight;
+            } else if (!this.winEl.querySelector(".xp-menubar")) {
+                menuHeight = 20;
+            }
         } catch {
-            // Use fallback height if cross-origin
+            if (!this.winEl.querySelector(".xp-menubar")) {
+                menuHeight = 20;
+            }
         }
 
         const chromeW = Math.max(6, this.winEl.offsetWidth - this.frameEl.clientWidth);

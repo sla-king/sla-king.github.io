@@ -42,8 +42,8 @@ var menus = {
 	"&Game": [
 		{
 			label: "&New",
-			// shortcutLabel: "F2",
-			// ariaKeyShortcuts: "F2", // TODO
+			shortcutLabel: "F2",
+			ariaKeyShortcuts: "F2",
 			action: function(){
 				minesweeper_.restart();
 			},
@@ -103,6 +103,10 @@ var menus = {
 				},
 			}
 		},
+		{
+			label: "&Sound",
+			enabled: false,
+		},
 		MENU_DIVIDER,
 		{
 			label: "Best &Times...",
@@ -120,6 +124,20 @@ var menus = {
 		}
 	],
 	"&Help": [
+		{
+			label: "&Contents",
+			shortcutLabel: "F1",
+			enabled: false,
+		},
+		{
+			label: "&Search for Help on...",
+			enabled: false,
+		},
+		{
+			label: "&Using Help",
+			enabled: false,
+		},
+		MENU_DIVIDER,
 		{
 			label: "&About Minesweeper...",
 			action: function(){

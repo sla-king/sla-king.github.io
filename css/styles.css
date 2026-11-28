@@ -1833,6 +1833,208 @@ body.xp-wallpaper-only .window {
     color: #000000;
 }
 
+/* Window Menu Bar */
+.xp-menubar {
+    position: relative;
+    z-index: 45;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    background-color: #ece9d8;
+    border-bottom: 1px solid #aca899;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.explorer-body .xp-menubar {
+    padding-left: 2px;
+}
+
+.xp-menubar-brand {
+    margin-left: auto;
+    width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    border-left: 1px solid #aca899;
+    box-shadow: -1px 0 0 #ffffff;
+    flex-shrink: 0;
+}
+
+.xp-menubar-brand-logo {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    display: block;
+}
+
+.xp-menubar-item-wrap {
+    position: relative;
+    display: flex;
+}
+
+.xp-menubar button.xp-menubar-btn,
+.xp-menubar button.xp-menubar-btn:not(:disabled),
+.xp-menubar button.xp-menubar-btn:focus,
+.xp-menubar button.xp-menubar-btn:not(:disabled):active {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 14px;
+    color: #000000;
+    cursor: default;
+}
+
+.xp-menubar button.xp-menubar-btn:hover,
+.xp-menubar button.xp-menubar-btn:not(:disabled):hover,
+.xp-menubar button.xp-menubar-btn:focus:hover,
+.xp-menubar button.xp-menubar-btn:not(:disabled):active:hover,
+.xp-menubar button.xp-menubar-btn[aria-expanded="true"],
+.xp-menubar button.xp-menubar-btn[aria-expanded="true"]:focus,
+.xp-menubar button.xp-menubar-btn[aria-expanded="true"]:active {
+    background: #316ac5;
+    color: #ffffff;
+    box-shadow: none;
+    outline: none;
+}
+
+.xp-menubar-menu {
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 0;
+    min-width: 155px;
+    z-index: 45;
+    background-color: #ffffff;
+    border: 1px solid #aca899;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+    padding: 2px;
+}
+
+.xp-menubar-menu[hidden] {
+    display: none;
+}
+
+.xp-menubar-subwrap {
+    position: relative;
+}
+
+.xp-menubar-submenu {
+    top: -3px;
+    left: calc(100% - 2px);
+    min-width: 140px;
+}
+
+.xp-menubar-menu button.xp-menubar-item,
+.xp-menubar-menu button.xp-menubar-item:not(:disabled),
+.xp-menubar-menu button.xp-menubar-item:focus,
+.xp-menubar-menu button.xp-menubar-item:not(:disabled):active {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    width: 100%;
+    text-align: left;
+    padding: 2px 8px 2px 24px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000000;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.xp-menubar-item-check {
+    position: absolute;
+    left: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    line-height: 1;
+    opacity: 0;
+}
+
+.xp-menubar-menu button.xp-menubar-item.is-checked .xp-menubar-item-check {
+    opacity: 1;
+}
+
+.xp-menubar-menu button.xp-menubar-item.has-icon,
+.xp-menubar-menu button.xp-menubar-item.has-icon:not(:disabled) {
+    padding-left: 4px;
+}
+
+.xp-menubar-item-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.xp-menubar-item-label {
+    flex: 1;
+}
+
+.xp-menubar-item-shortcut {
+    min-width: 36px;
+    margin-left: 18px;
+    text-align: left;
+    flex-shrink: 0;
+}
+
+.xp-menubar-item-arrow {
+    width: 0;
+    height: 0;
+    margin-left: 18px;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 4px solid currentColor;
+    flex-shrink: 0;
+}
+
+.xp-menubar-menu button.xp-menubar-item:not(:disabled):hover,
+.xp-menubar-menu button.xp-menubar-item:not(:disabled):focus:hover,
+.xp-menubar-menu button.xp-menubar-item:not(:disabled):active,
+.xp-menubar-menu button.xp-menubar-item[aria-expanded="true"] {
+    background: #316ac5;
+    color: #ffffff;
+    box-shadow: none;
+    outline: none;
+}
+
+.xp-menubar-menu button.xp-menubar-item:disabled,
+.xp-menubar-menu button.xp-menubar-item:disabled:hover {
+    background: transparent;
+    color: #8d8b80;
+    opacity: 1;
+    text-shadow: none;
+    box-shadow: none;
+    cursor: default;
+}
+
+.xp-menubar-divider {
+    height: 1px;
+    background-color: #c8c4b8;
+    margin: 3px 2px;
+}
+
 /* Notepad */
 .window .notepad-body {
     padding: 0;
@@ -1920,7 +2122,7 @@ body.xp-wallpaper-only .window {
     background-color: #bdbdbd;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .window .solitaire-body,
@@ -1931,6 +2133,7 @@ body.xp-wallpaper-only .window {
 .minesweeper-frame,
 .solitaire-frame {
     flex: 1;
+    min-height: 0;
     width: 100%;
     height: 100%;
     border: none;

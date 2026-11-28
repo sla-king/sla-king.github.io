@@ -27,12 +27,25 @@ export class IframeAppWindow extends XPWindow {
 
     onFrameLoad() {}
 
+    clearMenuBar() {
+        for (const menuBarEl of this.winEl.querySelectorAll(".xp-menubar")) {
+            menuBarEl._xpMenuBar?.destroy();
+            menuBarEl.remove();
+        }
+    }
+
+    onBlur() {
+        this.winEl.querySelector(".xp-menubar")?._xpMenuBar?.close();
+    }
+
     onClose() {
+        this.clearMenuBar();
         this.frameEl?.removeAttribute("src");
     }
 
     launchGame() {
         if (this.frameEl && this.frameEl.getAttribute("src") !== this.appUrl) {
+            this.clearMenuBar();
             this.frameEl.setAttribute("src", this.appUrl);
         }
         this.open();

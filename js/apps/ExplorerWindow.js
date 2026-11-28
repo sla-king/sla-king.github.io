@@ -1,4 +1,5 @@
 import { XPWindow } from '../os/XPWindow.js';
+import { MenuBar } from '../os/MenuBar.js';
 import { Autocomplete } from '../os/Autocomplete.js';
 import { registerDismissiblePopup } from '../os/windowManager.js';
 import {
@@ -12,6 +13,8 @@ import {
     isFileNode,
     isFolderNode,
     isHiddenExplorerItem,
+    isUrlFile,
+    parseUrlFileContent,
     resolvePath,
     truncateTooltipLines
 } from '../filesystem.js';
@@ -80,6 +83,7 @@ export class ExplorerWindow extends XPWindow {
             classNames
         });
 
+        this.bodyEl = this.winEl.querySelector(".explorer-body");
         this.toolbarEl = this.winEl.querySelector(".explorer-toolbar");
         this.backBtn = this.winEl.querySelector(".explorer-back-btn");
         this.backMenuBtn = this.winEl.querySelector(".explorer-back-menu-btn");
@@ -126,6 +130,20 @@ export class ExplorerWindow extends XPWindow {
             })
         ];
 
+        this.menuBar = new MenuBar({
+            containerEl: this.bodyEl,
+            insertBeforeEl: this.toolbarEl,
+            brandLogo: "assets/start_xp_logo.png",
+            menus: [
+                { label: "File", items: () => this.getFileMenuItems() },
+                { label: "Edit", items: () => this.getEditMenuItems() },
+                { label: "View", items: () => this.getViewMenuItems() },
+                { label: "Favorites", items: () => this.getFavoritesMenuItems() },
+                { label: "Tools", items: () => this.getToolsMenuItems() },
+                { label: "Help", items: () => this.getHelpMenuItems() }
+            ]
+        });
+
         this.bindEvents();
 
         if (initialMode === "web") {
@@ -138,17 +156,60 @@ export class ExplorerWindow extends XPWindow {
     }
 
     onBlur() {
+        this.menuBar?.close();
         this.closeAutoComplete();
         this.closeHistoryMenus();
     }
 
     onClose() {
+        this.menuBar?.destroy();
         this.closeAutoComplete();
         this.closeHistoryMenus();
         for (const unreg of this.unregisterPopups) {
             unreg();
         }
         explorerInstances.delete(this.id);
+    }
+
+    goBack() {
+        if (this.historyIndex > 0) {
+            this.applyHistoryEntry(this.history[--this.historyIndex]);
+        }
+    }
+
+    goForward() {
+        if (this.historyIndex < this.history.length - 1) {
+            this.applyHistoryEntry(this.history[++this.historyIndex]);
+        }
+    }
+
+    stopWeb() {
+        if (this.mode !== "web") return;
+        try {
+            this.explorerFrame.contentWindow?.stop?.();
+        } catch {
+            // Ignore errors when stopping external pages
+        }
+    }
+
+    refreshWeb() {
+        if (this.mode !== "web") return;
+        if (this.isWebError) {
+            this.showWebView({ url: this.webUrl, isError: true, recordHistory: false });
+            return;
+        }
+        this.reloadWebFrame();
+    }
+
+    goUp() {
+        if (this.mode !== "folder") return;
+        if (this.path.length > 1) {
+            playSound(SOUNDS.START_NAVIGATION);
+            this.renderFolder(this.path.slice(0, -1));
+        } else if (this.path.length === 1) {
+            playSound(SOUNDS.START_NAVIGATION);
+            this.renderComputer();
+        }
     }
 
     focusAddressInput() {
@@ -527,6 +588,238 @@ export class ExplorerWindow extends XPWindow {
         }
     }
 
+    getGoToMenuItems() {
+        return [
+            { label: "Back", disabled: () => this.historyIndex <= 0, onClick: () => this.goBack() },
+            { label: "Forward", disabled: () => this.historyIndex >= this.history.length - 1, onClick: () => this.goForward() },
+            { label: "Up One Level", disabled: () => this.mode !== "folder", onClick: () => this.goUp() },
+            { type: "divider" },
+            {
+                label: "Home Page",
+                onClick: () => {
+                    playSound(SOUNDS.START_NAVIGATION);
+                    this.renderWeb();
+                }
+            }
+        ];
+    }
+
+    getFileMenuItems() {
+        if (this.mode === "web") {
+            return [
+                { label: "New", hasSubmenu: true, disabled: true },
+                { label: "Open...", shortcut: "Ctrl+O", disabled: true },
+                { label: "Edit", disabled: true },
+                { label: "Save", shortcut: "Ctrl+S", disabled: true },
+                { label: "Save As...", disabled: true },
+                { type: "divider" },
+                { label: "Page Setup...", disabled: true },
+                { label: "Print...", shortcut: "Ctrl+P", disabled: true },
+                { label: "Print Preview...", disabled: true },
+                { type: "divider" },
+                { label: "Send", hasSubmenu: true, disabled: true },
+                { label: "Import and Export...", disabled: true },
+                { type: "divider" },
+                { label: "Properties", disabled: true },
+                { label: "Work Offline", disabled: true },
+                { label: "Close", onClick: () => this.close() }
+            ];
+        }
+        return [
+            { label: "New", hasSubmenu: true, disabled: true },
+            { type: "divider" },
+            { label: "Create Shortcut", disabled: true },
+            { label: "Delete", disabled: true },
+            { label: "Rename", disabled: true },
+            { label: "Properties", disabled: true },
+            { type: "divider" },
+            { label: "Work Offline", disabled: true },
+            { label: "Close", onClick: () => this.close() }
+        ];
+    }
+
+    getEditMenuItems() {
+        if (this.mode === "web") {
+            return [
+                { label: "Cut", shortcut: "Ctrl+X", disabled: true },
+                { label: "Copy", shortcut: "Ctrl+C", disabled: true },
+                { label: "Paste", shortcut: "Ctrl+V", disabled: true },
+                { type: "divider" },
+                { label: "Select All", shortcut: "Ctrl+A", disabled: true },
+                { type: "divider" },
+                { label: "Find (on This Page)...", shortcut: "Ctrl+F", disabled: true }
+            ];
+        }
+        return [
+            { label: "Undo", shortcut: "Ctrl+Z", disabled: true },
+            { type: "divider" },
+            { label: "Cut", shortcut: "Ctrl+X", disabled: true },
+            { label: "Copy", shortcut: "Ctrl+C", disabled: true },
+            { label: "Paste", shortcut: "Ctrl+V", disabled: true },
+            { label: "Paste Shortcut", disabled: true },
+            { type: "divider" },
+            { label: "Select All", shortcut: "Ctrl+A", disabled: true },
+            { label: "Invert Selection", disabled: true }
+        ];
+    }
+
+    getViewMenuItems() {
+        const goToItem = { label: "Go To", submenu: this.getGoToMenuItems() };
+        if (this.mode === "web") {
+            return [
+                { label: "Toolbars", hasSubmenu: true, disabled: true },
+                { label: "Status Bar", disabled: true },
+                { label: "Explorer Bar", hasSubmenu: true, disabled: true },
+                { type: "divider" },
+                goToItem,
+                { label: "Stop", shortcut: "Esc", onClick: () => this.stopWeb() },
+                { label: "Refresh", shortcut: "F5", onClick: () => this.refreshWeb() },
+                { type: "divider" },
+                { label: "Text Size", hasSubmenu: true, disabled: true },
+                { label: "Encoding", hasSubmenu: true, disabled: true },
+                { type: "divider" },
+                { label: "Source", disabled: true },
+                { label: "Privacy Report...", disabled: true },
+                { label: "Full Screen", shortcut: "F11", disabled: true }
+            ];
+        }
+        return [
+            { label: "Toolbars", hasSubmenu: true, disabled: true },
+            { label: "Status Bar", disabled: true },
+            { label: "Explorer Bar", hasSubmenu: true, disabled: true },
+            { type: "divider" },
+            { label: "Thumbnails", disabled: true },
+            { label: "Tiles", disabled: true },
+            { label: "Icons", disabled: true },
+            { label: "List", disabled: true },
+            { label: "Details", disabled: true },
+            { type: "divider" },
+            { label: "Arrange Icons by", hasSubmenu: true, disabled: true },
+            { type: "divider" },
+            { label: "Choose Details...", disabled: true },
+            goToItem,
+            { label: "Refresh", onClick: () => this.refreshCurrentView() }
+        ];
+    }
+
+    getFavoritesMenuItems() {
+        const favoriteItems = this.buildFavoritesItems();
+        return [
+            { label: "Add to Favorites...", disabled: true },
+            { label: "Organize Favorites...", disabled: true },
+            ...(favoriteItems.length > 0 ? [{ type: "divider" }, ...favoriteItems] : [])
+        ];
+    }
+
+    getToolsMenuItems() {
+        if (this.mode === "web") {
+            return [
+                { label: "Mail and News", hasSubmenu: true, disabled: true },
+                { label: "Pop-up Blocker", hasSubmenu: true, disabled: true },
+                { label: "Manage Add-ons...", disabled: true },
+                { label: "Synchronize...", disabled: true },
+                { label: "Windows Update", disabled: true },
+                { type: "divider" },
+                { label: "Windows Messenger", disabled: true },
+                { label: "Diagnose Connection Problems...", disabled: true },
+                { type: "divider" },
+                { label: "Internet Options...", disabled: true }
+            ];
+        }
+        return [
+            { label: "Map Network Drive...", disabled: true },
+            { label: "Disconnect Network Drive...", disabled: true },
+            { label: "Synchronize...", disabled: true },
+            { type: "divider" },
+            { label: "Folder Options...", disabled: true }
+        ];
+    }
+
+    getHelpMenuItems() {
+        if (this.mode === "web") {
+            return [
+                { label: "Contents and Index", disabled: true },
+                { label: "Tip of the Day", disabled: true },
+                { label: "For Netscape Users", disabled: true },
+                { label: "Online Support", disabled: true },
+                { label: "Send Feedback", disabled: true },
+                { type: "divider" },
+                { label: "About Internet Explorer", disabled: true }
+            ];
+        }
+        return [
+            { label: "Help and Support Center", disabled: true },
+            { type: "divider" },
+            { label: "Is this copy of Windows legal?", disabled: true },
+            { label: "About Windows", disabled: true }
+        ];
+    }
+
+    refreshCurrentView() {
+        if (this.mode === "web") {
+            this.refreshWeb();
+        } else if (this.mode === "computer") {
+            this.renderComputer({ recordHistory: false });
+        } else {
+            this.renderFolder([...this.path], { recordHistory: false });
+        }
+    }
+
+    buildFavoritesItems(folderPath = [...HOME_PATH, "Favorites"]) {
+        const folderNode = getNode(folderPath);
+        if (!isFolderNode(folderNode)) return [];
+
+        const entries = Object.entries(folderNode)
+            .filter(([name, value]) => !isHiddenExplorerItem(folderPath, name, value))
+            .sort(([nameA, nodeA], [nameB, nodeB]) => {
+                const aIsFolder = isFolderNode(nodeA);
+                const bIsFolder = isFolderNode(nodeB);
+                if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
+                return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+            });
+
+        return entries.map(([name, value]) => {
+            const entryPath = [...folderPath, name];
+            if (isFolderNode(value)) {
+                return {
+                    label: name,
+                    submenu: this.buildFavoritesItems(entryPath)
+                };
+            }
+            if (isUrlFile(name)) {
+                const url = parseUrlFileContent(value.content);
+                return {
+                    label: name.replace(/\.url$/i, ""),
+                    disabled: !url,
+                    onClick: () => this.openWebUrl(url)
+                };
+            }
+            return {
+                label: name,
+                onClick: () => openFileNode(entryPath, value, { autoplay: true })
+            };
+        });
+    }
+
+    openWebUrl(rawUrl) {
+        const webTarget = resolveWebTarget(rawUrl);
+        if (webTarget) {
+            playSound(SOUNDS.START_NAVIGATION);
+            if (this.mode === "web" && !this.isWebError && this.webUrl === webTarget.url) {
+                this.addressInput.value = webTarget.url;
+                this.reloadWebFrame();
+            } else {
+                this.showWebView({ url: webTarget.url, frameSrc: webTarget.frameSrc });
+            }
+            return true;
+        }
+        if (/^https?:\/\//i.test(rawUrl)) {
+            this.showWebView({ url: rawUrl, isError: true });
+            return true;
+        }
+        return false;
+    }
+
     navigateFromAddressBar() {
         this.closeAutoComplete();
         const rawValue = this.addressInput.value.trim();
@@ -543,15 +836,8 @@ export class ExplorerWindow extends XPWindow {
             return;
         }
 
-        const webTarget = resolveWebTarget(rawValue);
-        if (webTarget) {
-            playSound(SOUNDS.START_NAVIGATION);
-            if (this.mode === "web" && !this.isWebError && this.webUrl === webTarget.url) {
-                this.addressInput.value = webTarget.url;
-                this.reloadWebFrame();
-            } else {
-                this.showWebView({ url: webTarget.url, frameSrc: webTarget.frameSrc });
-            }
+        if (resolveWebTarget(rawValue)) {
+            this.openWebUrl(rawValue);
             return;
         }
 
@@ -697,11 +983,7 @@ export class ExplorerWindow extends XPWindow {
             }
         });
 
-        this.backBtn?.addEventListener("click", () => {
-            if (this.historyIndex > 0) {
-                this.applyHistoryEntry(this.history[--this.historyIndex]);
-            }
-        });
+        this.backBtn?.addEventListener("click", () => this.goBack());
 
         this.backMenuBtn?.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -712,11 +994,7 @@ export class ExplorerWindow extends XPWindow {
             }
         });
 
-        this.forwardBtn?.addEventListener("click", () => {
-            if (this.historyIndex < this.history.length - 1) {
-                this.applyHistoryEntry(this.history[++this.historyIndex]);
-            }
-        });
+        this.forwardBtn?.addEventListener("click", () => this.goForward());
 
         this.forwardMenuBtn?.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -727,39 +1005,16 @@ export class ExplorerWindow extends XPWindow {
             }
         });
 
-        this.stopBtn?.addEventListener("click", () => {
-            if (this.mode !== "web") return;
-            try {
-                this.explorerFrame.contentWindow?.stop?.();
-            } catch {
-                // Ignore errors when stopping external pages
-            }
-        });
+        this.stopBtn?.addEventListener("click", () => this.stopWeb());
 
-        this.refreshBtn?.addEventListener("click", () => {
-            if (this.mode !== "web") return;
-            if (this.isWebError) {
-                this.showWebView({ url: this.webUrl, isError: true, recordHistory: false });
-                return;
-            }
-            this.reloadWebFrame();
-        });
+        this.refreshBtn?.addEventListener("click", () => this.refreshWeb());
 
         this.homeBtn?.addEventListener("click", () => {
             playSound(SOUNDS.START_NAVIGATION);
             this.renderWeb();
         });
 
-        this.upBtn?.addEventListener("click", () => {
-            if (this.mode !== "folder") return;
-            if (this.path.length > 1) {
-                playSound(SOUNDS.START_NAVIGATION);
-                this.renderFolder(this.path.slice(0, -1));
-            } else if (this.path.length === 1) {
-                playSound(SOUNDS.START_NAVIGATION);
-                this.renderComputer();
-            }
-        });
+        this.upBtn?.addEventListener("click", () => this.goUp());
 
         this.goBtn?.addEventListener("click", () => this.navigateFromAddressBar());
     }

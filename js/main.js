@@ -3,6 +3,7 @@ import { initDialogs } from './os/DialogManager.js';
 import { PowerSessionManager } from './os/PowerSessionManager.js';
 import { StartMenu } from './os/StartMenu.js';
 import { TrayVolume } from './os/TrayVolume.js';
+import { MenuBar } from './os/MenuBar.js';
 import { initTerminal } from './apps/TerminalApp.js';
 import { initExplorer } from './apps/ExplorerWindow.js';
 import { initNotepad } from './apps/NotepadWindow.js';
@@ -10,6 +11,9 @@ import { initMediaPlayer } from './apps/MediaPlayerApp.js';
 import { initPictureViewer } from './apps/PictureViewerApp.js';
 import { initMinesweeper } from './apps/MinesweeperApp.js';
 import { initSolitaire } from './apps/SolitaireApp.js';
+
+// Allow embedded programs (Minesweeper, Solitaire) to render their menu bar in the parent XP frame
+window.MenuBar = MenuBar;
 
 initDialogs();
 
