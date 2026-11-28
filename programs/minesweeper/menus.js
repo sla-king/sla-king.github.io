@@ -141,8 +141,11 @@ var menus = {
 		{
 			label: "&About Minesweeper...",
 			action: function(){
-				// TODO: about dialog
-				window.open("https://github.com/ziebelje/minesweeper");
+				if (typeof window.showAboutDialog === "function") {
+					window.showAboutDialog();
+				} else {
+					window.open("https://github.com/ziebelje/minesweeper");
+				}
 			},
 		}
 	],

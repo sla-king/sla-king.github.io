@@ -19,7 +19,7 @@ import {
     truncateTooltipLines
 } from '../filesystem.js';
 import { getNodeIcon, openFileNode } from '../launcher.js';
-import { showAddressError } from '../os/DialogManager.js';
+import { showAboutInternetExplorer, showAddressError, showShellAbout } from '../os/DialogManager.js';
 import { SOUNDS, playSound } from '../os/AudioMixer.js';
 
 const HOME_URL = "https://sla-king.github.io/home.html";
@@ -744,14 +744,14 @@ export class ExplorerWindow extends XPWindow {
                 { label: "Online Support", disabled: true },
                 { label: "Send Feedback", disabled: true },
                 { type: "divider" },
-                { label: "About Internet Explorer", disabled: true }
+                { label: "About Internet Explorer", onClick: () => showAboutInternetExplorer(this.id) }
             ];
         }
         return [
             { label: "Help and Support Center", disabled: true },
             { type: "divider" },
             { label: "Is this copy of Windows legal?", disabled: true },
-            { label: "About Windows", disabled: true }
+            { label: "About Windows", onClick: () => showShellAbout("windows", this.id) }
         ];
     }
 

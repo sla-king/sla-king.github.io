@@ -23,11 +23,40 @@ export const EXTERNAL_LINKS = {
     }
 };
 
-// Handles the address error popup and external link confirmation popup
+export const SHELL_ABOUT_APPS = {
+    windows: {
+        title: "About Windows",
+        product: "Microsoft \u00ae Windows",
+        icon: null,
+        credits: ""
+    },
+    notepad: {
+        title: "About Notepad",
+        product: "Microsoft \u00ae Notepad",
+        icon: "assets/app_notepad.png",
+        credits: ""
+    },
+    minesweeper: {
+        title: "About Minesweeper",
+        product: "Microsoft \u00ae Minesweeper",
+        icon: "assets/app_minesweeper.png",
+        credits: "by Robert Donner and Curt Johnson"
+    },
+    solitaire: {
+        title: "About Solitaire",
+        product: "Microsoft \u00ae Solitaire",
+        icon: "assets/app_solitaire.png",
+        credits: "Developed for Microsoft by Wes Cherry"
+    }
+};
+
+// Handles modal dialogs and external link confirmation popups
 export class DialogManager {
     constructor() {
         this.errorWin = null;
         this.linkWin = null;
+        this.aboutIeWin = null;
+        this.aboutWin = null;
         this.errorMessage = null;
         this.errorOkBtn = null;
         this.errorCloseHandler = null;
@@ -35,6 +64,12 @@ export class DialogManager {
         this.linkIcon = null;
         this.linkMessage = null;
         this.linkVisitBtn = null;
+        this.aboutIeOkBtn = null;
+        this.aboutWinTitle = null;
+        this.aboutWinIcon = null;
+        this.aboutWinProduct = null;
+        this.aboutWinCredits = null;
+        this.aboutWinOkBtn = null;
         this.pendingLinkUrl = "";
         this.initialized = false;
     }
@@ -45,38 +80,51 @@ export class DialogManager {
 
         this.initErrorDialog();
         this.initLinkDialog();
+        this.initAboutIeDialog();
+        this.initShellAboutDialog();
         this.initFrameLinkListener();
     }
 
-    initErrorDialog() {
-        const errorWindowEl = document.getElementById("xp-error-window");
-        if (!errorWindowEl) return;
+    initModalDialog({ winId, windowElId, okBtnId, onClose = null }) {
+        const windowEl = document.getElementById(windowElId);
+        if (!windowEl) return { win: null, okBtn: null };
 
-        this.errorMessage = document.getElementById("xp-error-message");
-        this.errorOkBtn = document.getElementById("xp-error-ok");
-
-        this.errorWin = new XPWindow({
-            id: "xp-error",
-            winEl: errorWindowEl,
+        const okBtn = document.getElementById(okBtnId);
+        const win = new XPWindow({
+            id: winId,
+            winEl: windowEl,
             resizable: false,
             maximizable: false,
             showInTaskbar: false
         });
-        this.errorWin.onBlockedFocus = () => this.errorOkBtn?.focus();
-        this.errorWin.onClose = (ownerId) => {
-            const cb = this.errorCloseHandler;
-            this.errorCloseHandler = null;
-            cb?.(ownerId);
-        };
+        win.onBlockedFocus = () => okBtn?.focus();
+        if (onClose) win.onClose = onClose;
 
-        this.errorOkBtn?.addEventListener("click", () => this.errorWin.close());
-        errorWindowEl.addEventListener("keydown", (e) => {
+        okBtn?.addEventListener("click", () => win.close());
+        windowEl.addEventListener("keydown", (e) => {
             if (e.key === "Escape" || e.key === "Enter") {
                 e.preventDefault();
                 e.stopPropagation();
-                this.errorWin.close();
+                win.close();
             }
         });
+        return { win, okBtn };
+    }
+
+    initErrorDialog() {
+        this.errorMessage = document.getElementById("xp-error-message");
+        const { win, okBtn } = this.initModalDialog({
+            winId: "xp-error",
+            windowElId: "xp-error-window",
+            okBtnId: "xp-error-ok",
+            onClose: (ownerId) => {
+                const cb = this.errorCloseHandler;
+                this.errorCloseHandler = null;
+                cb?.(ownerId);
+            }
+        });
+        this.errorWin = win;
+        this.errorOkBtn = okBtn;
     }
 
     initLinkDialog() {
@@ -122,6 +170,30 @@ export class DialogManager {
             onClose: () => this.linkWin.close(),
             capture: true
         });
+    }
+
+    initAboutIeDialog() {
+        const { win, okBtn } = this.initModalDialog({
+            winId: "xp-about-ie",
+            windowElId: "xp-about-ie-window",
+            okBtnId: "xp-about-ie-ok"
+        });
+        this.aboutIeWin = win;
+        this.aboutIeOkBtn = okBtn;
+    }
+
+    initShellAboutDialog() {
+        this.aboutWinTitle = document.getElementById("xp-about-win-title");
+        this.aboutWinIcon = document.getElementById("xp-about-win-icon");
+        this.aboutWinProduct = document.getElementById("xp-about-win-product");
+        this.aboutWinCredits = document.getElementById("xp-about-win-credits");
+        const { win, okBtn } = this.initModalDialog({
+            winId: "xp-about-win",
+            windowElId: "xp-about-win-window",
+            okBtnId: "xp-about-win-ok"
+        });
+        this.aboutWin = win;
+        this.aboutWinOkBtn = okBtn;
     }
 
     initFrameLinkListener() {
@@ -186,6 +258,37 @@ export class DialogManager {
         playSound(SOUNDS.EXCLAMATION);
         requestAnimationFrame(() => this.linkVisitBtn?.focus());
     }
+
+    showAboutIe(ownerId) {
+        this.init();
+        if (!this.aboutIeWin) return;
+
+        this.aboutIeWin.open({ ownerId });
+        this.aboutIeWin.center();
+        requestAnimationFrame(() => this.aboutIeOkBtn?.focus());
+    }
+
+    showShellAbout(appKey, ownerId) {
+        this.init();
+        const cfg = SHELL_ABOUT_APPS[appKey];
+        if (!cfg || !this.aboutWin) return;
+
+        this.aboutWin.setTitle(cfg.title);
+        if (this.aboutWinTitle) this.aboutWinTitle.textContent = cfg.title;
+        if (this.aboutWinProduct) this.aboutWinProduct.textContent = cfg.product;
+        if (this.aboutWinIcon) {
+            this.aboutWinIcon.hidden = !cfg.icon;
+            this.aboutWinIcon.src = cfg.icon || "";
+        }
+        if (this.aboutWinCredits) {
+            this.aboutWinCredits.hidden = !cfg.credits;
+            this.aboutWinCredits.textContent = cfg.credits;
+        }
+
+        this.aboutWin.open({ ownerId });
+        this.aboutWin.center();
+        requestAnimationFrame(() => this.aboutWinOkBtn?.focus());
+    }
 }
 
 const dialogManager = new DialogManager();
@@ -196,6 +299,14 @@ export function initDialogs() {
 
 export function showAddressError(target, ownerId, onAfterClose) {
     dialogManager.showAddressError(target, ownerId, onAfterClose);
+}
+
+export function showAboutInternetExplorer(ownerId) {
+    dialogManager.showAboutIe(ownerId);
+}
+
+export function showShellAbout(appKey, ownerId) {
+    dialogManager.showShellAbout(appKey, ownerId);
 }
 
 export function openLinkDialog(targetOrKey) {

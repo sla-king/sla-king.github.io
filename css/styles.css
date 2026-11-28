@@ -1359,6 +1359,16 @@ body.xp-wallpaper-only .window {
     height: auto;
 }
 
+#xp-about-ie-window {
+    --win-w: 392px;
+    height: auto;
+}
+
+#xp-about-win-window {
+    --win-w: 414px;
+    height: auto;
+}
+
 /* Command Prompt */
 #command-window .window-body {
     background-color: #000000;
@@ -1825,12 +1835,292 @@ body.xp-wallpaper-only .window {
 
 #xp-error-ok,
 #xp-link-cancel,
-#xp-link-visit {
+#xp-link-visit,
+#xp-about-ie-ok,
+#xp-about-win-ok {
     min-width: 75px;
     min-height: 23px;
     font-family: 'Tahoma', sans-serif;
     font-size: 11px;
     color: #000000;
+}
+
+/* Shell About Dialog (Windows, Notepad, Minesweeper, Solitaire) */
+#xp-about-win-window .xp-about-win-body {
+    height: auto;
+    background-color: #ece9d8;
+    color: #000000;
+    padding: 0;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+}
+
+.xp-about-win-banner {
+    position: relative;
+    height: 76px;
+    background:
+        radial-gradient(circle at 46% 35%, rgba(160, 195, 255, 0.65) 0%, rgba(102, 141, 218, 0) 55%),
+        linear-gradient(180deg, #527bd5 0%, #6d92e0 52%, #4a72cc 100%);
+    color: #ffffff;
+    overflow: hidden;
+    user-select: none;
+}
+
+.xp-about-win-hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 10px;
+}
+
+.xp-about-win-flag {
+    width: 38px;
+    height: 35px;
+    object-fit: contain;
+    display: block;
+}
+
+.xp-about-win-wordmark {
+    line-height: 1;
+}
+
+.xp-about-win-ms {
+    font-size: 9px;
+    margin-bottom: 1px;
+}
+
+.xp-about-win-ms span {
+    font-size: 7px;
+    vertical-align: super;
+}
+
+.xp-about-win-os {
+    font-family: 'Franklin Gothic Medium', 'Arial', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    line-height: 0.95;
+}
+
+.xp-about-win-os sup {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ff6a22;
+    margin-left: 1px;
+    vertical-align: top;
+}
+
+.xp-about-win-edition {
+    font-size: 13px;
+    margin-top: 1px;
+}
+
+.xp-about-win-banner-copy {
+    position: absolute;
+    left: 6px;
+    bottom: 5px;
+    font-size: 9px;
+    line-height: 1.15;
+    color: #ffffff;
+}
+
+.xp-about-win-banner-brand {
+    position: absolute;
+    right: 6px;
+    bottom: 4px;
+    font-family: 'Franklin Gothic Medium', 'Arial', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    font-style: italic;
+    color: #ffffff;
+}
+
+.xp-about-win-banner-brand span {
+    font-size: 7px;
+    vertical-align: super;
+    font-style: normal;
+}
+
+.xp-about-win-stripe {
+    height: 5px;
+    background: linear-gradient(90deg, #91afe6 0%, #ea932a 42%, #f4ab3b 58%, #7ca2e1 100%);
+}
+
+.xp-about-win-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px 12px 10px 10px;
+}
+
+.xp-about-win-icon-col {
+    width: 34px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.xp-about-win-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    display: block;
+}
+
+.xp-about-win-icon[hidden] {
+    display: none;
+}
+
+.xp-about-win-info {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.48;
+    user-select: text;
+}
+
+.xp-about-win-eula {
+    margin-top: 16px;
+    line-height: 1.35;
+}
+
+.xp-about-win-link {
+    color: #0000cc;
+    text-decoration: underline;
+}
+
+.xp-about-win-user {
+    margin-top: 5px;
+    margin-left: 14px;
+}
+
+.xp-about-win-divider {
+    border: none;
+    border-top: 1px solid #aca899;
+    border-bottom: 1px solid #ffffff;
+    margin: 12px 0 8px 0;
+}
+
+.xp-about-win-memory {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.xp-about-win-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 12px 12px 12px;
+}
+
+/* About Internet Explorer Dialog */
+#xp-about-ie-window .xp-about-ie-body {
+    height: auto;
+    background-color: #ffffff;
+    color: #000000;
+    padding: 12px 16px 14px 10px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+}
+
+.xp-about-ie-banner {
+    position: relative;
+    height: 98px;
+    margin-left: 72px;
+    user-select: none;
+}
+
+.xp-about-ie-banner-svg {
+    width: 260px;
+    height: 98px;
+    display: block;
+}
+
+.xp-about-ie-orb {
+    position: absolute;
+    left: 63px;
+    top: 11px;
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.xp-about-ie-wordmark {
+    position: absolute;
+    left: 20px;
+    top: 57px;
+    line-height: 1;
+    color: #000000;
+}
+
+.xp-about-ie-ms {
+    font-family: 'Arial', 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    margin-bottom: 1px;
+}
+
+.xp-about-ie-ms span {
+    font-size: 8px;
+    vertical-align: super;
+}
+
+.xp-about-ie-title-text {
+    font-family: 'Arial Black', 'Arial', sans-serif;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -0.8px;
+    margin-left: 16px;
+}
+
+.xp-about-ie-main {
+    margin: 12px 2px 12px 76px;
+}
+
+.xp-about-ie-meta {
+    line-height: 1.38;
+    margin-bottom: 10px;
+    user-select: text;
+}
+
+.xp-about-ie-credits {
+    width: 100%;
+    height: 54px;
+    box-sizing: border-box;
+    resize: none;
+    overflow-y: scroll;
+    background-color: #ffffff;
+    border: 1px solid #7f9db9;
+    padding: 2px 4px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #000000;
+}
+
+.xp-about-ie-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.xp-about-ie-flag {
+    width: 30px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-left: 2px;
+}
+
+.xp-about-ie-copyright {
+    flex: 1;
+    margin-left: 34px;
+    text-decoration: underline;
+    color: #000000;
+    user-select: text;
 }
 
 /* Window Menu Bar */

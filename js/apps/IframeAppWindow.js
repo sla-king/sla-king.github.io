@@ -1,12 +1,13 @@
 import { XPWindow } from '../os/XPWindow.js';
-import { openExternalUrl } from '../os/DialogManager.js';
+import { openExternalUrl, showShellAbout } from '../os/DialogManager.js';
 
 // Shared XP window wrapper for local iframe programs
 export class IframeAppWindow extends XPWindow {
-    constructor({ id, winEl, frameId, url, resizable = true, maximizable = true }) {
+    constructor({ id, winEl, frameId, url, aboutKey = null, resizable = true, maximizable = true }) {
         super({ id, winEl, resizable, maximizable });
         this.frameEl = document.getElementById(frameId);
         this.appUrl = url;
+        this.aboutKey = aboutKey;
         this.frameEl?.addEventListener("load", () => this.handleFrameLoad());
     }
 
@@ -19,6 +20,9 @@ export class IframeAppWindow extends XPWindow {
                 openExternalUrl(href);
                 return null;
             };
+            if (this.aboutKey) {
+                cw.showAboutDialog = () => showShellAbout(this.aboutKey, this.id);
+            }
         } catch {
             // Ignore cross-origin restrictions
         }

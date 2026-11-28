@@ -1,5 +1,6 @@
 import { XPWindow } from '../os/XPWindow.js';
 import { MenuBar } from '../os/MenuBar.js';
+import { showShellAbout } from '../os/DialogManager.js';
 import { HOME_PATH, getNode, getPathString, isFileNode } from '../filesystem.js';
 
 const DEFAULT_RECENT_DOCUMENTS = ["experience.txt", "about_me.txt"];
@@ -84,7 +85,7 @@ export class NotepadWindow extends XPWindow {
                     items: [
                         { label: "Help Topics", disabled: true },
                         { type: "divider" },
-                        { label: "About Notepad", disabled: true }
+                        { label: "About Notepad", onClick: () => showShellAbout("notepad", this.id) }
                     ]
                 }
             ]

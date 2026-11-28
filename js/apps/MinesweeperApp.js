@@ -11,6 +11,7 @@ export class MinesweeperApp extends IframeAppWindow {
             winEl,
             frameId: "minesweeper-frame",
             url: MINESWEEPER_URL,
+            aboutKey: "minesweeper",
             resizable: false,
             maximizable: false
         });

@@ -10,7 +10,8 @@ export class SolitaireApp extends IframeAppWindow {
             id: SOLITAIRE_ID,
             winEl,
             frameId: "solitaire-frame",
-            url: SOLITAIRE_URL
+            url: SOLITAIRE_URL,
+            aboutKey: "solitaire"
         });
     }
 }

@@ -2,7 +2,7 @@ import { XPWindow } from '../os/XPWindow.js';
 import { getNode, getPathString, isFileNode, isImageFile, listFilesInFolder, resolvePath } from '../filesystem.js';
 
 const VIEWER_ID = "picture-viewer";
-const VIEWER_ICON = "assets/app_.picture_viewer_16png.png";
+const VIEWER_ICON = "assets/app_picture_viewer_16.png";
 const ZOOM_STEP = 0.25;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
