@@ -57,6 +57,7 @@ export class PowerSessionManager {
         this.powerBalloonBody = document.getElementById("xp-power-balloon-body");
 
         this.systemScreen = document.getElementById("xp-system-screen");
+        this.switchFadeView = document.getElementById("xp-switch-fade-view");
         this.statusView = document.getElementById("xp-status-view");
         this.statusText = document.getElementById("xp-status-text");
         this.logonView = document.getElementById("xp-logon-view");
@@ -100,9 +101,10 @@ export class PowerSessionManager {
 
     showSystemView(activeView, message = "", { welcomeOnly = false } = {}) {
         if (!this.systemScreen) return;
-        for (const view of [this.statusView, this.logonView, this.bootView, this.poweroffView]) {
+        for (const view of [this.switchFadeView, this.statusView, this.logonView, this.bootView, this.poweroffView]) {
             if (view) view.hidden = view !== activeView;
         }
+        this.systemScreen.classList.toggle("xp-fade-transition", activeView === this.switchFadeView);
         if (this.statusView) {
             this.statusView.classList.toggle("xp-welcome-mode", activeView === this.statusView && welcomeOnly);
         }
@@ -116,8 +118,9 @@ export class PowerSessionManager {
         this.clearSystemTimers();
         document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
         if (!this.systemScreen) return;
+        this.systemScreen.classList.remove("xp-fade-transition");
         this.systemScreen.hidden = true;
-        for (const view of [this.statusView, this.logonView, this.bootView, this.poweroffView]) {
+        for (const view of [this.switchFadeView, this.statusView, this.logonView, this.bootView, this.poweroffView]) {
             if (view) view.hidden = true;
         }
     }
@@ -160,10 +163,13 @@ export class PowerSessionManager {
         this.isSwitchedUserSession = true;
         this.isLoggingOn = false;
         this.setLogonStatus("Logged on");
-        document.body.classList.add("xp-session-closing");
-        this.scheduleStep(500, () => {
-            document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
+        document.body.classList.add("xp-session-closing", "xp-wallpaper-only");
+        this.scheduleStep(200, () => {
             playSound(SOUNDS.LOGOFF);
+            this.showSystemView(this.switchFadeView);
+        });
+        this.scheduleStep(650, () => {
+            document.body.classList.remove("xp-session-closing", "xp-wallpaper-only");
             this.showSystemView(this.logonView);
         });
     }

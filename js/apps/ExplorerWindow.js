@@ -344,7 +344,7 @@ export class ExplorerWindow extends XPWindow {
         if (!isError && this.explorerFrame.getAttribute("src") !== resolvedSrc) {
             this.explorerFrame.setAttribute("src", resolvedSrc);
         }
-        this.addressIcon?.setAttribute("src", "assets/app_explorer_16.png");
+        this.addressIcon?.setAttribute("src", "assets/file_internet_doc_16.png");
         this.addressInput.value = resolvedUrl;
         this.closeAutoComplete();
         this.closeHistoryMenus();
@@ -352,7 +352,7 @@ export class ExplorerWindow extends XPWindow {
         const title = isError
             ? "Cannot find server - Microsoft Internet Explorer"
             : `${resolvedUrl} - Microsoft Internet Explorer`;
-        this.setTitle(title, "assets/app_explorer_16.png");
+        this.setTitle(title, "assets/file_internet_doc_16.png");
 
         if (recordHistory) {
             this.pushHistory({ mode: "web", url: resolvedUrl, frameSrc: resolvedSrc, isError });

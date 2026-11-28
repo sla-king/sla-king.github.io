@@ -1,6 +1,6 @@
 import { SOUNDS, playSound } from './AudioMixer.js';
 import { blurAllWindows, nextZIndex } from './windowManager.js';
-import { ALL_PROGRAMS_ORDER, APP_ACTIONS, launchAppAction } from '../launcher.js';
+import { ALL_PROGRAMS_SECTIONS, APP_ACTIONS, launchAppAction } from '../launcher.js';
 import { getRecentDocuments, openNotepad } from '../apps/NotepadWindow.js';
 
 const SUBMENU_DELAY_MS = 350;
@@ -18,6 +18,7 @@ export class StartMenu {
         this.allProgramsMenuItem = document.querySelector('.menu-item[data-action="all-programs"]');
         this.allProgramsMenu = document.getElementById("all-programs-menu");
         this.submenuTimers = new Map();
+        this.pinnedSubmenu = null;
     }
 
     init() {
@@ -44,7 +45,7 @@ export class StartMenu {
 
         this.startMenu.addEventListener("pointerover", (e) => {
             const item = e.target.closest(".menu-item");
-            if (item) {
+            if (item && !this.pinnedSubmenu) {
                 this.closeOtherSubmenus(item);
             }
         });
@@ -75,12 +76,14 @@ export class StartMenu {
     }
 
     closeOtherSubmenus(exceptEl = null) {
-        for (const [el, timer] of this.submenuTimers.entries()) {
-            if (el !== exceptEl) {
-                clearTimeout(timer);
-                this.submenuTimers.delete(el);
-                el.classList.remove("submenu-open");
-            }
+        if (this.pinnedSubmenu && this.pinnedSubmenu !== exceptEl) {
+            this.pinnedSubmenu = null;
+        }
+        for (const el of [this.recentMenuItem, this.allProgramsMenuItem]) {
+            if (!el || el === exceptEl) continue;
+            clearTimeout(this.submenuTimers.get(el));
+            this.submenuTimers.delete(el);
+            el.classList.remove("submenu-open");
         }
     }
 
@@ -114,16 +117,25 @@ export class StartMenu {
     renderAllProgramsMenu() {
         if (!this.allProgramsMenu) return;
         this.allProgramsMenu.innerHTML = "";
-        for (const action of ALL_PROGRAMS_ORDER) {
-            const app = APP_ACTIONS[action];
-            if (!app) continue;
-            const tooltip = this.startMenu
-                ?.querySelector(`.menu-item[data-action="${action}"]`)
-                ?.title || app.tooltip || "";
-            this.allProgramsMenu.appendChild(
-                this.createSubmenuEntry(app.name, app.icon, tooltip, () => launchAppAction(action))
-            );
-        }
+        const sections = ALL_PROGRAMS_SECTIONS.filter((section) => section.length > 0);
+        sections.forEach((section, idx) => {
+            if (idx > 0) {
+                const divider = document.createElement("div");
+                divider.className = "start-submenu-divider";
+                divider.setAttribute("role", "separator");
+                this.allProgramsMenu.appendChild(divider);
+            }
+            for (const action of section) {
+                const app = APP_ACTIONS[action];
+                if (!app) continue;
+                const tooltip = this.startMenu
+                    ?.querySelector(`.menu-item[data-action="${action}"]`)
+                    ?.title || app.tooltip || "";
+                this.allProgramsMenu.appendChild(
+                    this.createSubmenuEntry(app.name, app.icon, tooltip, () => launchAppAction(action))
+                );
+            }
+        });
     }
 
     renderRecentDocumentsMenu() {
@@ -155,9 +167,13 @@ export class StartMenu {
 
         menuItemEl.addEventListener("pointerenter", (e) => {
             clearTimeout(this.submenuTimers.get(menuItemEl));
-            this.closeOtherSubmenus(menuItemEl);
+            this.submenuTimers.delete(menuItemEl);
+            if (!this.pinnedSubmenu) {
+                this.closeOtherSubmenus(menuItemEl);
+            }
             if (e.pointerType !== "touch" && !menuItemEl.classList.contains("submenu-open")) {
                 const timer = setTimeout(() => {
+                    this.closeOtherSubmenus(menuItemEl);
                     menuItemEl.classList.add("submenu-open");
                 }, SUBMENU_DELAY_MS);
                 this.submenuTimers.set(menuItemEl, timer);
@@ -166,6 +182,8 @@ export class StartMenu {
 
         menuItemEl.addEventListener("pointerleave", () => {
             clearTimeout(this.submenuTimers.get(menuItemEl));
+            this.submenuTimers.delete(menuItemEl);
+            if (this.pinnedSubmenu === menuItemEl) return;
             const timer = setTimeout(() => {
                 menuItemEl.classList.remove("submenu-open");
             }, 250);
@@ -174,9 +192,17 @@ export class StartMenu {
 
         menuItemEl.addEventListener("click", (e) => {
             if (submenuEl?.contains(e.target)) return;
+            e.stopPropagation();
             clearTimeout(this.submenuTimers.get(menuItemEl));
+            this.submenuTimers.delete(menuItemEl);
             this.closeOtherSubmenus(menuItemEl);
-            menuItemEl.classList.toggle("submenu-open");
+            if (this.pinnedSubmenu === menuItemEl) {
+                this.pinnedSubmenu = null;
+                menuItemEl.classList.remove("submenu-open");
+            } else {
+                this.pinnedSubmenu = menuItemEl;
+                menuItemEl.classList.add("submenu-open");
+            }
         });
     }
 }

@@ -27,7 +27,7 @@ export const APP_ACTIONS = {
         launch: () => openWebExplorer()
     },
     email: {
-        name: "Outlook Express",
+        name: "E-mail",
         icon: "assets/app_outlook.png",
         tooltip: "Opens your e-mail program so you can send or read a message.",
         isLinkDialog: true,
@@ -86,14 +86,10 @@ export const APP_ACTIONS = {
     }
 };
 
-export const ALL_PROGRAMS_ORDER = [
-    "cmd",
-    "github",
-    "explorer-web",
-    "linkedin",
-    "notepad",
-    "email",
-    "media-player"
+export const ALL_PROGRAMS_SECTIONS = [
+    ["cmd", "explorer-web", "notepad", "media-player"],
+    ["email", "linkedin", "github"],
+    [] // Programs not already on the Start menu
 ];
 
 export function launchAppAction(action) {
